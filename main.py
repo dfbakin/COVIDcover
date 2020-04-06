@@ -79,6 +79,12 @@ class Player(pygame.sprite.Sprite):
         self.is_moving = False
         self.grav = 0
         self.is_jumping = False
+        self.clock = pygame.time.Clock()
+
+        self.health = 100
+        self.hazard_risk = 0
+        self.danger_level = 1
+        self.hazard_timer = 0
 
     def set_position(self, pos):
         self.rect.x, self.rect.y = pos
@@ -125,6 +131,8 @@ class Player(pygame.sprite.Sprite):
         self.prev_coords = self.get_coords()
         self.rect.y -= value
         if check_collisions(self):
+            if self.grav < -16:
+                self.health -= abs(self.grav) - 10
             self.rect.x = self.prev_coords[0]
             self.rect.y = self.prev_coords[1]
             self.grav = -5
@@ -135,9 +143,36 @@ class Player(pygame.sprite.Sprite):
             self.grav = Player.jump_power
             self.is_jumping = True
 
+    def render_info(self):
+        canvas = pygame.Surface((width, 80))
+        font = pygame.font.Font(None, 30)
+        canvas.blit(font.render(f'Health: {self.health}%, Risk of infection: {self.hazard_risk}%', 1, (255, 255, 255)),
+                    (0, 0))
+        return canvas
+
     def update(self, *args):
+        self.danger_level = 1 - (100 - self.health) / 100
+        self.hazard_timer += self.clock.tick()
+        if self.hazard_timer > 1000 * self.danger_level:
+            self.hazard_risk += 1
+            self.hazard_timer = 0
         self.move_down(self.grav)
         self.grav -= gravity
+
+        if self.health <= 0:
+            self.health = 0
+        if self.hazard_risk >= 100:
+            self.hazard_risk = 100
+        if self.health == 0 or self.hazard_risk == 100:
+            screen.fill((0, 0, 0))
+            background_group.draw(screen)
+            screen.blit(self.render_info(), (0, 0))
+            text = render_text('You died!!!')
+            screen.blit(text, (width // 2 - text.get_width() // 2, height // 2))
+            pygame.display.flip()
+            for i in range(5):
+                self.clock.tick(1)
+            quit()
 
 
 class Terrain(pygame.sprite.Sprite):
@@ -213,8 +248,11 @@ class Camera:
         self.dx = -(target.rect.x + target.rect.w // 2 - width // 2)
         # self.dy = -(target.rect.y + target.rect.h // 2 - height // 2) + 75
 
+
 def exit_game():
     quit()
+
+
 def menu(pause=False):
     delt_width = 75
 
@@ -258,7 +296,7 @@ def menu(pause=False):
 
         canvas = pygame.Surface((315, 100))
         canvas.fill((181, 109, 2))
-        #text = render_text(f"Music {'on' if music_on else 'off'}")
+        # text = render_text(f"Music {'on' if music_on else 'off'}")
         text = render_text(f"Music on/off")
         canvas.blit(text, (canvas.get_width() // 2 - text.get_width() // 2,
                            canvas.get_height() // 2 - text.get_height() // 2))
@@ -268,7 +306,7 @@ def menu(pause=False):
 
         canvas = pygame.Surface((315, 100))
         canvas.fill((181, 109, 2))
-        #text = render_text(f"Sound effects {'on' if effects_on else 'off'}")
+        # text = render_text(f"Sound effects {'on' if effects_on else 'off'}")
         text = render_text(f"Sound effects on/off")
         canvas.blit(text, (canvas.get_width() // 2 - text.get_width() // 2,
                            canvas.get_height() // 2 - text.get_height() // 2))
@@ -281,14 +319,14 @@ def menu(pause=False):
         canvas.fill((181, 109, 2))
         text = render_text('Back')
         canvas.blit(text, (
-        canvas.get_width() // 2 - text.get_width() // 2, canvas.get_height() // 2 - text.get_height() // 2))
+            canvas.get_width() // 2 - text.get_width() // 2, canvas.get_height() // 2 - text.get_height() // 2))
 
         Button(width // 2 - delt_width, height // 4 * 3, 315, 100, canvas, lambda: 'back', settings_buttons_group)
 
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    quit()
                 elif event.type == pygame.MOUSEMOTION:
                     pos = event.pos
                     for btn in button_group:
@@ -330,7 +368,7 @@ def menu(pause=False):
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                quit()
             elif event.type == pygame.MOUSEMOTION:
                 pos = event.pos
                 for btn in button_group:
@@ -344,8 +382,11 @@ def menu(pause=False):
         button_group.draw(screen)
         pygame.display.flip()
         clock.tick(fps)
+    button_group.empty()
+    settings_buttons_group.empty()
 
 
+images = {'pause_button': load_image('data/other/pause_button.png', colorkey=(0, 255, 0), size=(50, 50))}
 fps = 60
 running = True
 clock = pygame.time.Clock()
@@ -356,18 +397,26 @@ player = Player(200, 450, player_group, all_sprites)
 terrain = Terrain(0, 0, all_sprites)
 bank = Bank(350, 335, all_sprites, building_group)
 
+pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
+
 camera = Camera()
 camera.update(player)
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            for btn in button_group:
+                if btn.rect.collidepoint(event.pos):
+                    btn.run()
+                    pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
     data = pygame.key.get_pressed()
     # if any(data):
     # print(data.index(1))
     player.set_moving(False)
     if data[27]:
         menu(pause=True)
+        pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
     if data[97]:
         player.move_left()
         player.set_moving(True)
@@ -382,8 +431,10 @@ while running:
         camera.apply(sprite)
     if near_building_message and near_building:
         screen.blit(render_text(near_building_message), (0, 0))
+    screen.blit(player.render_info(), (0, 0))
     all_sprites.update()
     all_sprites.draw(screen)
+    button_group.draw(screen)
     player_group.draw(screen)
     pygame.display.flip()
     clock.tick(fps)

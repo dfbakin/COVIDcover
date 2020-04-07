@@ -11,6 +11,8 @@ building_group = pygame.sprite.Group()
 settings_buttons_group = pygame.sprite.Group()
 button_group = pygame.sprite.Group()
 
+bank_buttons = pygame.sprite.Group()
+
 building_collide_step = 0
 near_building_message = None
 near_building = None
@@ -50,15 +52,16 @@ def check_near_building(player):
             near_building_message = f'Press [E] to enter the {building.name}'
 
 
-def render_text(line, size=50):
+def render_text(line, size=50, color=(255, 255, 255)):
     font = pygame.font.Font(None, size)
-    text = font.render(line, 1, (255, 255, 255))
+    text = font.render(line, 1, color)
     return text
 
 
 class Player(pygame.sprite.Sprite):
     speed = 5
     jump_power = 15
+
 
     def __init__(self, x, y, *groups):
         super().__init__(groups)
@@ -143,10 +146,11 @@ class Player(pygame.sprite.Sprite):
             self.grav = Player.jump_power
             self.is_jumping = True
 
-    def render_info(self):
-        canvas = pygame.Surface((width, 80))
+    def render_info(self, color=(255, 255, 255), background=(0, 0, 0)):
+        canvas = pygame.Surface((width // 2, 20))
+        canvas.fill(background)
         font = pygame.font.Font(None, 30)
-        canvas.blit(font.render(f'Health: {self.health}%, Risk of infection: {self.hazard_risk}%', 1, (255, 255, 255)),
+        canvas.blit(font.render(f'Health: {self.health}%, Risk of infection: {self.hazard_risk}%', 1, color),
                     (0, 0))
         return canvas
 
@@ -201,15 +205,130 @@ class Bank(pygame.sprite.Sprite):
         return False
 
     def enter(self):
-        pass
+        all_sprites.empty()
+        pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
+        running = True
+
+        mode = 'pin'
+        right_pin = '1991'
+        current_pin = ''
+
+        main_display = pygame.Surface((width // 2, height // 3 + 150))
+        main_display.fill((0, 0, 0))
+
+        Button(50, 130, 50, 50, images['right_arrow'], None, 'first', bank_buttons)
+        Button(50, 230, 50, 50, images['right_arrow'], None, 'second', bank_buttons)
+        Button(50, 330, 50, 50, images['right_arrow'], None, 'third', bank_buttons)
+
+        Button(100 + main_display.get_width(), 130, 50, 50, images['left_arrow'], None, 'fourth', bank_buttons)
+        Button(100 + main_display.get_width(), 230, 50, 50, images['left_arrow'], None, 'fifth', bank_buttons)
+        Button(100 + main_display.get_width(), 330, 50, 50, images['left_arrow'], None, 'sixth', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('1', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4, 500, 50, 50, image, None, '1', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('2', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75, 500, 50, 50, image, None, '2', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('3', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75 * 2, 500, 50, 50, image, None, '3', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('4', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4, 575, 50, 50, image, None, '4', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('5', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75, 575, 50, 50, image, None, '5', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('6', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75 * 2, 575, 50, 50, image, None, '6', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('7', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4, 650, 50, 50, image, None, '7', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('8', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75, 650, 50, 50, image, None, '8', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('9', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75 * 2, 650, 50, 50, image, None, '9', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('0', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75, 700, 50, 50, image, None, '0', bank_buttons)
+
+        image = load_image('data/objects/long_button.png')
+        image.blit(render_text('Enter', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75 * 3, 650, 208, 47, image, None, 'enter', bank_buttons)
+
+
+
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    quit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for btn in bank_buttons:
+                        if btn.rect.collidepoint(event.pos):
+                            if not btn.id:
+                                btn.run()
+                            elif btn.id.isdigit() and mode == 'pin':
+                                current_pin += btn.id
+                                if len(current_pin) == 4 and current_pin == right_pin:
+                                    mode = 'main'
+                                    print('success')
+                                    current_pin = ''
+                            elif mode == 'main':
+                                if btn.id == 'first':
+                                    mode = 'balance'
+                                elif btn.id == 'second':
+                                    mode = 'deposit'
+                            pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
+            data = pygame.key.get_pressed()
+            # if any(data):
+            # print(data.index(1))
+            player.set_moving(False)
+            if data[27]:
+                menu(pause=True)
+                pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
+
+            main_display.fill((0, 0, 0))
+            if mode == 'pin':
+                main_display.blit(render_text('Введите пин код:', color=(232, 208, 79)),
+                                  (main_display.get_width() // 4, main_display.get_height() // 2 - 50))
+                main_display.blit(render_text(('_' * (4 - len(current_pin))).rjust(4, '*'), color=(232, 208, 79)),
+                                  (main_display.get_width() // 2, main_display.get_height() // 2))
+            elif mode == 'main':
+                main_display.blit(render_text('Show balance', color=(232, 208, 79)), (60, 30))
+                main_display.blit(render_text('Deposit cash', color=(232, 208, 79)), (60, 130))
+
+            screen.fill((156, 65, 10))
+            all_sprites.update()
+            player_group.update()
+            # all_sprites.draw(screen)
+            button_group.draw(screen)
+            bank_buttons.draw(screen)
+            screen.blit(player.render_info(background=(156, 65, 10)), (0, 0))
+            screen.blit(main_display, (100, 100))
+            pygame.display.flip()
+            clock.tick(fps)
+        all_sprites.empty()
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, x, y, w, h, image, func, *groups):
+    def __init__(self, x, y, w, h, image, func, id=None, *groups):
         groups = list(groups)
         super().__init__(groups)
         self.h = h
         self.w = w
+        self.id = id
         # self.image = pygame.transform.scale(image, (self.w, self.h))
         self.image = image
         self.rect = self.image.get_rect()
@@ -384,21 +503,25 @@ def menu(pause=False):
     settings_buttons_group.empty()
 
 
-images = {'pause_button': load_image('data/other/pause_button.png', size=(50, 50))}
+images = {'pause_button': load_image('data/other/pause_button.png', size=(50, 50)),
+          'right_arrow': load_image('data/objects/arrow_button_right.png', size=(50, 50)),
+          'left_arrow': load_image('data/objects/arrow_button_left.png', size=(50, 50)), }
 fps = 60
 running = True
 clock = pygame.time.Clock()
 
-# menu()
+#menu()
 
-player = Player(200, 150, player_group, all_sprites)
+player = Player(200, 150, player_group)
 terrain = Terrain(0, 0, all_sprites)
-bank = Bank(350, 275, all_sprites, building_group)
+bank = Bank(350, 350, all_sprites, building_group)
 
 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
 
 camera = Camera()
 camera.update(player)
+
+bank.enter()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -415,6 +538,14 @@ while running:
     if data[27]:
         menu(pause=True)
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
+    if data[101]:
+        bank.enter()
+        # other setup params here
+        player = Player(200, 150, player_group, all_sprites)
+        terrain = Terrain(0, 0, all_sprites)
+        bank = Bank(350, 275, all_sprites, building_group)
+        pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
+
     if data[97]:
         player.move_left()
         player.set_moving(True)
@@ -427,7 +558,9 @@ while running:
     camera.update(player)
     for sprite in all_sprites:
         camera.apply(sprite)
+    camera.apply(player)
     all_sprites.update()
+    player_group.update()
     all_sprites.draw(screen)
     button_group.draw(screen)
     player_group.draw(screen)

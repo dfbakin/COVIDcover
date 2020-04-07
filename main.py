@@ -18,13 +18,13 @@ gravity = 1
 
 
 def load_image(path, colorkey=None, size=None):
-    image = pygame.image.load(path).convert()
+    image = pygame.image.load(path).convert_alpha()
     if colorkey is not None:
         if colorkey == -1:
             colorkey = image.get_at((0, 0))
         image.set_colorkey(colorkey)
-    else:
-        image = image.convert_alpha()
+    # else:
+    # image = image.convert_alpha()
     if size:
         image = pygame.transform.scale(image, size)
     return image
@@ -45,7 +45,7 @@ def check_near_building(player):
     global near_building, near_building_message
     near_building, near_building_message = None, None
     for building in building_group:
-        if player.rect.colliderect(building.rect):
+        if pygame.sprite.collide_mask(player, building):
             near_building = building
             near_building_message = f'Press [E] to enter the {building.name}'
 
@@ -65,10 +65,10 @@ class Player(pygame.sprite.Sprite):
         self.frames = {'left': [], 'right': []}
         for i in range(1):
             self.frames['left'].append(
-                load_image(f'data/characters/player_left_{i + 1}.png', colorkey=(0, 255, 0), size=(30, 80)))
+                load_image(f'data/characters/player_left_{i + 1}.png', size=(30, 80)))
         for i in range(1):
             self.frames['right'].append(
-                load_image(f'data/characters/player_right_{i + 1}.png', colorkey=(0, 255, 0), size=(30, 80)))
+                load_image(f'data/characters/player_right_{i + 1}.png', size=(30, 80)))
 
         self.image = self.frames['right'][0]
         self.mask = pygame.mask.from_surface(self.image)
@@ -165,7 +165,7 @@ class Player(pygame.sprite.Sprite):
             self.hazard_risk = 100
         if self.health == 0 or self.hazard_risk == 100:
             screen.fill((0, 0, 0))
-            background_group.draw(screen)
+            # background_group.draw(screen)
             screen.blit(self.render_info(), (0, 0))
             text = render_text('You died!!!')
             screen.blit(text, (width // 2 - text.get_width() // 2, height // 2))
@@ -178,7 +178,7 @@ class Player(pygame.sprite.Sprite):
 class Terrain(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(groups)
-        self.image = load_image('data/textures/city_terrain.png', colorkey=(0, 255, 0))
+        self.image = load_image('data/textures/city_terrain.png')
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x, y
@@ -190,13 +190,11 @@ class Terrain(pygame.sprite.Sprite):
 class Bank(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(groups)
-        self.image = load_image('data/textures/bank.png', colorkey=(0, 255, 0), size=(250, 150))
+        self.image = load_image('data/textures/bank.png', size=(250, 150))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x, y
-        self.rect = pygame.Rect(self.rect.x - building_collide_step,
-                                self.rect.y - building_collide_step,
-                                self.rect.w + building_collide_step * 2,
-                                self.rect.h + building_collide_step * 2)
+        self.mask = pygame.mask.from_surface(self.image)
+
         self.name = 'Bank'
 
     def is_obstacle(self):
@@ -246,7 +244,7 @@ class Camera:
 
     def update(self, target):
         self.dx = -(target.rect.x + target.rect.w // 2 - width // 2)
-        # self.dy = -(target.rect.y + target.rect.h // 2 - height // 2) + 75
+        # self.dy = -(target.rect.y + target.rect.h // 2 - height // 2)
 
 
 def exit_game():
@@ -386,16 +384,16 @@ def menu(pause=False):
     settings_buttons_group.empty()
 
 
-images = {'pause_button': load_image('data/other/pause_button.png', colorkey=(0, 255, 0), size=(50, 50))}
+images = {'pause_button': load_image('data/other/pause_button.png', size=(50, 50))}
 fps = 60
 running = True
 clock = pygame.time.Clock()
 
-menu()
+# menu()
 
-player = Player(200, 450, player_group, all_sprites)
+player = Player(200, 150, player_group, all_sprites)
 terrain = Terrain(0, 0, all_sprites)
-bank = Bank(350, 335, all_sprites, building_group)
+bank = Bank(350, 275, all_sprites, building_group)
 
 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
 
@@ -429,12 +427,12 @@ while running:
     camera.update(player)
     for sprite in all_sprites:
         camera.apply(sprite)
-    if near_building_message and near_building:
-        screen.blit(render_text(near_building_message), (0, 0))
-    screen.blit(player.render_info(), (0, 0))
     all_sprites.update()
     all_sprites.draw(screen)
     button_group.draw(screen)
     player_group.draw(screen)
+    if near_building_message and near_building:
+        screen.blit(render_text(near_building_message), (0, height - 50))
+    screen.blit(player.render_info(), (0, 0))
     pygame.display.flip()
     clock.tick(fps)

@@ -10,6 +10,7 @@ player_group = pygame.sprite.Group()
 building_group = pygame.sprite.Group()
 settings_buttons_group = pygame.sprite.Group()
 button_group = pygame.sprite.Group()
+terrain_group = pygame.sprite.Group()
 
 bank_buttons = pygame.sprite.Group()
 
@@ -230,7 +231,7 @@ class Terrain(pygame.sprite.Sprite):
 class Bank(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(groups)
-        self.image = load_image('data/textures/bank.png', size=(250, 150))
+        self.image = load_image('data/buildings/bank.png', size=(250, 150))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x, y
         self.mask = pygame.mask.from_surface(self.image)
@@ -337,9 +338,9 @@ class Bank(pygame.sprite.Sprite):
                                     if deposit_summ.isdigit() and player.give_money(int(deposit_summ)):
                                         player.card_money += int(deposit_summ)
                                         mode = 'success'
-                                        deposit_summ = ''
                                     else:
                                         mode = 'error'
+                                    deposit_summ = ''
                                 elif btn.id.isdigit():
                                     deposit_summ += btn.id
                             elif mode == 'error' or mode == 'success':
@@ -391,6 +392,40 @@ class Bank(pygame.sprite.Sprite):
             clock.tick(fps)
         bank_buttons.empty()
         button_group.empty()
+
+
+class MainHouse(pygame.sprite.Sprite):
+    def __init__(self, x, y, *groups):
+        super().__init__(groups)
+        self.image = load_image('data/buildings/main_house.png', size=(250, 500))
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = x, y
+        self.mask = pygame.mask.from_surface(self.image)
+
+        self.name = 'Home, sweet home'
+
+    def is_obstacle(self):
+        return False
+
+    def enter(self):
+        pass
+
+
+class Pharmacy(pygame.sprite.Sprite):
+    def __init__(self, x, y, *groups):
+        super().__init__(groups)
+        self.image = load_image('data/buildings/pharmacy.png', size=(250, 200))
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = x, y
+        self.mask = pygame.mask.from_surface(self.image)
+
+        self.name = 'Pharmacy'
+
+    def is_obstacle(self):
+        return False
+
+    def enter(self):
+        pass
 
 
 class Button(pygame.sprite.Sprite):
@@ -582,18 +617,19 @@ fps = 60
 running = True
 clock = pygame.time.Clock()
 
-menu()
+#menu()
 
-player = Player(200, 150, player_group)
-terrain = Terrain(0, 0, all_sprites)
+player = Player(2500, 350, player_group)
+terrain = Terrain(0, 0, all_sprites, terrain_group)
 bank = Bank(350, 350, all_sprites, building_group)
+home = MainHouse(3710, 125, building_group, all_sprites)
+pharmacy = Pharmacy(5050, 100, building_group, all_sprites)
 
 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
 
 camera = Camera()
 camera.update(player)
 
-# bank.enter()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -630,6 +666,7 @@ while running:
     all_sprites.update()
     player_group.update()
     all_sprites.draw(screen)
+    terrain_group.draw(screen)
     button_group.draw(screen)
     player_group.draw(screen)
     if near_building_message and near_building:

@@ -14,15 +14,21 @@ terrain_group = pygame.sprite.Group()
 
 bank_buttons = pygame.sprite.Group()
 
+pharm_buttons = pygame.sprite.Group()
+pharm_group = pygame.sprite.Group()
+background_pharm = pygame.sprite.Group()
+pharm_products = pygame.sprite.Group()
+
 building_collide_step = 0
 near_building_message = None
 near_building = None
 gravity = 1
+menu_is_on = False
 
 player_params = dict()
 
 
-def load_image(path, colorkey=None, size=None):
+def load_image(path, colorkey=None, size=None) -> pygame.Surface:
     image = pygame.image.load(path).convert_alpha()
     if colorkey is not None:
         if colorkey == -1:
@@ -64,6 +70,7 @@ def render_text(line, size=50, color=(255, 255, 255)):
 class Player(pygame.sprite.Sprite):
     speed = 5
     jump_power = 15
+    infection_rate = 1500
 
     def __init__(self, x, y, *groups):
         super().__init__(groups)
@@ -93,6 +100,15 @@ class Player(pygame.sprite.Sprite):
 
         self.card_money = 0
         self.cash = 10000
+
+        self.objects = []
+
+    def get_objects(self):
+        return self.objects
+
+    def add_objects(self, *objects):
+        for i in objects:
+            self.objects.append(i)
 
     def get_cash(self):
         return self.cash
@@ -190,7 +206,7 @@ class Player(pygame.sprite.Sprite):
     def update_params(self):
         self.danger_level = 1 - (100 - self.health) / 100
         self.hazard_timer += self.clock.tick()
-        if self.hazard_timer > 1000 * self.danger_level:
+        if self.hazard_timer > Player.infection_rate * self.danger_level:
             self.hazard_risk += 1
             self.hazard_timer = 0
 
@@ -245,6 +261,7 @@ class Bank(pygame.sprite.Sprite):
     # balance on the card == 10000
     # cash == 0
     def enter(self):
+        button_group.empty()
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
         running = True
 
@@ -345,6 +362,7 @@ class Bank(pygame.sprite.Sprite):
                                     deposit_summ += btn.id
                             elif mode == 'error' or mode == 'success':
                                 mode = 'main'
+                            button_group.empty()
                             pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
             data = pygame.key.get_pressed()
             # if any(data):
@@ -352,6 +370,7 @@ class Bank(pygame.sprite.Sprite):
             player.set_moving(False)
             if data[27]:
                 menu(pause=True)
+                button_group.empty()
                 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
 
             main_display.fill((0, 0, 0))
@@ -425,7 +444,133 @@ class Pharmacy(pygame.sprite.Sprite):
         return False
 
     def enter(self):
-        pass
+        def checkout():
+            def buy():
+                summ = sum([i.get_price() for i in cart])
+                if player.spend_money(summ):
+                    # extend players equipment
+                    player.add_objects(*cart)
+                    return False, True, 'success'
+                return False, True, 'error'
+
+            running = True
+
+            Button(width // 3, height - 100, 200, 50, render_text('Back'), lambda: False, None, pharm_buttons)
+            Button(width // 3 * 2, height - 100, 200, 50, render_text('Apply'), buy, None, pharm_buttons)
+
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        quit()
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        for btn in pharm_buttons:
+                            if btn.rect.collidepoint(event.pos):
+                                running, run, status = btn.run()
+                data = pygame.key.get_pressed()
+                # if any(data):
+                # print(data.index(1))
+                player.set_moving(False)
+                if data[27]:
+                    menu(pause=True)
+                    button_group.empty()
+                    pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
+
+                screen.fill((156, 65, 10))
+                pharm_buttons.draw(screen)
+                screen.blit(player.render_info(background=(156, 65, 10)), (0, 0))
+                for num in range(len(cart)):
+                    screen.blit(render_text(f'{num + 1} -- {cart[num].name} ------ {cart[num].get_price()}'),
+                                (width // 2, height // 2))
+                pygame.display.flip()
+                clock.tick(fps)
+            pharm_buttons.empty()
+            # pharm_group.empty()
+            return run, status
+
+        button_group.empty()
+        pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, pharm_buttons)
+
+        backgr = pygame.sprite.Sprite(background_pharm)
+        backgr.image = load_image('data/inside/pharmacy_inside.png', size=size)
+        backgr.rect = backgr.image.get_rect()
+
+        running = True
+
+        bottle = Product(200, 200, 'Спирт', 500, 'bottle', pharm_products)
+
+        cart = []
+        cart_rect = pygame.Rect(848, 346, 100, 350)
+
+        Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
+               100, 50, images['exit_sign'], lambda: False, None, pharm_buttons)
+        status = 'ok'
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    quit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for btn in pharm_buttons:
+                        if btn.rect.collidepoint(event.pos):
+                            running = btn.run()
+                    for product in pharm_products:
+                        if product.rect.collidepoint(event.pos):
+                            cart.append(product)
+                            pharm_products.remove(product)
+                    if cart_rect.collidepoint(event.pos):
+                        running, status = checkout()
+                        if status == 'success':
+                            cart = []
+                        Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
+                               100, 50, images['exit_sign'], lambda: False, None, pharm_buttons)
+                        pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, pharm_buttons)
+
+            data = pygame.key.get_pressed()
+            # if any(data):
+            # print(data.index(1))
+            player.set_moving(False)
+            if data[27]:
+                menu(pause=True)
+                button_group.empty()
+                pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
+
+            screen.fill((156, 65, 10))
+            player.update_params()
+            background_pharm.draw(screen)
+            button_group.draw(screen)
+            pharm_buttons.draw(screen)
+            pharm_group.draw(screen)
+            pharm_products.draw(screen)
+            if status == 'error':
+                screen.blit(render_text('Not enough money! Visit the bank!', color=(255, 0, 0)), (200, 100))
+            screen.blit(player.render_info(background=(179, 185, 206)), (0, 0))
+            pygame.display.flip()
+            clock.tick(fps)
+        pharm_buttons.empty()
+        pharm_group.empty()
+        print([i.name for i in player.get_objects()])
+
+
+class Product(pygame.sprite.Sprite):
+    def __init__(self, x, y, name, price, id, *groups):
+        super().__init__(groups)
+
+        self.image = images['bottle']
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = x, y
+        self.mask = pygame.mask.from_surface(self.image)
+
+        self.name = name
+        self.price = price
+        self.id = id
+
+    def get_price(self):
+        return self.price
+
+    def get_info(self):
+        return f'{self.name} for {self.price} R'
+
+    def get_id(self):
+        return self.id
 
 
 class Button(pygame.sprite.Sprite):
@@ -437,6 +582,7 @@ class Button(pygame.sprite.Sprite):
         self.id = id
         # self.image = pygame.transform.scale(image, (self.w, self.h))
         self.image = image
+        self.image.set_alpha(255)
         self.rect = self.image.get_rect()
         self.func = func
         self.rect.x, self.rect.y = x, y
@@ -456,6 +602,13 @@ class Button(pygame.sprite.Sprite):
 
     def is_obstacle(self):
         return False
+
+    def update(self, *args):
+        if args:
+            pos = args[0]
+            self.image.set_alpha(100)
+            if self.rect.collidepoint(pos):
+                self.image.set_alpha(255)
 
 
 class Camera:
@@ -477,6 +630,11 @@ def exit_game():
 
 
 def menu(pause=False):
+    global menu_is_on
+    if menu_is_on:
+        return
+    else:
+        menu_is_on = True
     delt_width = 75
 
     def start():
@@ -516,6 +674,7 @@ def menu(pause=False):
                 music['main_track'].play(-1)
 
         running = True
+        pos = (0, 0)
 
         canvas = pygame.Surface((315, 100))
         canvas.fill((181, 109, 2))
@@ -552,19 +711,19 @@ def menu(pause=False):
                     quit()
                 elif event.type == pygame.MOUSEMOTION:
                     pos = event.pos
-                    for btn in button_group:
-                        btn.check_selection(pos)
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     pos = event.pos
                     for btn in settings_buttons_group:
                         if btn.rect.collidepoint(pos):
                             running = btn.run() != 'back'
-            screen.fill((219, 146, 72))
+            screen.fill((219, 146, 72, 100))
+            settings_buttons_group.update(pos)
             settings_buttons_group.draw(screen)
             pygame.display.flip()
             clock.tick(fps)
 
     running = True
+    pos = (0, 0)
     label = 'Resume' if pause else 'Start'
 
     canvas = pygame.Surface((200, 100))
@@ -594,32 +753,37 @@ def menu(pause=False):
                 quit()
             elif event.type == pygame.MOUSEMOTION:
                 pos = event.pos
-                for btn in button_group:
-                    btn.check_selection(pos)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = event.pos
                 for btn in button_group:
                     if btn.rect.collidepoint(pos):
                         running = btn.run() != 'start'
         screen.fill((219, 146, 72))
+        button_group.update(pos)
+
         button_group.draw(screen)
         pygame.display.flip()
         clock.tick(fps)
     button_group.empty()
     settings_buttons_group.empty()
+    menu_is_on = False
+    return 1
 
 
 images = {'pause_button': load_image('data/other/pause_button.png', size=(50, 50)),
           'right_arrow': load_image('data/objects/arrow_button_right.png', size=(50, 50)),
           'left_arrow': load_image('data/objects/arrow_button_left.png', size=(50, 50)),
-          'exit_sign': load_image('data/objects/exit_sign.png', size=(100, 50))}
+          'exit_sign': load_image('data/objects/exit_sign.png', size=(100, 50)),
+          'bottle': load_image('data/objects/bottle.png', size=(50, 90))}
+images['pause_button'].set_alpha(100)
 fps = 60
 running = True
 clock = pygame.time.Clock()
+pos = (0, 0)
 
-#menu()
+menu()
 
-player = Player(2500, 350, player_group)
+player = Player(2500, 350, player_group)  # 2500, 350 #4000, 500
 terrain = Terrain(0, 0, all_sprites, terrain_group)
 bank = Bank(350, 350, all_sprites, building_group)
 home = MainHouse(3710, 125, building_group, all_sprites)
@@ -630,14 +794,18 @@ pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None,
 camera = Camera()
 camera.update(player)
 
+#pharmacy.enter()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.MOUSEMOTION:
+            pos = event.pos
         if event.type == pygame.MOUSEBUTTONDOWN:
             for btn in button_group:
                 if btn.rect.collidepoint(event.pos):
                     btn.run()
+                    button_group.empty()
                     pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
     data = pygame.key.get_pressed()
     # if any(data):
@@ -645,6 +813,7 @@ while running:
     player.set_moving(False)
     if data[27]:
         menu(pause=True)
+        button_group.empty()
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
     if data[101]:
         if near_building:
@@ -663,8 +832,11 @@ while running:
     for sprite in all_sprites:
         camera.apply(sprite)
     camera.apply(player)
+
     all_sprites.update()
     player_group.update()
+    button_group.update(pos)
+
     all_sprites.draw(screen)
     terrain_group.draw(screen)
     button_group.draw(screen)

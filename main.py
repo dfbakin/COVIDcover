@@ -103,7 +103,7 @@ class Player(pygame.sprite.Sprite):
         self.hazard_timer = 0
 
         self.card_money = 0
-        self.cash = 10000
+        self.cash = 2000
 
         self.objects = []
 
@@ -489,7 +489,7 @@ class Pharmacy(pygame.sprite.Sprite):
                 screen.blit(player.render_info(background=(156, 65, 10)), (0, 0))
                 for num in range(len(cart)):
                     screen.blit(render_text(f'{num + 1} -- {cart[num].name} ------ {cart[num].get_price()}'),
-                                (width // 2, height // 2))
+                                (width // 2, height // 2-200 + 35*num))
                 pygame.display.flip()
                 clock.tick(fps)
             pharm_buttons.empty()
@@ -507,11 +507,16 @@ class Pharmacy(pygame.sprite.Sprite):
 
         bottle = products['alcohol']
         if bottle.can_be_bought():
-            bottle.set_pos((200, 200))
+            bottle.set_pos((350, 180))
             bottle.add_to_groups(pharm_products)
+        mask = products['mask']
+        if mask.can_be_bought():
+            mask.set_pos((550, 180))
+            mask.add_to_groups(pharm_products)
+
 
         cart = []
-        cart_rect = pygame.Rect(848, 346, 100, 350)
+        cart_rect = pygame.Rect(950, 300, 150, 450)
 
         Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
                100, 50, images['exit_sign'], lambda: False, None, pharm_buttons)

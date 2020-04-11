@@ -3,7 +3,7 @@ import pygame
 pygame.init()
 
 size = width, height = 1280, 720
-screen = pygame.display.set_mode(size)  # , pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -11,6 +11,7 @@ building_group = pygame.sprite.Group()
 settings_buttons_group = pygame.sprite.Group()
 button_group = pygame.sprite.Group()
 terrain_group = pygame.sprite.Group()
+background_group = pygame.sprite.Group()
 
 bank_buttons = pygame.sprite.Group()
 
@@ -92,10 +93,10 @@ class Player(pygame.sprite.Sprite):
         self.frames = {'left': [], 'right': []}
         for i in range(1):
             self.frames['left'].append(
-                load_image(f'data/characters/player_left_{i + 1}.png', size=(30, 80)))
+                load_image(f'data/characters/player_left_{i + 1}.png', size=(40, 90)))
         for i in range(1):
             self.frames['right'].append(
-                load_image(f'data/characters/player_right_{i + 1}.png', size=(30, 80)))
+                load_image(f'data/characters/player_right_{i + 1}.png', size=(40, 90)))
 
         self.image = self.frames['right'][0]
         self.mask = pygame.mask.from_surface(self.image)
@@ -290,7 +291,7 @@ class Bank(pygame.sprite.Sprite):
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
         running = True
 
-        mode = 'pin'
+        mode = ''
         right_pin = '1991'
         current_pin = ''
         deposit_summ = ''
@@ -298,75 +299,94 @@ class Bank(pygame.sprite.Sprite):
         main_display = pygame.Surface((width // 2, height // 3 + 150))
         main_display.fill((0, 0, 0))
 
+        card_size = (100, 150)
+        card = Button(width - card_size[0], height - card_size[1], *card_size,
+                      load_image('data/objects/bank_card.png', size=card_size), None, 'card', bank_buttons)
+        card_moving = False
+        hole_rect = pygame.Rect(888, 107, 300, 20)
+
         Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
                100, 50, images['exit_sign'], lambda: False, None, bank_buttons)
 
-        Button(50, 130, 50, 50, images['right_arrow'], None, 'first', bank_buttons)
-        Button(50, 230, 50, 50, images['right_arrow'], None, 'second', bank_buttons)
-        Button(50, 330, 50, 50, images['right_arrow'], None, 'third', bank_buttons)
+        Button(50, 100, 50, 50, images['right_arrow'], None, 'first', bank_buttons)
+        Button(50, 200, 50, 50, images['right_arrow'], None, 'second', bank_buttons)
+        Button(50, 300, 50, 50, images['right_arrow'], None, 'third', bank_buttons)
 
-        Button(100 + main_display.get_width(), 130, 50, 50, images['left_arrow'], None, 'fourth', bank_buttons)
-        Button(100 + main_display.get_width(), 230, 50, 50, images['left_arrow'], None, 'fifth', bank_buttons)
-        Button(100 + main_display.get_width(), 330, 50, 50, images['left_arrow'], None, 'sixth', bank_buttons)
+        Button(100 + main_display.get_width(), 100, 50, 50, images['left_arrow'], None, 'fourth', bank_buttons)
+        Button(100 + main_display.get_width(), 200, 50, 50, images['left_arrow'], None, 'fifth', bank_buttons)
+        Button(100 + main_display.get_width(), 300, 50, 50, images['left_arrow'], None, 'sixth', bank_buttons)
 
         image = load_image('data/objects/digit_button.png')
         image.blit(render_text('1', color=(0, 0, 0)), (10, 5))
-        Button(100 + main_display.get_width() // 4, 500, 50, 50, image, None, '1', bank_buttons)
+        Button(100 + main_display.get_width() // 4, 470, 50, 50, image, None, '1', bank_buttons)
 
         image = load_image('data/objects/digit_button.png')
         image.blit(render_text('2', color=(0, 0, 0)), (10, 5))
-        Button(100 + main_display.get_width() // 4 + 75, 500, 50, 50, image, None, '2', bank_buttons)
+        Button(100 + main_display.get_width() // 4 + 75, 470, 50, 50, image, None, '2', bank_buttons)
 
         image = load_image('data/objects/digit_button.png')
         image.blit(render_text('3', color=(0, 0, 0)), (10, 5))
-        Button(100 + main_display.get_width() // 4 + 75 * 2, 500, 50, 50, image, None, '3', bank_buttons)
+        Button(100 + main_display.get_width() // 4 + 75 * 2, 470, 50, 50, image, None, '3', bank_buttons)
 
         image = load_image('data/objects/digit_button.png')
         image.blit(render_text('4', color=(0, 0, 0)), (10, 5))
-        Button(100 + main_display.get_width() // 4, 575, 50, 50, image, None, '4', bank_buttons)
+        Button(100 + main_display.get_width() // 4, 545, 50, 50, image, None, '4', bank_buttons)
 
         image = load_image('data/objects/digit_button.png')
         image.blit(render_text('5', color=(0, 0, 0)), (10, 5))
-        Button(100 + main_display.get_width() // 4 + 75, 575, 50, 50, image, None, '5', bank_buttons)
+        Button(100 + main_display.get_width() // 4 + 75, 545, 50, 50, image, None, '5', bank_buttons)
 
         image = load_image('data/objects/digit_button.png')
         image.blit(render_text('6', color=(0, 0, 0)), (10, 5))
-        Button(100 + main_display.get_width() // 4 + 75 * 2, 575, 50, 50, image, None, '6', bank_buttons)
+        Button(100 + main_display.get_width() // 4 + 75 * 2, 545, 50, 50, image, None, '6', bank_buttons)
 
         image = load_image('data/objects/digit_button.png')
         image.blit(render_text('7', color=(0, 0, 0)), (10, 5))
-        Button(100 + main_display.get_width() // 4, 650, 50, 50, image, None, '7', bank_buttons)
+        Button(100 + main_display.get_width() // 4, 620, 50, 50, image, None, '7', bank_buttons)
 
         image = load_image('data/objects/digit_button.png')
         image.blit(render_text('8', color=(0, 0, 0)), (10, 5))
-        Button(100 + main_display.get_width() // 4 + 75, 650, 50, 50, image, None, '8', bank_buttons)
+        Button(100 + main_display.get_width() // 4 + 75, 620, 50, 50, image, None, '8', bank_buttons)
 
         image = load_image('data/objects/digit_button.png')
         image.blit(render_text('9', color=(0, 0, 0)), (10, 5))
-        Button(100 + main_display.get_width() // 4 + 75 * 2, 650, 50, 50, image, None, '9', bank_buttons)
+        Button(100 + main_display.get_width() // 4 + 75 * 2, 620, 50, 50, image, None, '9', bank_buttons)
 
         image = load_image('data/objects/digit_button.png')
         image.blit(render_text('0', color=(0, 0, 0)), (10, 5))
-        Button(100 + main_display.get_width() // 4 + 75, 700, 50, 50, image, None, '0', bank_buttons)
+        Button(100 + main_display.get_width() // 4 + 75, 670, 50, 50, image, None, '0', bank_buttons)
 
         image = load_image('data/objects/long_button.png')
         image.blit(render_text('Enter', color=(0, 0, 0)), (10, 5))
-        Button(100 + main_display.get_width() // 4 + 75 * 3, 650, 208, 47, image, None, 'enter', bank_buttons)
+        Button(100 + main_display.get_width() // 4 + 75 * 3, 620, 208, 47, image, None, 'enter', bank_buttons)
 
         image = load_image('data/objects/long_button.png')
         image.blit(render_text('Clear', color=(0, 0, 0)), (10, 5))
-        Button(100 + main_display.get_width() // 4 + 75 * 3, 575, 208, 47, image, None, 'clear', bank_buttons)
-
+        Button(100 + main_display.get_width() // 4 + 75 * 3, 545, 208, 47, image, None, 'clear', bank_buttons)
 
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     quit()
+                if event.type == pygame.MOUSEMOTION:
+                    if card_moving:
+                        card.rect.x, card.rect.y = event.pos
+
+                    if card.rect.colliderect(hole_rect):
+                        mode = 'pin'
+                        bank_buttons.remove(card)
+
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for btn in bank_buttons:
                         if btn.rect.collidepoint(event.pos):
                             if not btn.id:
                                 running = btn.run()
+                            elif btn.id == 'card':
+                                card_moving = True
+                                card.rect.x, card.rect.y = event.pos
+                            elif btn.id == 'clear':
+                                current_pin = ''
+                                deposit_summ = ''
                             elif btn.id.isdigit() and mode == 'pin':
                                 current_pin += btn.id
                                 if len(current_pin) == 4 and current_pin == right_pin:
@@ -436,7 +456,8 @@ class Bank(pygame.sprite.Sprite):
             button_group.draw(screen)
             bank_buttons.draw(screen)
             screen.blit(player.render_info(background=(156, 65, 10)), (0, 0))
-            screen.blit(main_display, (100, 100))
+            screen.blit(main_display, (100, 70))
+            pygame.draw.rect(screen, (0, 0, 0), hole_rect)
             pygame.display.flip()
             clock.tick(fps)
         bank_buttons.empty()
@@ -535,7 +556,7 @@ class MainHouse(pygame.sprite.Sprite):
 class Shop(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(groups)
-        self.image = load_image('data/buildings/shop.png', size=(250, 200))
+        self.image = load_image('data/buildings/shop_1.png', size=(250, 200))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x, y
         self.mask = pygame.mask.from_surface(self.image)
@@ -600,7 +621,7 @@ class Shop(pygame.sprite.Sprite):
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, pharm_buttons)
 
         backgr = pygame.sprite.Sprite(background_shop)
-        backgr.image = load_image('data/inside/shop_inside.png', size=size)
+        backgr.image = load_image('data/inside/shop_1_inside.png', size=size)
         backgr.rect = backgr.image.get_rect()
 
         running = True
@@ -627,6 +648,153 @@ class Shop(pygame.sprite.Sprite):
 
         cart = []
         cart_rect = pygame.Rect(950, 300, 150, 450)
+
+        Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
+               100, 50, images['exit_sign'], lambda: False, None, shop_buttons)
+        status = 'ok'
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    quit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for btn in shop_buttons:
+                        if btn.rect.collidepoint(event.pos):
+                            running = btn.run()
+                    for product in shop_products:
+                        if product.rect.collidepoint(event.pos):
+                            cart.append(product)
+                            for i in cart:
+                                i.reset_groups()
+                            # pharm_products.remove(product)
+                    if cart_rect.collidepoint(event.pos):
+                        a = 1
+                        running, status = checkout()
+                        if status == 'success':
+                            cart = []
+                        Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
+                               100, 50, images['exit_sign'], lambda: False, None, shop_buttons)
+                        pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, shop_buttons)
+
+            data = pygame.key.get_pressed()
+            # if any(data):
+            # print(data.index(1))
+            player.set_moving(False)
+            if data[27]:
+                menu(pause=True)
+                button_group.empty()
+                pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
+
+            screen.fill((156, 65, 10))
+            player.update_params()
+            background_shop.draw(screen)
+            button_group.draw(screen)
+            shop_buttons.draw(screen)
+            shop_group.draw(screen)
+            shop_products.draw(screen)
+            if status == 'error':
+                screen.blit(render_text('Not enough money! Visit the bank!', color=(255, 0, 0)), (200, 100))
+            screen.blit(player.render_info(background=(179, 185, 206)), (0, 0))
+            pygame.display.flip()
+            clock.tick(fps)
+        shop_buttons.empty()
+        shop_group.empty()
+
+
+class SecondShop(pygame.sprite.Sprite):
+    def __init__(self, x, y, *groups):
+        super().__init__(groups)
+        self.image = load_image('data/buildings/shop_2.png', size=(250, 200))
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = x, y
+        self.mask = pygame.mask.from_surface(self.image)
+
+        self.name = 'Shop'
+
+    def is_obstacle(self):
+        return False
+
+    def enter(self):
+        def checkout():
+            def buy():
+                summ = sum([i.get_price() for i in cart])
+                if player.spend_money(summ):
+                    player.add_objects(*cart)
+                    for i in cart:
+                        i.buy()
+                    return False, True, 'success'
+                return False, True, 'error'
+
+            running = True
+            shop_buttons.empty()
+            Button(width // 3, height - 100, 200, 50, render_text('Back'), lambda: (False, True, 'ok'), None,
+                   shop_buttons)
+            Button(width // 3 * 2, height - 100, 200, 50, render_text('Apply'), buy, None, shop_buttons)
+
+            Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
+                   100, 50, images['exit_sign'], lambda: (False, False, 'ok'), None, shop_buttons)
+
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        quit()
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        for btn in shop_buttons:
+                            if btn.rect.collidepoint(event.pos):
+                                running, run, status = btn.run()
+                data = pygame.key.get_pressed()
+                # if any(data):
+                # print(data.index(1))
+                player.set_moving(False)
+                if data[27]:
+                    menu(pause=True)
+                    button_group.empty()
+                    pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
+
+                screen.fill((156, 65, 10))
+                shop_buttons.draw(screen)
+                screen.blit(player.render_info(background=(156, 65, 10)), (0, 0))
+                for num in range(len(cart)):
+                    screen.blit(render_text(f'{num + 1} -- {cart[num].name} ------ {cart[num].get_price()}'),
+                                (width // 2, height // 2 - 200 + 35 * num))
+                pygame.display.flip()
+                clock.tick(fps)
+            shop_buttons.empty()
+            # pharm_group.empty()
+            return run, status
+
+        button_group.empty()
+        if level == 1:
+            return
+        pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, pharm_buttons)
+
+        backgr = pygame.sprite.Sprite(background_shop)
+        backgr.image = load_image('data/inside/shop_2_inside.png', size=size)
+        backgr.rect = backgr.image.get_rect()
+
+        running = True
+
+        carrot = products['carrot']
+        if carrot.can_be_bought():
+            carrot.set_pos((550, 180))
+            carrot.add_to_groups(shop_products)
+        potato = products['potato']
+        if potato.can_be_bought():
+            potato.set_pos((750, 180))
+            potato.add_to_groups(shop_products)
+
+        if level == 2 or level == 3:
+            soap = products['soap']
+            if soap.can_be_bought():
+                soap.set_pos((950, 180))
+                soap.add_to_groups(shop_products)
+        if level == 3:
+            apple = products['apple']
+            if apple.can_be_bought():
+                apple.set_pos((750, 300))
+                apple.add_to_groups(shop_products)
+
+        cart = []
+        cart_rect = pygame.Rect(300, 327, 80, 200)
 
         Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
                100, 50, images['exit_sign'], lambda: False, None, shop_buttons)
@@ -1187,7 +1355,7 @@ images = {'pause_button': load_image('data/other/pause_button.png', size=(50, 50
           'left_arrow': load_image('data/objects/arrow_button_left.png', size=(50, 50)),
           'exit_sign': load_image('data/objects/exit_sign.png', size=(100, 50)),
           'room': load_image('data/inside/room.png', size=size),
-          'radio': load_image('data/objects/radio.png'), }
+          'radio': load_image('data/objects/radio.png')}
 images['pause_button'].set_alpha(100)
 fps = 60
 running = True
@@ -1196,12 +1364,17 @@ pos = (0, 0)
 
 menu()
 
-player = Player(4000, 500, player_group)  # 2500, 350 #4000, 500
+backgr = pygame.sprite.Sprite(background_group)
+backgr.image = load_image('data/textures/background.png', size=size)
+backgr.rect = backgr.image.get_rect()
+
+player = Player(3850, 500, player_group)  # 2500, 350 #4000, 500
 terrain = Terrain(0, 0, all_sprites, terrain_group)
 bank = Bank(350, 350, all_sprites, building_group)
 home = MainHouse(3710, 125, building_group, all_sprites)
 pharmacy = Pharmacy(5050, 100, building_group, all_sprites)
 shop = Shop(5750, 80, building_group, all_sprites)
+second_shop = SecondShop(6000, 120, building_group, all_sprites)
 
 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
 
@@ -1293,6 +1466,7 @@ while running:
     player_group.update()
     button_group.update(pos)
 
+    background_group.draw(screen)
     all_sprites.draw(screen)
     terrain_group.draw(screen)
     button_group.draw(screen)

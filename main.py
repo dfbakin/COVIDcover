@@ -3,7 +3,7 @@ import pygame
 pygame.init()
 
 size = width, height = 1280, 720
-screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size)  # , pygame.FULLSCREEN)
 
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -37,11 +37,29 @@ near_building_message = None
 near_building = None
 gravity = 1
 menu_is_on = False
+music_on = True
+effects_on = True
+
+
 level = None
+
+speeches = {'intro': pygame.mixer.Sound('data/speech/intro.wav'),
+            '1': pygame.mixer.Sound('data/speech/1.wav'),
+            '2': pygame.mixer.Sound('data/speech/2.wav'),
+            '3': pygame.mixer.Sound('data/speech/3.wav'),
+            'autro': pygame.mixer.Sound('data/speech/autro.wav'),
+            'news': pygame.mixer.Sound('data/speech/news.wav')}
+music = {'main': pygame.mixer.Sound('data/music/main_music.ogg')}
+music['main'].play(-1)
 
 player_params = dict()
 
 products = dict()
+
+
+def stop_speeches():
+    for sound in speeches.values():
+        sound.stop()
 
 
 def load_image(path, colorkey=None, size=None) -> pygame.Surface:
@@ -74,7 +92,7 @@ def check_near_building(player):
     for building in building_group:
         if pygame.sprite.collide_mask(player, building):
             near_building = building
-            near_building_message = f'Press [E] to enter the {building.name}'
+            near_building_message = f'Нажмите [E], чтобы войти в {building.name}'
 
 
 def render_text(line, size=50, color=(255, 255, 255)):
@@ -121,7 +139,7 @@ class Player(pygame.sprite.Sprite):
             self.card_money = 1000
             self.cash = 0
         elif level == 3:
-            self.card_money = 0
+            self.card_money = 3000
             self.cash = 3000
 
         self.objects = []
@@ -223,7 +241,7 @@ class Player(pygame.sprite.Sprite):
         font = pygame.font.Font(None, 30)
         canvas.blit(
             font.render(
-                f'Health: {self.health}%, Risk of infection: {self.hazard_risk}%    Cash: {self.cash} R     Deposit: {self.card_money}',
+                f'Здоровье: {self.health}%, Риск заражения: {self.hazard_risk}%    Наличные: {self.cash} Р     На карте: {self.card_money} Р',
                 1, color), (0, 0))
         return canvas
 
@@ -242,12 +260,13 @@ class Player(pygame.sprite.Sprite):
             screen.fill((0, 0, 0))
             # background_group.draw(screen)
             screen.blit(self.render_info(), (0, 0))
-            text = render_text('You died!!!')
+            text = render_text('Вы мертвы!!!')
             screen.blit(text, (width // 2 - text.get_width() // 2, height // 2))
             pygame.display.flip()
             for i in range(5):
                 self.clock.tick(1)
-            quit()
+            global level
+            level = None
 
     def update(self, *args):
         self.move_down(self.grav)
@@ -276,7 +295,7 @@ class Bank(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = x, y
         self.mask = pygame.mask.from_surface(self.image)
 
-        self.name = 'Bank'
+        self.name = 'Банк'
 
     def is_obstacle(self):
         return False
@@ -430,18 +449,18 @@ class Bank(pygame.sprite.Sprite):
                 main_display.blit(render_text(('_' * (4 - len(current_pin))).rjust(4, '*'), color=(232, 208, 79)),
                                   (main_display.get_width() // 2, main_display.get_height() // 2))
             elif mode == 'main':
-                main_display.blit(render_text('Show balance', color=(232, 208, 79)), (60, 30))
-                main_display.blit(render_text('Deposit cash', color=(232, 208, 79)), (60, 130))
+                main_display.blit(render_text('Показать баланс', color=(232, 208, 79)), (60, 30))
+                main_display.blit(render_text('Внести наличные', color=(232, 208, 79)), (60, 130))
             elif mode == 'balance':
                 main_display.blit(
-                    render_text(f'Your deposit is {player.get_card_balance()} rubles', color=(232, 208, 79)),
+                    render_text(f'Ваш баланс: {player.get_card_balance()} рублей', color=(232, 208, 79)),
                     (0, main_display.get_height() // 3))
-                main_display.blit(render_text('Back', color=(232, 208, 79)), (main_display.get_width() - 125, 250))
+                main_display.blit(render_text('Назад', color=(232, 208, 79)), (main_display.get_width() - 125, 250))
             elif mode == 'success':
-                main_display.blit(render_text('Success!', color=(232, 208, 79)),
+                main_display.blit(render_text('Успешно!', color=(232, 208, 79)),
                                   (main_display.get_width() // 3, main_display.get_height() // 2))
             elif mode == 'error':
-                main_display.blit(render_text('Error!', color=(232, 208, 79)),
+                main_display.blit(render_text('Ошибка!', color=(232, 208, 79)),
                                   (main_display.get_width() // 3, main_display.get_height() // 2))
             elif mode == 'deposit':
                 main_display.blit(render_text('Введите сумму:', color=(232, 208, 79)),
@@ -472,7 +491,7 @@ class MainHouse(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = x, y
         self.mask = pygame.mask.from_surface(self.image)
 
-        self.name = 'Home, sweet home'
+        self.name = 'Дом'
 
         self.clock = pygame.time.Clock()
 
@@ -481,8 +500,7 @@ class MainHouse(pygame.sprite.Sprite):
 
     def enter(self):
         def play_radio_info():
-            # Tplay information recording here
-            print('playing information')
+            speeches['news'].play()
             return True
 
         def success():
@@ -494,7 +512,7 @@ class MainHouse(pygame.sprite.Sprite):
                 self.clock.tick(1)
 
         button_group.empty()
-
+        print([i.name for i in player.get_objects()])
         global level
         if level == 1:
             aims = ['Маска']
@@ -504,6 +522,8 @@ class MainHouse(pygame.sprite.Sprite):
             aims = ['Морковь', 'Картофель', 'Яблоко', 'Маска', 'Спирт']
 
         for i in player.get_objects():
+            if i.name == 'Маска' and not i.is_used:
+                break
             if i.name in aims:
                 aims.remove(i.name)
         if not aims:
@@ -561,7 +581,7 @@ class Shop(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = x, y
         self.mask = pygame.mask.from_surface(self.image)
 
-        self.name = 'Shop'
+        self.name = 'Продуктовый магазин'
 
     def is_obstacle(self):
         return False
@@ -579,9 +599,9 @@ class Shop(pygame.sprite.Sprite):
 
             running = True
             shop_buttons.empty()
-            Button(width // 3, height - 100, 200, 50, render_text('Back'), lambda: (False, True, 'ok'), None,
+            Button(width // 3, height - 100, 200, 50, render_text('Назад'), lambda: (False, True, 'ok'), None,
                    shop_buttons)
-            Button(width // 3 * 2, height - 100, 200, 50, render_text('Apply'), buy, None, shop_buttons)
+            Button(width // 3 * 2, height - 100, 200, 50, render_text('Купить'), buy, None, shop_buttons)
 
             Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
                    100, 50, images['exit_sign'], lambda: (False, False, 'ok'), None, shop_buttons)
@@ -692,7 +712,7 @@ class Shop(pygame.sprite.Sprite):
             shop_group.draw(screen)
             shop_products.draw(screen)
             if status == 'error':
-                screen.blit(render_text('Not enough money! Visit the bank!', color=(255, 0, 0)), (200, 100))
+                screen.blit(render_text('Недостаточно средств! Посетите банк!', color=(255, 0, 0)), (200, 100))
             screen.blit(player.render_info(background=(179, 185, 206)), (0, 0))
             pygame.display.flip()
             clock.tick(fps)
@@ -708,7 +728,7 @@ class SecondShop(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = x, y
         self.mask = pygame.mask.from_surface(self.image)
 
-        self.name = 'Shop'
+        self.name = 'Хозяйственный магазин'
 
     def is_obstacle(self):
         return False
@@ -726,9 +746,9 @@ class SecondShop(pygame.sprite.Sprite):
 
             running = True
             shop_buttons.empty()
-            Button(width // 3, height - 100, 200, 50, render_text('Back'), lambda: (False, True, 'ok'), None,
+            Button(width // 3, height - 100, 200, 50, render_text('Назад'), lambda: (False, True, 'ok'), None,
                    shop_buttons)
-            Button(width // 3 * 2, height - 100, 200, 50, render_text('Apply'), buy, None, shop_buttons)
+            Button(width // 3 * 2, height - 100, 200, 50, render_text('Купить'), buy, None, shop_buttons)
 
             Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
                    100, 50, images['exit_sign'], lambda: (False, False, 'ok'), None, shop_buttons)
@@ -839,7 +859,7 @@ class SecondShop(pygame.sprite.Sprite):
             shop_group.draw(screen)
             shop_products.draw(screen)
             if status == 'error':
-                screen.blit(render_text('Not enough money! Visit the bank!', color=(255, 0, 0)), (200, 100))
+                screen.blit(render_text('Недостаточно средств! Посетите банк!', color=(255, 0, 0)), (200, 100))
             screen.blit(player.render_info(background=(179, 185, 206)), (0, 0))
             pygame.display.flip()
             clock.tick(fps)
@@ -855,7 +875,7 @@ class Pharmacy(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = x, y
         self.mask = pygame.mask.from_surface(self.image)
 
-        self.name = 'Pharmacy'
+        self.name = 'Аптека'
 
     def is_obstacle(self):
         return False
@@ -873,9 +893,9 @@ class Pharmacy(pygame.sprite.Sprite):
 
             running = True
             pharm_buttons.empty()
-            Button(width // 3, height - 100, 200, 50, render_text('Back'), lambda: (False, True, 'ok'), None,
+            Button(width // 3, height - 100, 200, 50, render_text('Назад'), lambda: (False, True, 'ok'), None,
                    pharm_buttons)
-            Button(width // 3 * 2, height - 100, 200, 50, render_text('Apply'), buy, None, pharm_buttons)
+            Button(width // 3 * 2, height - 100, 200, 50, render_text('Купить'), buy, None, pharm_buttons)
 
             Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
                    100, 50, images['exit_sign'], lambda: (False, False, 'ok'), None, pharm_buttons)
@@ -978,7 +998,7 @@ class Pharmacy(pygame.sprite.Sprite):
             pharm_group.draw(screen)
             pharm_products.draw(screen)
             if status == 'error':
-                screen.blit(render_text('Not enough money! Visit the bank!', color=(255, 0, 0)), (200, 100))
+                screen.blit(render_text('Недостаточно средств! Посетите банк!', color=(255, 0, 0)), (200, 100))
             screen.blit(player.render_info(background=(179, 185, 206)), (0, 0))
             pygame.display.flip()
             clock.tick(fps)
@@ -1001,6 +1021,10 @@ class Product(pygame.sprite.Sprite):
         self.id = id
         self.description = describtion
         self.bought = False
+        self.is_used = False
+
+    def was_used(self):
+        return self.is_used
 
     def can_be_bought(self):
         return not self.bought
@@ -1015,7 +1039,7 @@ class Product(pygame.sprite.Sprite):
         return self.price
 
     def get_info(self):
-        return f'{self.name} for {self.price} R'
+        return f'{self.name} за {self.price} рублей'
 
     def get_describtion(self):
         return self.description
@@ -1052,6 +1076,23 @@ class Product(pygame.sprite.Sprite):
             pxl_num += 1
         return display
 
+    def use(self):
+        if self.name == 'Маска':
+            player.infection_rate += 300
+        elif self.name == 'Спирт':
+            player.infection_rate += 250
+        elif self.name == 'Мыло':
+            player.infection_rate += 200
+        elif self.name == 'Витамины':
+            player.infection_rate += 100
+        else:
+            player.infection_rate += 50
+            player.health += 10
+            if player.health > 100:
+                player.health = 100
+        self.is_used = True
+        return True
+
 
 class Equipment:
     table_width = 4
@@ -1061,18 +1102,31 @@ class Equipment:
         self.products = player.get_objects()
 
     def enter(self):
+        def reset():
+            product_buttons.empty()
+            for i in range(Equipment.table_height):
+                for j in range(Equipment.table_width):
+                    index = i * Equipment.table_width + j
+                    if index >= len(self.products):
+                        break
+                    if not self.products[index].was_used():
+                        Button(50 + 50 * j, 50 + 50 * i, 50, 50, self.products[index].get_small_image(),
+                               self.products[index].render_info, index, product_buttons)
+
         running = True
 
         Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
                100, 50, images['exit_sign'], lambda: False, 'exit', product_buttons)
-        for i in range(Equipment.table_height):
+        '''for i in range(Equipment.table_height):
             for j in range(Equipment.table_width):
                 index = i * Equipment.table_width + j
                 if index >= len(self.products):
                     break
                 Button(50 + 50 * j, 50 + 50 * i, 50, 50, self.products[index].get_small_image(),
-                       self.products[index].render_info, None, product_buttons)
+                       self.products[index].render_info, index, product_buttons)'''
+        reset()
         info_display = None
+        use_btn = None
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -1082,8 +1136,18 @@ class Equipment:
                         if btn.rect.collidepoint(event.pos):
                             if btn.id == 'exit':
                                 running = False
-                            else:
+                            elif btn != use_btn:
                                 info_display = btn.run()
+                                if btn.id is not None:
+                                    if use_btn:
+                                        use_btn.kill()
+                                    use_btn = Button(width - 300, height - 150, 300, 75, render_text('Использовать'),
+                                                     self.products[int(btn.id)].use, None, product_buttons)
+                            else:
+                                btn.run()
+                                reset()
+                                if info_display:
+                                    info_display.fill((156, 65, 10))
                 if event.type == pygame.KEYUP:
                     if event.key == 9:  # TAB
                         running = False
@@ -1178,10 +1242,9 @@ def menu(pause=False):
 
     def settings():
         def sound_effect_switch():
-            return
             global effects_on
             effects_on = not effects_on
-            label = f"Sound effects {'on' if effects_on else 'off'}"
+            label = f"Эффекты {'вкл' if effects_on else 'выкл'}"
 
             canvas = pygame.Surface((315, 100))
             canvas.fill((181, 109, 2))
@@ -1192,10 +1255,9 @@ def menu(pause=False):
             effects_button.image = canvas
 
         def music_switch():
-            return
             global music_on
             music_on = not music_on
-            label = f"Music {'on' if music_on else 'off'}"
+            label = f"Музыка {'вкл' if music_on else 'выкл'}"
             canvas = pygame.Surface((315, 100))
             canvas.fill((181, 109, 2))
             text = render_text(label)
@@ -1207,7 +1269,7 @@ def menu(pause=False):
                 for mu in music.values():
                     mu.stop()
             else:
-                music['main_track'].play(-1)
+                music['main'].play(-1)
 
         running = True
         pos = (0, 0)
@@ -1215,7 +1277,7 @@ def menu(pause=False):
         canvas = pygame.Surface((315, 100))
         canvas.fill((181, 109, 2))
         # text = render_text(f"Music {'on' if music_on else 'off'}")
-        text = render_text(f"Music on/off")
+        text = render_text(f"Музыка вкл")
         canvas.blit(text, (canvas.get_width() // 2 - text.get_width() // 2,
                            canvas.get_height() // 2 - text.get_height() // 2))
 
@@ -1225,7 +1287,7 @@ def menu(pause=False):
         canvas = pygame.Surface((315, 100))
         canvas.fill((181, 109, 2))
         # text = render_text(f"Sound effects {'on' if effects_on else 'off'}")
-        text = render_text(f"Sound effects on/off")
+        text = render_text(f"Эффекты вкл")
         canvas.blit(text, (canvas.get_width() // 2 - text.get_width() // 2,
                            canvas.get_height() // 2 - text.get_height() // 2))
 
@@ -1235,7 +1297,7 @@ def menu(pause=False):
 
         canvas = pygame.Surface((315, 100))
         canvas.fill((181, 109, 2))
-        text = render_text('Back')
+        text = render_text('Назад')
         canvas.blit(text, (
             canvas.get_width() // 2 - text.get_width() // 2, canvas.get_height() // 2 - text.get_height() // 2))
 
@@ -1262,6 +1324,7 @@ def menu(pause=False):
     running = True
     pos = (0, 0)
     if not level:
+        speeches['intro'].play()
         canvas = pygame.Surface((200, 100))
         canvas.fill((181, 109, 2))
         text = render_text('Уровень 1')
@@ -1269,7 +1332,7 @@ def menu(pause=False):
                     (
                         canvas.get_width() // 2 - text.get_width() // 2,
                         canvas.get_height() // 2 - text.get_height() // 2))
-        Button(width // 2 - delt_width * 4, height // 4, 200, 100, canvas, None, '1', button_group)
+        Button(width // 2 - delt_width * 4 - 100, height // 4, 200, 100, canvas, None, '1', button_group)
 
         canvas = pygame.Surface((200, 100))
         canvas.fill((181, 109, 2))
@@ -1278,7 +1341,7 @@ def menu(pause=False):
                     (
                         canvas.get_width() // 2 - text.get_width() // 2,
                         canvas.get_height() // 2 - text.get_height() // 2))
-        Button(width // 2 - delt_width, height // 4, 200, 100, canvas, None, '2', button_group)
+        Button(width // 2 - delt_width - 100, height // 4, 200, 100, canvas, None, '2', button_group)
 
         canvas = pygame.Surface((200, 100))
         canvas.fill((181, 109, 2))
@@ -1287,10 +1350,20 @@ def menu(pause=False):
                     (
                         canvas.get_width() // 2 - text.get_width() // 2,
                         canvas.get_height() // 2 - text.get_height() // 2))
-        Button(width // 2 + delt_width * 2, height // 4, 200, 100, canvas, None, '3', button_group)
+        Button(width // 2 + delt_width * 2 - 100, height // 4, 200, 100, canvas, None, '3', button_group)
+
+        canvas = pygame.Surface((200, 100))
+        canvas.fill((181, 109, 2))
+        text = render_text('Эпилог')
+        canvas.blit(text,
+                    (
+                        canvas.get_width() // 2 - text.get_width() // 2,
+                        canvas.get_height() // 2 - text.get_height() // 2))
+        Button(width // 2 + delt_width * 4, height // 4, 200, 100, canvas, None, 'autro', button_group)
+
 
     else:
-        label = 'Resume'
+        label = 'Продолжить'
         canvas = pygame.Surface((200, 100))
         canvas.fill((181, 109, 2))
         text = render_text(label)
@@ -1302,17 +1375,17 @@ def menu(pause=False):
 
     canvas = pygame.Surface((200, 100))
     canvas.fill((181, 109, 2))
-    text = render_text('Settings')
+    text = render_text('Настройки')
     canvas.blit(text,
                 (canvas.get_width() // 2 - text.get_width() // 2, canvas.get_height() // 2 - text.get_height() // 2))
     Button(width // 2 - delt_width, height // 4 * 2, 200, 100, canvas, settings, None, button_group)
 
     canvas = pygame.Surface((200, 100))
     canvas.fill((181, 109, 2))
-    text = render_text('Exit')
+    text = render_text('Выход')
     canvas.blit(text,
                 (canvas.get_width() // 2 - text.get_width() // 2, canvas.get_height() // 2 - text.get_height() // 2))
-    Button(width // 2 - delt_width, height // 4 * 3, 200, 100, canvas, exit_game, None, button_group)
+    Button(width // 2 - delt_width, height // 4 * 3, 200, 100, canvas, quit, 'exit', button_group)
 
     while running:
         for event in pygame.event.get():
@@ -1327,6 +1400,11 @@ def menu(pause=False):
                         if btn.id and btn.id.isdigit():
                             level = int(btn.id)
                             running = False
+                            stop_speeches()
+                            if str(level).isdigit():
+                                speeches[str(level)].play()
+                        elif btn.id == 'autro':
+                            speeches['autro'].play()
                         else:
                             running = btn.run() != 'start'
         data = pygame.key.get_pressed()

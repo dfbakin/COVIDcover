@@ -1,11 +1,11 @@
-import socket
-from time import sleep, time
+import socket, threading
+from time import sleep
 
 players = dict()
 
 
 def operate_connection(con: socket.socket):
-    #print(players)
+    # print(players)
     data = None
     while not data:
         data = con.recv(1024).decode('utf-8').split(r'\t')
@@ -16,28 +16,29 @@ def operate_connection(con: socket.socket):
         if i == player_id:
             continue
         info = i + r'\t' + players[i]
-        #print(player_id, params)
-        #print(players)
-        #print(info)
+        # print(player_id, params)
+        # print(players)
+        # print(info)
         con.send(info.encode('utf-8'))
-        sleep(0.005)
+        sleep(0.002)
     con.send('end'.encode('utf-8'))
 
     con.close()
 
 
-def main():
+def run_server():
     host = '127.0.0.1'
     port = 9000
     so = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     so.bind((host, port))
-    so.listen(10)
+    so.listen(20)
     print("server started.")
     while True:
-        conn, addr = so.accept()
-        #print("client connected IP:<" + str(addr) + ">")
-        operate_connection(conn)
+        client, addr = so.accept()
+        # print("client connected IP:<" + str(addr) + ">")
+        thread = threading.Thread(target=operate_connection, args=(client,))
+        thread.start()
+        thread.join(5)
 
 
-if __name__ == '__main__':
-    main()
+run_server()

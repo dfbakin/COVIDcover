@@ -1,7 +1,7 @@
 import pygame
 from random import randint
 import sys
-import socket, time
+import socket, time, threading
 
 pygame.init()
 
@@ -46,6 +46,9 @@ menu_is_on = False
 music_on = True
 effects_on = True
 
+host = '127.0.0.1'
+port = 9000
+
 level = 1
 
 speeches = {'intro': pygame.mixer.Sound('data/speech/intro.wav'),
@@ -62,7 +65,10 @@ player_params = dict()
 products = dict()
 
 
-def operate_player_data(con):
+def operate_player_data():
+    con = socket.socket()
+    con.connect((host, port))
+
     a = player.id + r'\t' + player.get_pos_info()
     con.send((player.id + r'\t' + player.get_pos_info()).encode('utf-8'))
 
@@ -85,6 +91,10 @@ def operate_player_data(con):
             # remote_players.empty()
             player_params[id] = RemotePlayer(0, 0, remote_players, all_sprites)
         player_params[id].set_params(params)
+        try:
+            test = player_params[id].image
+        except AttributeError:
+            player_params[id].kill()
     con.close()
 
 
@@ -1474,7 +1484,7 @@ images = {'pause_button': load_image('data/other/pause_button.png', size=(50, 50
           'room': load_image('data/inside/room.png', size=size),
           'radio': load_image('data/objects/radio.png')}
 images['pause_button'].set_alpha(100)
-fps = 60
+fps = 30
 running = True
 clock = pygame.time.Clock()
 pos = (0, 0)
@@ -1497,13 +1507,13 @@ second_shop = SecondShop(6000, 120, building_group, all_sprites)
 
 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
 
-client = socket.socket()
+#client = socket.socket()
 # socket.setdefaulttimeout(0.015)
 # TODO host, port
 # ip = client.gethostbyname('HOST')
-client.connect(('127.0.0.1', 9000))
-print("client connected to server")
-operate_player_data(client)
+#client.connect(('127.0.0.1', 9000))
+#print("client connected to server")
+operate_player_data()
 time.sleep(0.5)
 connect_tick = 0
 
@@ -1588,23 +1598,27 @@ while running:
         camera.apply(sprite)
     camera.apply(player)
 
-    if connect_tick == 2:
-        client = socket.socket()
-        client.connect(('127.0.0.1', 9000))
-        operate_player_data(client)
-        connect_tick = 0
+    thread = threading.Thread(target=operate_player_data)
+    thread.start()
+    thread.join(0.01)
 
     all_sprites.update()
     player_group.update()
     button_group.update(pos)
 
     background_group.draw(screen)
-    all_sprites.draw(screen)
+    try:
+        all_sprites.draw(screen)
+    except AttributeError:
+        pass
     terrain_group.draw(screen)
     button_group.draw(screen)
     screen.blit(player.render_info(), (0, 0))
     player_group.draw(screen)
-    remote_players.draw(screen)
+    try:
+        remote_players.draw(screen)
+    except AttributeError:
+        pass
 
     if near_building_message and near_building:
         screen.blit(render_text(near_building_message), (0, height - 50))

@@ -5,7 +5,6 @@ players = dict()
 
 
 def operate_connection(con: socket.socket):
-    # print(players)
     data = None
     while not data:
         data = con.recv(1024).decode('utf-8').split(r'\t')
@@ -16,9 +15,6 @@ def operate_connection(con: socket.socket):
         if i == player_id:
             continue
         info = i + r'\t' + players[i]
-        # print(player_id, params)
-        # print(players)
-        # print(info)
         con.send(info.encode('utf-8'))
         sleep(0.002)
     con.send('end'.encode('utf-8'))
@@ -31,14 +27,13 @@ def run_server():
     port = 9000
     so = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     so.bind((host, port))
-    so.listen(20)
-    print("server started.")
+    so.listen(50)
+    print("[OK] server started")
     while True:
         client, addr = so.accept()
-        # print("client connected IP:<" + str(addr) + ">")
         thread = threading.Thread(target=operate_connection, args=(client,))
         thread.start()
-        thread.join(5)
+        thread.join(1)
 
 
 run_server()

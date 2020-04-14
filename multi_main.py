@@ -67,34 +67,26 @@ products = dict()
 
 def operate_player_data():
     con = socket.socket()
-    con.connect((host, port))
+    try:
+        con.connect((host, port))
+    except ConnectionRefusedError:
+        return
 
-    a = player.id + r'\t' + player.get_pos_info()
     con.send((player.id + r'\t' + player.get_pos_info()).encode('utf-8'))
 
-    data = None
     end = False
     while not end:
-        # while not data:
         data = con.recv(1024).decode('utf-8')
         if 'end' in data and len(data) > 3:
             end = True
             data = data[:data.index('end')]
         elif data == 'end':
             break
-        # print(data)
         # TODO mind the slice indexes
-        id, params = data.split(r'\t')[0], r'\t'.join(data.split(r'\t')[1:5])
+        id, params = data.split(r'\t')[0], r'\t'.join(data.split(r'\t')[1:])
         if str(id) not in player_params.keys() and id != player.id:
-            # print(player_params)
-            # print(id)
-            # remote_players.empty()
             player_params[id] = RemotePlayer(0, 0, remote_players, all_sprites)
         player_params[id].set_params(params)
-        try:
-            test = player_params[id].image
-        except AttributeError:
-            player_params[id].kill()
     con.close()
 
 

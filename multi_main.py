@@ -45,6 +45,7 @@ gravity = 1
 menu_is_on = False
 music_on = True
 effects_on = True
+global_exit = False
 
 host = '127.0.0.1'
 port = 9000
@@ -66,28 +67,34 @@ products = dict()
 
 
 def operate_player_data():
-    con = socket.socket()
-    try:
-        con.connect((host, port))
-    except ConnectionRefusedError:
-        return
+    global global_exit
+    while True:
+        con = socket.socket()
+        try:
+            con.connect((host, port))
+        except ConnectionRefusedError:
+            return
 
-    con.send((player.id + r'\t' + player.get_pos_info()).encode('utf-8'))
+        con.send((player.id + r'\t' + player.get_pos_info()).encode('utf-8'))
 
-    end = False
-    while not end:
-        data = con.recv(1024).decode('utf-8')
-        if 'end' in data and len(data) > 3:
-            end = True
-            data = data[:data.index('end')]
-        elif data == 'end':
+        end = False
+        while not end:
+            data = con.recv(1024).decode('utf-8')
+            if 'end' in data and len(data) > 3:
+                end = True
+                data = data[:data.index('end')]
+            elif data == 'end':
+                break
+            # TODO mind the slice indexes
+            id, params = data.split(r'\t')[0], r'\t'.join(data.split(r'\t')[1:])
+            if str(id) not in player_params.keys() and id != player.id:
+                player_params[id] = RemotePlayer(0, 0, remote_players, all_sprites)
+                time.sleep(0.002)
+            player_params[id].set_params(params)
+            time.sleep(0.002)
+        con.close()
+        if global_exit:
             break
-        # TODO mind the slice indexes
-        id, params = data.split(r'\t')[0], r'\t'.join(data.split(r'\t')[1:])
-        if str(id) not in player_params.keys() and id != player.id:
-            player_params[id] = RemotePlayer(0, 0, remote_players, all_sprites)
-        player_params[id].set_params(params)
-    con.close()
 
 
 def stop_speeches():
@@ -486,7 +493,7 @@ class Bank(pygame.sprite.Sprite):
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    sys.exit()
+                    exit_game()
                 if event.type == pygame.MOUSEMOTION:
                     if card_moving:
                         card.rect.x, card.rect.y = event.pos
@@ -641,7 +648,7 @@ class MainHouse(pygame.sprite.Sprite):
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    sys.exit()
+                    exit_game()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for btn in house_buttons:
                         if btn.rect.collidepoint(event.pos):
@@ -701,7 +708,7 @@ class Shop(pygame.sprite.Sprite):
             while running:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        sys.exit()
+                        exit_game()
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         for btn in shop_buttons:
                             if btn.rect.collidepoint(event.pos):
@@ -758,7 +765,7 @@ class Shop(pygame.sprite.Sprite):
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    sys.exit()
+                    exit_game()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for btn in shop_buttons:
                         if btn.rect.collidepoint(event.pos):
@@ -836,7 +843,7 @@ class SecondShop(pygame.sprite.Sprite):
             while running:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        sys.exit()
+                        exit_game()
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         for btn in shop_buttons:
                             if btn.rect.collidepoint(event.pos):
@@ -885,7 +892,7 @@ class SecondShop(pygame.sprite.Sprite):
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    sys.exit()
+                    exit_game()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for btn in shop_buttons:
                         if btn.rect.collidepoint(event.pos):
@@ -964,7 +971,7 @@ class Pharmacy(pygame.sprite.Sprite):
             while running:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        sys.exit()
+                        exit_game()
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         for btn in pharm_buttons:
                             if btn.rect.collidepoint(event.pos):
@@ -1019,7 +1026,7 @@ class Pharmacy(pygame.sprite.Sprite):
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    sys.exit()
+                    exit_game()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for btn in pharm_buttons:
                         if btn.rect.collidepoint(event.pos):
@@ -1178,7 +1185,7 @@ class Equipment:
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    sys.exit()
+                    exit_game()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for btn in product_buttons:
                         if btn.rect.collidepoint(event.pos):
@@ -1269,6 +1276,9 @@ class Camera:
 
 
 def exit_game():
+    global global_exit
+    global_exit = True
+    time.sleep(0.5)
     sys.exit()
 
 
@@ -1347,7 +1357,7 @@ def menu(pause=False):
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    sys.exit()
+                    exit_game()
                 elif event.type == pygame.MOUSEMOTION:
                     pos = event.pos
                 elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -1431,7 +1441,7 @@ def menu(pause=False):
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                sys.exit()
+                exit_game()
             elif event.type == pygame.MOUSEMOTION:
                 pos = event.pos
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -1499,14 +1509,16 @@ second_shop = SecondShop(6000, 120, building_group, all_sprites)
 
 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
 
-#client = socket.socket()
+# client = socket.socket()
 # socket.setdefaulttimeout(0.015)
 # TODO host, port
 # ip = client.gethostbyname('HOST')
-#client.connect(('127.0.0.1', 9000))
-#print("client connected to server")
-operate_player_data()
-time.sleep(0.5)
+# client.connect(('127.0.0.1', 9000))
+# print("client connected to server")
+thread = threading.Thread(target=operate_player_data)
+thread.start()
+# thread.join(0.01)
+
 connect_tick = 0
 
 camera = Camera()
@@ -1587,12 +1599,11 @@ while running:
     screen.fill((0, 0, 0))
     camera.update(player)
     for sprite in all_sprites:
-        camera.apply(sprite)
+        try:
+            camera.apply(sprite)
+        except AttributeError:
+            sprite.kill()
     camera.apply(player)
-
-    thread = threading.Thread(target=operate_player_data)
-    thread.start()
-    thread.join(0.01)
 
     all_sprites.update()
     player_group.update()
@@ -1617,3 +1628,4 @@ while running:
     pygame.display.flip()
     clock.tick(fps)
     connect_tick += 1
+exit_game()

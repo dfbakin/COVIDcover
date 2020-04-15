@@ -1,5 +1,5 @@
 import pygame
-from random import randint
+from random import randint, random
 import sys
 import socket, time, threading
 
@@ -65,15 +65,6 @@ music['main'].play(-1)
 player_params = dict()
 products = dict()
 
-
-def clean_players():
-    global player_params
-    while True:
-        player_params = dict()
-        remote_players.empty()
-        time.sleep(3)
-        if global_exit:
-            break
 
 
 
@@ -193,7 +184,7 @@ class RemotePlayer(pygame.sprite.Sprite):
         try:
             assert len(data) == 5
             new_x, new_y = int(data[0]), int(data[1])
-            #TODO if an exception -> change back to bool
+            # TODO if an exception -> change back to bool
             moving = True if data[2] == 'True' else False
             assert data[3] in ['left', 'right'] and str(data[3]).isalpha()
             infected = str(data[4])
@@ -298,7 +289,7 @@ class Player(pygame.sprite.Sprite):
         products['card'].pin = pin
         self.objects.append(products['card'])
 
-        self.infected = 3 if self.role == 'citizen' else None
+        self.infected = 1 if self.role == 'citizen' else None
 
     def get_objects(self):
         return self.objects
@@ -398,7 +389,7 @@ class Player(pygame.sprite.Sprite):
         font = pygame.font.Font(None, 30)
         canvas.blit(
             font.render(
-                f'Здоровье: {self.health}%    Наличные: {self.cash} Р     На карте: {self.card_money} Р',
+                f'Здоровье: {self.health}%   Риск заражения: {self.hazard_risk}%   Наличные: {self.cash} Р     На карте: {self.card_money} Р',
                 1, color), (0, 0))
         return canvas
 
@@ -411,8 +402,18 @@ class Player(pygame.sprite.Sprite):
         return res
 
     def update_params(self):
+        if self.role == 'citizen':
+            self.danger_level = 1 - (100 - self.health) / 100
+            self.hazard_timer += self.clock.tick()
+            if self.hazard_timer > Player.infection_rate * self.danger_level:
+                self.hazard_risk += 1
+                self.hazard_timer = 0
+
         if self.health <= 0:
             self.health = 0
+        if self.hazard_risk >= 100:
+            self.hazard_risk = 100
+
         if self.health == 0 or self.hazard_risk == 100 or self.grav < -50:
             screen.fill((0, 0, 0))
             # background_group.draw(screen)
@@ -1114,6 +1115,191 @@ class Pharmacy(pygame.sprite.Sprite):
         pharm_group.empty()
 
 
+class Hospital(pygame.sprite.Sprite):
+    def __init__(self, x, y, *groups):
+        super().__init__(groups)
+        self.image = load_image('data/buildings/hospital.png', size=(370, 340))
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = x, y
+        self.mask = pygame.mask.from_surface(self.image)
+
+        self.name = 'Больница'
+
+    def is_obstacle(self):
+        return False
+
+    def enter(self):
+        button_group.empty()
+        if player.role != 'citizen':
+            return
+        if player.infected != 1:
+            return
+        pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
+        running = True
+
+        mode = 'main'
+        current_year = ''
+        math = ''
+        answer = ''
+        right_answer = ''
+
+        main_display = pygame.Surface((width // 2, height // 3 + 150))
+        main_display.fill((0, 0, 0))
+
+        Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
+               100, 50, images['exit_sign'], lambda: False, None, bank_buttons)
+
+        Button(50, 100, 50, 50, images['right_arrow'], None, 'first', bank_buttons)
+        Button(50, 200, 50, 50, images['right_arrow'], None, 'second', bank_buttons)
+        Button(50, 300, 50, 50, images['right_arrow'], None, 'third', bank_buttons)
+
+        Button(100 + main_display.get_width(), 100, 50, 50, images['left_arrow'], None, 'fourth', bank_buttons)
+        Button(100 + main_display.get_width(), 200, 50, 50, images['left_arrow'], None, 'fifth', bank_buttons)
+        Button(100 + main_display.get_width(), 300, 50, 50, images['left_arrow'], None, 'sixth', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('1', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4, 470, 50, 50, image, None, '1', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('2', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75, 470, 50, 50, image, None, '2', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('3', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75 * 2, 470, 50, 50, image, None, '3', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('4', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4, 545, 50, 50, image, None, '4', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('5', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75, 545, 50, 50, image, None, '5', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('6', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75 * 2, 545, 50, 50, image, None, '6', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('7', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4, 620, 50, 50, image, None, '7', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('8', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75, 620, 50, 50, image, None, '8', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('9', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75 * 2, 620, 50, 50, image, None, '9', bank_buttons)
+
+        image = load_image('data/objects/digit_button.png')
+        image.blit(render_text('0', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75, 670, 50, 50, image, None, '0', bank_buttons)
+
+        image = load_image('data/objects/long_button.png')
+        image.blit(render_text('Enter', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75 * 3, 620, 208, 47, image, None, 'enter', bank_buttons)
+
+        image = load_image('data/objects/long_button.png')
+        image.blit(render_text('Clear', color=(0, 0, 0)), (10, 5))
+        Button(100 + main_display.get_width() // 4 + 75 * 3, 545, 208, 47, image, None, 'clear', bank_buttons)
+
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    exit_game()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for btn in bank_buttons:
+                        if btn.rect.collidepoint(event.pos):
+                            if not btn.id:
+                                running = btn.run()
+                            elif mode == 'error':
+                                mode = 'main'
+                                current_year = ''
+                                math = ''
+                                answer = ''
+                            elif mode == 'main' and btn.id.isdigit():
+                                current_year += btn.id
+                            elif btn.id == 'enter' and mode == 'main':
+                                if len(current_year) != 4:
+                                    mode = 'error'
+                                else:
+                                    mode = 'math'
+                                    a = randint(100, 999)
+                                    b = randint(100, 999)
+                                    right_answer = str(a + b)
+                                    math = f'{a} + {b}'
+                            elif mode == 'math' and btn.id.isdigit():
+                                answer += btn.id
+                            elif mode == 'math' and btn.id == 'enter':
+                                if right_answer == answer:
+                                    if random() < 0.75:
+                                        player.infected = 3
+                                        mode = 'infected'
+                                    else:
+                                        mode = 'ok'
+                                        player.infected = 2
+                                else:
+                                    mode = 'error'
+
+                            pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
+            data = pygame.key.get_pressed()
+            player.set_moving(False)
+            if data[27]:
+                menu(pause=True)
+                button_group.empty()
+                pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
+
+            main_display.fill((0, 0, 0))
+            if mode == 'main':
+                main_display.blit(
+                    render_text('Введите ваш год рождения,', color=(232, 208, 79)),
+                    (main_display.get_width() // 8, main_display.get_height() // 2 - 50))
+                main_display.blit(
+                    render_text('если вы хотите сдать анализы', color=(232, 208, 79)),
+                    (main_display.get_width() // 8, main_display.get_height() // 2))
+
+                main_display.blit(render_text(('_' * (4 - len(current_year))).rjust(4, '*'), color=(232, 208, 79)),
+                                  (main_display.get_width() // 2, main_display.get_height() // 2 + 50))
+            elif mode == 'math':
+                main_display.blit(render_text('Решите простой пример, ', color=(232, 208, 79)),
+                                  (main_display.get_width() // 8, main_display.get_height() // 2 - 50))
+                main_display.blit(render_text('пока Ваши анализы готовятся...', color=(232, 208, 79)),
+                                  (main_display.get_width() // 8, main_display.get_height() // 2))
+
+                main_display.blit(render_text(math, color=(232, 208, 79)),
+                                  (main_display.get_width() // 8, main_display.get_height() // 2 + 50))
+
+                main_display.blit(render_text(('_' * (4 - len(current_year))).rjust(4, '*'), color=(232, 208, 79)),
+                                  (main_display.get_width() // 2, main_display.get_height() // 2 + 100))
+            elif mode == 'error':
+                main_display.blit(
+                    render_text('Ошибка! Попробуйте снова;)', color=(232, 208, 79)),
+                    (main_display.get_width() // 4, main_display.get_height() // 2 - 50))
+            elif mode == 'infected':
+                main_display.blit(render_text('Вы инфецированы и заразны!', color=(232, 208, 79), size=35),
+                                  (10, main_display.get_height() // 2 - 50))
+                main_display.blit(render_text('Срочно необходима строгая изоляция!', color=(232, 208, 79), size=35),
+                                  (10, main_display.get_height() // 2))
+            elif mode == 'ok':
+                main_display.blit(render_text('Вы здоровы!', color=(232, 208, 79)),
+                                  (main_display.get_width() // 4, main_display.get_height() // 2 - 50))
+                main_display.blit(render_text('Но мы советуем оставаться дома!', color=(232, 208, 79)),
+                                  (main_display.get_width() // 8, main_display.get_height() // 2))
+
+            screen.fill((156, 65, 10))
+            player.update_params()
+            button_group.draw(screen)
+            bank_buttons.draw(screen)
+            screen.blit(player.render_info(background=(156, 65, 10)), (0, 0))
+            screen.blit(main_display, (100, 70))
+            pygame.display.flip()
+            clock.tick(fps)
+        bank_buttons.empty()
+        button_group.empty()
+
+
 class Product(pygame.sprite.Sprite):
     def __init__(self, x, y, name, image, price, describtion, *groups):
         super().__init__(groups)
@@ -1546,7 +1732,8 @@ backgr = pygame.sprite.Sprite(background_group)
 backgr.image = load_image('data/textures/background.png', size=size)
 backgr.rect = backgr.image.get_rect()
 
-player = Player(3850, 500, input('enter role:     '), player_group)
+player = Player(3850, 450, input('enter role:     '), player_group)
+#player = Player(3850, 500, 'citizen', player_group)
 player.id = internal_id
 terrain = Terrain(0, 0, all_sprites, terrain_group)
 bank = Bank(350, 350, all_sprites, building_group)
@@ -1554,6 +1741,7 @@ home = MainHouse(3710, 125, building_group, all_sprites)
 pharmacy = Pharmacy(5050, 100, building_group, all_sprites)
 shop = Shop(5750, 80, building_group, all_sprites)
 second_shop = SecondShop(6000, 120, building_group, all_sprites)
+hospital = Hospital(2200, 225, building_group, all_sprites)
 
 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
 
@@ -1566,8 +1754,6 @@ pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None,
 thread = threading.Thread(target=operate_player_data)
 thread.start()
 # thread.join(0.01)
-clean_thread = threading.Thread(target=clean_players)
-clean_thread.start()
 
 connect_tick = 0
 

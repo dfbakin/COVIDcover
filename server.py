@@ -24,12 +24,6 @@ def operate_connection():
         con.close()
 
 
-def clean_players():
-    global players
-    sleep(5)
-    players = dict()
-
-
 host = '127.0.0.1'
 port = 9000
 so = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -48,7 +42,3 @@ thread_3.start()
 
 thread_4 = threading.Thread(target=operate_connection)
 thread_4.start()
-
-thread_5 = threading.Thread(target=clean_players)
-thread_5.start()
-

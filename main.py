@@ -249,7 +249,7 @@ class Player(pygame.sprite.Sprite):
         font = pygame.font.Font(None, 30)
         canvas.blit(
             font.render(
-                f'Здоровье: {self.health}%, Риск заражения: {self.hazard_risk}%    Наличные: {self.cash} Р     На карте: {self.card_money} Р',
+                f'Здоровье: {self.health}%   Риск заражения: {self.hazard_risk}%    Наличные: {self.cash} Р     На карте: {self.card_money} Р',
                 1, color), (0, 0))
         return canvas
 
@@ -444,7 +444,7 @@ class Bank(pygame.sprite.Sprite):
                                     deposit_summ += btn.id
                             elif mode == 'error' or mode == 'success':
                                 mode = 'main'
-                            button_group.empty()
+                            #button_group.empty()
                             pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
             data = pygame.key.get_pressed()
             player.set_moving(False)

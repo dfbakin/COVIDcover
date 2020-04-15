@@ -66,33 +66,49 @@ player_params = dict()
 products = dict()
 
 
+def clean_players():
+    global player_params
+    while True:
+        player_params = dict()
+        remote_players.empty()
+        time.sleep(3)
+        if global_exit:
+            break
+
+
+
 def operate_player_data():
     global global_exit
     while True:
-        con = socket.socket()
         try:
-            con.connect((host, port))
-        except ConnectionRefusedError:
-            return
+            con = socket.socket()
+            try:
+                con.connect((host, port))
+            except ConnectionRefusedError:
+                return
 
-        con.send((player.id + r'\t' + player.get_pos_info()).encode('utf-8'))
+            con.send((player.id + r'\t' + player.get_pos_info()).encode('utf-8'))
 
-        end = False
-        while not end:
-            data = con.recv(1024).decode('utf-8')
-            if 'end' in data and len(data) > 3:
-                end = True
-                data = data[:data.index('end')]
-            elif data == 'end':
-                break
-            # TODO mind the slice indexes
-            id, params = data.split(r'\t')[0], r'\t'.join(data.split(r'\t')[1:])
-            if str(id) not in player_params.keys() and id != player.id:
-                player_params[id] = RemotePlayer(0, 0, remote_players, all_sprites)
+            end = False
+            while not end:
+                data = con.recv(1024).decode('utf-8')
+                if 'end' in data and len(data) > 3:
+                    end = True
+                    data = data[:data.index('end')]
+                elif data == 'end':
+                    break
+                # TODO mind the slice indexes
+                id, params = data.split(r'\t')[0], r'\t'.join(data.split(r'\t')[1:])
+                if str(id) not in player_params.keys() and id != player.id:
+                    role = params.split(r'\t')[0]
+                    player_params[id] = RemotePlayer(0, 0, role, remote_players)
+                    if len(remote_players.sprites()) == 0:
+                        player_params[id] = RemotePlayer(0, 0, role, remote_players)
+                    time.sleep(0.002)
+                player_params[id].set_params(params)
                 time.sleep(0.002)
-            player_params[id].set_params(params)
-            time.sleep(0.002)
-        con.close()
+        finally:
+            con.close()
         if global_exit:
             break
 
@@ -140,15 +156,14 @@ def render_text(line, size=50, color=(255, 255, 255)):
 
 
 class RemotePlayer(pygame.sprite.Sprite):
-    def __init__(self, x, y, *groups):
+    def __init__(self, x, y, role, *groups):
+        print(groups)
+        print(x, y, role)
         super().__init__(groups)
-        self.frames = {'left': [], 'right': []}
-        for i in range(1):
-            self.frames['left'].append(
-                load_image(f'data/characters/player_left_{i + 1}.png', size=(40, 90)))
-        for i in range(1):
-            self.frames['right'].append(
-                load_image(f'data/characters/player_right_{i + 1}.png', size=(40, 90)))
+        self.role = role
+        self.scanner_is_on = False
+        self.side = 'left'
+        self.update_images()
 
         self.image = self.frames['right'][0]
         self.rect = self.image.get_rect()
@@ -156,7 +171,8 @@ class RemotePlayer(pygame.sprite.Sprite):
 
         self.is_moving = False
         self.clock = pygame.time.Clock()
-        self.side = 'left'
+
+        self.infected = None
 
     def get_coords(self):
         return self.rect.x, self.rect.y
@@ -171,31 +187,66 @@ class RemotePlayer(pygame.sprite.Sprite):
         return False
 
     def set_params(self, data):
-        data = data.split(r'\t')
+        data = data.split(r'\t')[1:]
         # print(123)
         # print(data)
         try:
-            assert len(data) == 4
+            assert len(data) == 5
             new_x, new_y = int(data[0]), int(data[1])
-            moving = bool(data[2])
+            #TODO if an exception -> change back to bool
+            moving = True if data[2] == 'True' else False
             assert data[3] in ['left', 'right'] and str(data[3]).isalpha()
-        except:
-            print('error')
+            infected = str(data[4])
+        except Exception as e:
+            print('error', e)
             return
         self.set_position((new_x + terrain.rect.x, new_y + terrain.rect.y))
         self.is_moving = moving
-        self.image = self.frames[data[3]][0]
+        while True:
+            try:
+                self.image = self.frames[data[3]][0]
+            except IndexError:
+                continue
+            break
+        if infected == 'None':
+            self.infected = None
+        elif infected.isdigit():
+            self.infected = int(infected)
+        else:
+            print('[ERROR] value infection:', infected)
 
-    def render_info(self, color=(255, 255, 255), background=(0, 0, 0)):
-        return
-        canvas = pygame.Surface((width // 2 + 175, 20))
-        canvas.fill(background)
-        font = pygame.font.Font(None, 30)
-        canvas.blit(
-            font.render(
-                f'Здоровье: {self.health}%, Риск заражения: {self.hazard_risk}%    Наличные: {self.cash} Р     На карте: {self.card_money} Р',
-                1, color), (0, 0))
-        return canvas
+    # TODO add infected param to socket data
+    def update_images(self):
+        self.frames = {'left': [], 'right': []}
+        self.frames['left'].append(
+            pygame.transform.flip(load_image(f'data/characters/{self.role}_right_5.png', size=(80, 110)), 1, 0))
+        if self.scanner_is_on:
+            if self.infected == 1:
+                self.frames['left'][0].blit(load_image('data/characters/not_stated.png', size=(20, 20)), (60, 0))
+            elif self.infected == 2:
+                self.frames['left'][0].blit(load_image('data/characters/ok.png', size=(20, 20)), (60, 0))
+            elif self.infected == 3:
+                self.frames['left'][0].blit(load_image('data/characters/infected.png', size=(20, 20)), (60, 0))
+
+        self.frames['right'].append(
+            load_image(f'data/characters/{self.role}_right_5.png', size=(80, 110)))
+        if self.scanner_is_on:
+            if self.infected == 1:
+                self.frames['right'][0].blit(load_image('data/characters/not_stated.png', size=(20, 20)), (60, 0))
+            elif self.infected == 2:
+                self.frames['right'][0].blit(load_image('data/characters/ok.png', size=(20, 20)), (60, 0))
+            elif self.infected == 3:
+                self.frames['right'][0].blit(load_image('data/characters/infected.png', size=(20, 20)), (60, 0))
+
+        self.image = self.frames[self.side][0]
+
+    def update(self, *args):
+        if not args:
+            return
+        scanner_on = args[0]
+        if scanner_on != self.scanner_is_on:
+            self.scanner_is_on = scanner_on
+            self.update_images()
 
 
 class Player(pygame.sprite.Sprite):
@@ -203,15 +254,15 @@ class Player(pygame.sprite.Sprite):
     jump_power = 15
     infection_rate = 1500
 
-    def __init__(self, x, y, *groups):
+    def __init__(self, x, y, role, *groups):
         super().__init__(groups)
+        self.role = role
+
         self.frames = {'left': [], 'right': []}
-        for i in range(1):
-            self.frames['left'].append(
-                load_image(f'data/characters/player_left_{i + 1}.png', size=(40, 90)))
-        for i in range(1):
-            self.frames['right'].append(
-                load_image(f'data/characters/player_right_{i + 1}.png', size=(40, 90)))
+        self.frames['left'].append(
+            pygame.transform.flip(load_image(f'data/characters/{role}_right_5.png', size=(80, 110)), 1, 0))
+        self.frames['right'].append(
+            load_image(f'data/characters/{role}_right_5.png', size=(80, 110)))
 
         self.image = self.frames['right'][0]
         self.mask = pygame.mask.from_surface(self.image)
@@ -246,6 +297,8 @@ class Player(pygame.sprite.Sprite):
         products['card'].description = (r'Пин код:\n' + str(pin)).split(r'\n')
         products['card'].pin = pin
         self.objects.append(products['card'])
+
+        self.infected = 3 if self.role == 'citizen' else None
 
     def get_objects(self):
         return self.objects
@@ -345,27 +398,21 @@ class Player(pygame.sprite.Sprite):
         font = pygame.font.Font(None, 30)
         canvas.blit(
             font.render(
-                f'Здоровье: {self.health}%, Риск заражения: {self.hazard_risk}%    Наличные: {self.cash} Р     На карте: {self.card_money} Р',
+                f'Здоровье: {self.health}%    Наличные: {self.cash} Р     На карте: {self.card_money} Р',
                 1, color), (0, 0))
         return canvas
 
+    # TODO add infected and alarm for policeman
     def get_pos_info(self):
-        res = str(self.rect.x - terrain.rect.x) + r'\t' + str(self.rect.y - terrain.rect.y) + r'\t' + str(
-            self.is_moving) + r'\t' + self.side
-        # print(res)
+        res = self.role + r'\t' + str(self.rect.x - terrain.rect.x) + r'\t' + str(
+            self.rect.y - terrain.rect.y) + r'\t' + str(
+            self.is_moving) + r'\t' + self.side + r'\t' + str(self.infected)
+        print(res)
         return res
 
     def update_params(self):
-        self.danger_level = 1 - (100 - self.health) / 100
-        self.hazard_timer += self.clock.tick()
-        if self.hazard_timer > Player.infection_rate * self.danger_level:
-            self.hazard_risk += 1
-            self.hazard_timer = 0
-
         if self.health <= 0:
             self.health = 0
-        if self.hazard_risk >= 100:
-            self.hazard_risk = 100
         if self.health == 0 or self.hazard_risk == 100 or self.grav < -50:
             screen.fill((0, 0, 0))
             # background_group.draw(screen)
@@ -1492,13 +1539,14 @@ clock = pygame.time.Clock()
 pos = (0, 0)
 
 # menu()
-internal_id = input('Enter internal id:   ')
+# internal_id = input('Enter internal id:   ')
+internal_id = str(randint(1000, 9999))
 
 backgr = pygame.sprite.Sprite(background_group)
 backgr.image = load_image('data/textures/background.png', size=size)
 backgr.rect = backgr.image.get_rect()
 
-player = Player(3850, 500, player_group)
+player = Player(3850, 500, input('enter role:     '), player_group)
 player.id = internal_id
 terrain = Terrain(0, 0, all_sprites, terrain_group)
 bank = Bank(350, 350, all_sprites, building_group)
@@ -1518,11 +1566,15 @@ pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None,
 thread = threading.Thread(target=operate_player_data)
 thread.start()
 # thread.join(0.01)
+clean_thread = threading.Thread(target=clean_players)
+clean_thread.start()
 
 connect_tick = 0
 
 camera = Camera()
 camera.update(player)
+
+scanner_on = False
 
 # home.enter()
 while running:
@@ -1573,9 +1625,17 @@ while running:
                     button_group.empty()
                     pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
         if event.type == pygame.KEYUP:
+            if player.role == 'policeman' and event.key == 99:
+                scanner_on = False
+                print('scanner off')
             if event.key == 9:  # TAB
                 eq = Equipment(player)
                 eq.enter()
+        if event.type == pygame.KEYDOWN:
+            if player.role == 'policeman' and event.key == 99:
+                print('scanner on')
+                scanner_on = True
+
     data = pygame.key.get_pressed()
     player.set_moving(False)
     if data[27]:
@@ -1603,11 +1663,18 @@ while running:
             camera.apply(sprite)
         except AttributeError:
             sprite.kill()
+    for sprite in remote_players:
+        try:
+            camera.apply(sprite)
+        except AttributeError:
+            sprite.kill()
     camera.apply(player)
 
     all_sprites.update()
     player_group.update()
     button_group.update(pos)
+
+    remote_players.update(scanner_on)
 
     background_group.draw(screen)
     try:

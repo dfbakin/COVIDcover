@@ -102,23 +102,26 @@ def render_text(line, size=50, color=(255, 255, 255)):
 
 class Player(pygame.sprite.Sprite):
     speed = 5
-    jump_power = 15
+    jump_power = 17
     infection_rate = 1500
 
     def __init__(self, x, y, *groups):
         super().__init__(groups)
         self.frames = {'left': [], 'right': []}
-        for i in range(1):
+        for i in range(6):
             self.frames['left'].append(
-                load_image(f'data/characters/player_left_{i + 1}.png', size=(40, 90)))
-        for i in range(1):
+                pygame.transform.flip(load_image(f'data/characters/citizen_right_{i + 1}.png', size=(80, 110)), 1, 0))
+        for i in range(6):
             self.frames['right'].append(
-                load_image(f'data/characters/player_right_{i + 1}.png', size=(40, 90)))
+                load_image(f'data/characters/citizen_right_{i + 1}.png', size=(80, 110)))
 
         self.image = self.frames['right'][0]
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x, y
+        self.side = 'right'
+        self.image_num = 0
+
 
         self.prev_coords = x, y
         self.is_moving = False
@@ -194,7 +197,8 @@ class Player(pygame.sprite.Sprite):
         return False
 
     def move_left(self):
-        self.image = self.frames['left'][0]
+        self.side = 'left'
+        self.image = self.frames[self.side][0]
 
         self.prev_coords = self.get_coords()
         self.rect.x -= Player.speed
@@ -209,7 +213,8 @@ class Player(pygame.sprite.Sprite):
             self.rect.y = self.prev_coords[1]
 
     def move_right(self):
-        self.image = self.frames['right'][0]
+        self.side = 'right'
+        self.image = self.frames[self.side][0]
         self.prev_coords = self.get_coords()
         self.rect.x += Player.speed
         if check_collisions(self):
@@ -272,6 +277,14 @@ class Player(pygame.sprite.Sprite):
             level = None
 
     def update(self, *args):
+        if self.is_moving:
+            self.image_num += 1
+            if self.image_num >= len(self.frames['right']) * 6:
+                self.image_num = 0
+            self.image = self.frames[self.side][self.image_num // 6]
+        else:
+            self.image = self.frames[self.side][4]
+
         self.move_down(self.grav)
         self.grav -= gravity
 

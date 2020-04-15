@@ -21,8 +21,13 @@ def operate_connection():
             con.send(info.encode('utf-8'))
             sleep(0.002)
         con.send('end'.encode('utf-8'))
-
         con.close()
+
+
+def clean_players():
+    global players
+    sleep(5)
+    players = dict()
 
 
 host = '127.0.0.1'
@@ -40,4 +45,10 @@ thread_2.start()
 
 thread_3 = threading.Thread(target=operate_connection)
 thread_3.start()
+
+thread_4 = threading.Thread(target=operate_connection)
+thread_4.start()
+
+thread_5 = threading.Thread(target=clean_players)
+thread_5.start()
 

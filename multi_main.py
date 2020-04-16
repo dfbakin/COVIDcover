@@ -6,7 +6,7 @@ import socket, time, threading
 pygame.init()
 
 size = width, height = 1280, 720
-screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size)#, pygame.FULLSCREEN)
 
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -47,10 +47,11 @@ music_on = True
 effects_on = True
 global_exit = False
 
-ip = socket.gethostbyname('0.tcp.ngrok.io')
-host = ip
-# host = '127.0.0.1'
-port = 19514
+#ip = socket.gethostbyname('0.tcp.ngrok.io')
+#host = ip
+host = '84.201.168.123'
+#host = '127.0.0.1'
+port = 9000
 
 caught_ids = []
 
@@ -76,7 +77,7 @@ def operate_player_data():
             try:
                 con.connect((host, port))
             except ConnectionRefusedError:
-                return
+                con.close()
 
             con.send((player.id + r'\t' + player.get_pos_info() + r'\t' + '%'.join(caught_ids)).encode('utf-8'))
 
@@ -97,8 +98,8 @@ def operate_player_data():
                     time.sleep(0.002)
                 player_params[id].set_params(params)
                 time.sleep(0.002)
-        finally:
-            con.close()
+        except Exception:
+            continue
         if global_exit:
             break
 

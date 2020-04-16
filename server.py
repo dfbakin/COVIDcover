@@ -6,22 +6,26 @@ players = dict()
 
 def operate_connection():
     while True:
-        con, addr = so.accept()
-        data = None
-        while not data:
-            data = con.recv(1024).decode('utf-8').split(r'\t')
-        player_id, params = data[0], r'\t'.join(data[1:])
-        players[player_id] = params
+        try:
+            con, addr = so.accept()
+            data = None
+            while not data:
+                data = con.recv(1024).decode('utf-8').split(r'\t')
+            player_id, params = data[0], r'\t'.join(data[1:])
+            players[player_id] = params
 
-        data = players.copy()
-        for i in data.keys():
-            if i == player_id:
-                continue
-            info = i + r'\t' + data[i]
-            con.send(info.encode('utf-8'))
-            sleep(0.002)
-        con.send('end'.encode('utf-8'))
-        con.close()
+            data = players.copy()
+            for i in data.keys():
+                if i == player_id:
+                    continue
+                info = i + r'\t' + data[i]
+                con.send(info.encode('utf-8'))
+                sleep(0.002)
+            con.send('end'.encode('utf-8'))
+            con.close()
+        except Exception:
+            con.close()
+            continue
 
 
 host = '127.0.0.1'

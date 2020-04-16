@@ -1,12 +1,12 @@
 import pygame
-from random import randint, random
+from random import randint, random, choice
 import sys
 import socket, time, threading
 
 pygame.init()
 
 size = width, height = 1280, 720
-screen = pygame.display.set_mode(size)  # , pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -47,10 +47,12 @@ music_on = True
 effects_on = True
 global_exit = False
 
-host = '127.0.0.1'
-port = 9000
+ip = socket.gethostbyname('0.tcp.ngrok.io')
+host = ip
+# host = '127.0.0.1'
+port = 19514
 
-level = 1
+caught_ids = []
 
 speeches = {'intro': pygame.mixer.Sound('data/speech/intro.wav'),
             '1': pygame.mixer.Sound('data/speech/1.wav'),
@@ -76,7 +78,7 @@ def operate_player_data():
             except ConnectionRefusedError:
                 return
 
-            con.send((player.id + r'\t' + player.get_pos_info()).encode('utf-8'))
+            con.send((player.id + r'\t' + player.get_pos_info() + r'\t' + '%'.join(caught_ids)).encode('utf-8'))
 
             end = False
             while not end:
@@ -86,13 +88,12 @@ def operate_player_data():
                     data = data[:data.index('end')]
                 elif data == 'end':
                     break
-                # TODO mind the slice indexes
                 id, params = data.split(r'\t')[0], r'\t'.join(data.split(r'\t')[1:])
                 if str(id) not in player_params.keys() and id != player.id:
                     role = params.split(r'\t')[0]
-                    player_params[id] = RemotePlayer(0, 0, role, remote_players)
+                    player_params[id] = RemotePlayer(str(id), 0, 0, role, remote_players)
                     if len(remote_players.sprites()) == 0:
-                        player_params[id] = RemotePlayer(0, 0, role, remote_players)
+                        player_params[id] = RemotePlayer(str(id), 0, 0, role, remote_players)
                     time.sleep(0.002)
                 player_params[id].set_params(params)
                 time.sleep(0.002)
@@ -145,9 +146,8 @@ def render_text(line, size=50, color=(255, 255, 255)):
 
 
 class RemotePlayer(pygame.sprite.Sprite):
-    def __init__(self, x, y, role, *groups):
-        print(groups)
-        print(x, y, role)
+    def __init__(self, id, x, y, role, *groups):
+        self.id = id
         super().__init__(groups)
         self.role = role
         self.scanner_is_on = False
@@ -162,6 +162,8 @@ class RemotePlayer(pygame.sprite.Sprite):
         self.clock = pygame.time.Clock()
 
         self.infected = None
+
+        self.caught = 0
 
     def get_coords(self):
         return self.rect.x, self.rect.y
@@ -180,9 +182,8 @@ class RemotePlayer(pygame.sprite.Sprite):
         # print(123)
         # print(data)
         try:
-            assert len(data) == 5
+            # assert len(data) == 5
             new_x, new_y = int(data[0]), int(data[1])
-            # TODO if an exception -> change back to bool
             moving = True if data[2] == 'True' else False
             assert data[3] in ['left', 'right'] and str(data[3]).isalpha()
             infected = str(data[4])
@@ -197,6 +198,16 @@ class RemotePlayer(pygame.sprite.Sprite):
             except IndexError:
                 continue
             break
+        if internal_id in data[5].split('%'):
+            screen.fill((0, 0, 0))
+            # background_group.draw(screen)
+            text = render_text('Вы арестованы за нарушение карантина!!!')
+            screen.blit(text, (width // 2 - text.get_width() // 2, height // 2))
+            pygame.display.flip()
+            for i in range(5):
+                self.clock.tick(1)
+
+            exit_game()
         if infected == 'None':
             self.infected = None
         elif infected.isdigit():
@@ -204,8 +215,9 @@ class RemotePlayer(pygame.sprite.Sprite):
         else:
             print('[ERROR] value infection:', infected)
 
-    # TODO add infected param to socket data
     def update_images(self):
+        if not self.role:
+            self.kill()
         self.frames = {'left': [], 'right': []}
         self.frames['left'].append(
             pygame.transform.flip(load_image(f'data/characters/{self.role}_right_5.png', size=(80, 110)), 1, 0))
@@ -272,15 +284,8 @@ class Player(pygame.sprite.Sprite):
         self.hazard_timer = 0
         self.id = None
 
-        if level == 1:
-            self.card_money = 500
-            self.cash = 0
-        elif level == 2:
-            self.card_money = 1500
-            self.cash = 0
-        elif level == 3:
-            self.card_money = 0
-            self.cash = 3000
+        self.card_money = 0
+        self.cash = 5000
 
         self.objects = []
         pin = str(randint(1000, 9999))
@@ -392,14 +397,13 @@ class Player(pygame.sprite.Sprite):
                 1, color), (0, 0))
         return canvas
 
-    # TODO add infected and alarm for policeman
     def get_pos_info(self):
         x, y = str(self.rect.x - terrain.rect.x), str(self.rect.y - terrain.rect.y)
         if self.inside:
             x, y = '0', '0'
         res = self.role + r'\t' + x + r'\t' + y + r'\t' + str(
             self.is_moving) + r'\t' + self.side + r'\t' + str(self.infected)
-        print(res)
+        # print(res)
         return res
 
     def update_params(self):
@@ -424,8 +428,8 @@ class Player(pygame.sprite.Sprite):
             pygame.display.flip()
             for i in range(5):
                 self.clock.tick(1)
-            global level
-            level = None
+
+            exit_game()
         elif self.hazard_risk == 100:
             self.infected = 3
 
@@ -463,8 +467,6 @@ class Bank(pygame.sprite.Sprite):
 
     def enter(self):
         button_group.empty()
-        if level == 1 or level == 2:
-            return
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
         running = True
 
@@ -657,32 +659,7 @@ class MainHouse(pygame.sprite.Sprite):
             speeches['news'].play()
             return True
 
-        def success():
-            screen.fill((177, 170, 142))
-            text = render_text('Поздравляем! Вы выполнили задание уровня успешно!')
-            screen.blit(text, (width // 2 - text.get_width() // 2, height // 2))
-            pygame.display.flip()
-            for i in range(3):
-                self.clock.tick(1)
-
         button_group.empty()
-        global level
-        if level == 1:
-            aims = ['Маска']
-        elif level == 2:
-            aims = ['Спирт', 'Мыло']
-        elif level == 3:
-            aims = ['Морковь', 'Картофель', 'Яблоко', 'Маска', 'Спирт']
-
-        for i in player.get_objects():
-            if i.name == 'Маска' and not i.is_used:
-                break
-            if i.name in aims:
-                aims.remove(i.name)
-        if not aims:
-            success()
-            level = None
-            return
 
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, house_buttons)
 
@@ -783,8 +760,6 @@ class Shop(pygame.sprite.Sprite):
             return run, status
 
         button_group.empty()
-        if level == 1:
-            return
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, pharm_buttons)
 
         backgr = pygame.sprite.Sprite(background_shop)
@@ -797,15 +772,16 @@ class Shop(pygame.sprite.Sprite):
         if carrot.can_be_bought():
             carrot.set_pos((350, 180))
             carrot.add_to_groups(shop_products)
+
         potato = products['potato']
         if potato.can_be_bought():
             potato.set_pos((550, 180))
             potato.add_to_groups(shop_products)
-        if level == 3:
-            apple = products['apple']
-            if apple.can_be_bought():
-                apple.set_pos((350, 300))
-                apple.add_to_groups(shop_products)
+
+        apple = products['apple']
+        if apple.can_be_bought():
+            apple.set_pos((350, 300))
+            apple.add_to_groups(shop_products)
 
         cart = []
         cart_rect = pygame.Rect(950, 300, 150, 450)
@@ -918,8 +894,6 @@ class SecondShop(pygame.sprite.Sprite):
             return run, status
 
         button_group.empty()
-        if level == 1:
-            return
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, pharm_buttons)
 
         backgr = pygame.sprite.Sprite(background_shop)
@@ -928,11 +902,10 @@ class SecondShop(pygame.sprite.Sprite):
 
         running = True
 
-        if level == 2 or level == 3:
-            soap = products['soap']
-            if soap.can_be_bought():
-                soap.set_pos((950, 180))
-                soap.add_to_groups(shop_products)
+        soap = products['soap']
+        if soap.can_be_bought():
+            soap.set_pos((950, 180))
+            soap.add_to_groups(shop_products)
 
         cart = []
         cart_rect = pygame.Rect(300, 327, 80, 200)
@@ -1053,11 +1026,12 @@ class Pharmacy(pygame.sprite.Sprite):
         backgr.rect = backgr.image.get_rect()
 
         running = True
-        if level == 2 or level == 3:
-            bottle = products['alcohol']
-            if bottle.can_be_bought():
-                bottle.set_pos((350, 180))
-                bottle.add_to_groups(pharm_products)
+
+        bottle = products['alcohol']
+        if bottle.can_be_bought():
+            bottle.set_pos((350, 180))
+            bottle.add_to_groups(pharm_products)
+
         mask = products['mask']
         if mask.can_be_bought():
             mask.set_pos((550, 180))
@@ -1632,7 +1606,7 @@ def menu(pause=False):
     text = render_text('Выход')
     canvas.blit(text,
                 (canvas.get_width() // 2 - text.get_width() // 2, canvas.get_height() // 2 - text.get_height() // 2))
-    Button(width // 2 - delt_width, height // 4 * 3, 200, 100, canvas, sys.exit, 'exit', button_group)
+    Button(width // 2 - delt_width, height // 4 * 3, 200, 100, canvas, exit_game, 'exit', button_group)
 
     while running:
         for event in pygame.event.get():
@@ -1644,14 +1618,7 @@ def menu(pause=False):
                 pos = event.pos
                 for btn in button_group:
                     if btn.rect.collidepoint(pos):
-                        if btn.id and btn.id.isdigit():
-                            level = int(btn.id)
-                            running = False
-                            stop_speeches()
-                            if str(level).isdigit():
-                                speeches[str(level)].play()
-                        else:
-                            running = btn.run() != 'start'
+                        running = btn.run() != 'start'
         data = pygame.key.get_pressed()
         if data[9]:
             running = False
@@ -1683,6 +1650,7 @@ images['pause_button'].set_alpha(100)
 fps = 30
 running = True
 clock = pygame.time.Clock()
+info_clock = pygame.time.Clock()
 pos = (0, 0)
 
 # menu()
@@ -1693,8 +1661,9 @@ backgr = pygame.sprite.Sprite(background_group)
 backgr.image = load_image('data/textures/background.png', size=size)
 backgr.rect = backgr.image.get_rect()
 
-#player = Player(3850, 450, input('enter role:     '), player_group)
-player = Player(3850, 1050, 'policeman', player_group)
+role = ['policeman', 'citizen']
+#player = Player(3850, 1050, input('enter role:     '), player_group)
+player = Player(3850, 1050, choice(role), player_group)
 player.id = internal_id
 terrain = Terrain(0, 0, all_sprites, terrain_group)
 bank = Bank(350, 900, all_sprites, building_group)
@@ -1706,22 +1675,17 @@ hospital = Hospital(2200, 800, building_group, all_sprites)
 
 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
 
-# client = socket.socket()
-# socket.setdefaulttimeout(0.015)
-# TODO host, port
-# ip = client.gethostbyname('HOST')
-# client.connect(('127.0.0.1', 9000))
 # print("client connected to server")
 thread = threading.Thread(target=operate_player_data)
 thread.start()
 # thread.join(0.01)
-
 connect_tick = 0
 
 camera = Camera()
 camera.update(player)
 
 scanner_on = False
+arrest_rate = 0
 
 # home.enter()
 while running:
@@ -1749,6 +1713,10 @@ while running:
                 scanner_on = True
 
     data = pygame.key.get_pressed()
+
+    # if any(data):
+    # print(data.index(1))
+
     player.set_moving(False)
     if data[27]:
         menu(pause=True)
@@ -1759,8 +1727,15 @@ while running:
             player.inside = True
             near_building.enter()
             player.inside = False
-            if not level:
-                continue
+    if data[51]:
+        if player.role == 'policeman':
+            for i in remote_players:
+                if pygame.sprite.collide_mask(i, player) and i.role == 'citizen':
+                    if arrest_rate > 5000:
+                        i.caught += 1
+                        if i.caught >= 3:
+                            caught_ids.append(i.id)
+                        arrest_rate = 0
 
     if data[97]:
         player.move_left()
@@ -1809,4 +1784,7 @@ while running:
     pygame.display.flip()
     clock.tick(fps)
     connect_tick += 1
+    arrest_rate += info_clock.tick()
+    if global_exit:
+        break
 exit_game()

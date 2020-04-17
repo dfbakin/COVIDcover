@@ -6,7 +6,7 @@ import socket, time, threading
 pygame.init()
 
 size = width, height = 1280, 720
-screen = pygame.display.set_mode(size)#, pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size)  # , pygame.FULLSCREEN)
 
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -47,10 +47,15 @@ music_on = True
 effects_on = True
 global_exit = False
 
-#ip = socket.gethostbyname('0.tcp.ngrok.io')
-#host = ip
-host = '84.201.168.123'
-#host = '127.0.0.1'
+# internal_id = input('Enter internal id:   ')
+internal_id = str(randint(1000, 9999))
+role = choice(['policeman', 'citizen'])
+score = 0
+
+# ip = socket.gethostbyname('0.tcp.ngrok.io')
+# host = ip
+# host = '84.201.168.123'
+host = '127.0.0.1'
 port = 9000
 
 caught_ids = []
@@ -63,7 +68,7 @@ speeches = {'intro': pygame.mixer.Sound('data/speech/intro.wav'),
             'news': pygame.mixer.Sound('data/speech/news.wav')}
 
 music = {'main': pygame.mixer.Sound('data/music/main_music.ogg')}
-music['main'].play(-1)
+# music['main'].play(-1)
 
 player_params = dict()
 products = dict()
@@ -98,10 +103,30 @@ def operate_player_data():
                     time.sleep(0.002)
                 player_params[id].set_params(params)
                 time.sleep(0.002)
+
         except Exception:
             continue
-        if global_exit:
-            break
+        finally:
+            if global_exit:
+                break
+
+
+def clean_params():
+    global global_exit, player_params
+    print('[OK] cleaning thread started')
+    while True:
+        try:
+            for i in player_params:
+                player_params[i].kill()
+                player_params = dict()
+            print('cleaned', player_params)
+        except Exception as e:
+            print('[ERROR]   ', e)
+        finally:
+            if global_exit:
+                print('[OK] cleaning thread stopped')
+                break
+            time.sleep(3)
 
 
 def stop_speeches():
@@ -220,8 +245,10 @@ class RemotePlayer(pygame.sprite.Sprite):
         if not self.role:
             self.kill()
         self.frames = {'left': [], 'right': []}
+        if self.role == 'volunteer':
+            role = 'citizen'
         self.frames['left'].append(
-            pygame.transform.flip(load_image(f'data/characters/{self.role}_right_5.png', size=(80, 110)), 1, 0))
+            pygame.transform.flip(load_image(f'data/characters/{role}_right_5.png', size=(80, 110)), 1, 0))
         if self.scanner_is_on:
             if self.infected == 1:
                 self.frames['left'][0].blit(load_image('data/characters/not_stated.png', size=(20, 20)), (60, 0))
@@ -231,7 +258,7 @@ class RemotePlayer(pygame.sprite.Sprite):
                 self.frames['left'][0].blit(load_image('data/characters/infected.png', size=(20, 20)), (60, 0))
 
         self.frames['right'].append(
-            load_image(f'data/characters/{self.role}_right_5.png', size=(80, 110)))
+            load_image(f'data/characters/{role}_right_5.png', size=(80, 110)))
         if self.scanner_is_on:
             if self.infected == 1:
                 self.frames['right'][0].blit(load_image('data/characters/not_stated.png', size=(20, 20)), (60, 0))
@@ -254,11 +281,12 @@ class RemotePlayer(pygame.sprite.Sprite):
 class Player(pygame.sprite.Sprite):
     speed = 10
     jump_power = 15
-    infection_rate = 1500
 
     def __init__(self, x, y, role, *groups):
         super().__init__(groups)
         self.role = role
+        if role == 'volunteer':
+            role = 'citizen'
         self.inside = False
 
         self.frames = {'left': [], 'right': []}
@@ -294,12 +322,19 @@ class Player(pygame.sprite.Sprite):
         products['card'].pin = pin
         self.objects.append(products['card'])
 
-        self.infected = 1 if self.role == 'citizen' else None
+        self.infected = 1
+
+        if self.role == 'citizen':
+            self.infection_rate = 1250
+        else:
+            self.infection_rate = 2000
 
     def get_objects(self):
         return self.objects
 
     def add_objects(self, *objects):
+        global score
+        score += 10 * len(objects)
         for i in objects:
             self.objects.append(i)
 
@@ -389,12 +424,12 @@ class Player(pygame.sprite.Sprite):
             self.is_jumping = True
 
     def render_info(self, color=(255, 255, 255), background=(0, 0, 0)):
-        canvas = pygame.Surface((width // 2 + 175, 20))
+        canvas = pygame.Surface((width // 2 + 200, 20))
         canvas.fill(background)
         font = pygame.font.Font(None, 30)
         canvas.blit(
             font.render(
-                f'Здоровье: {self.health}%   Риск заражения: {self.hazard_risk}%   Наличные: {self.cash} Р     На карте: {self.card_money} Р',
+                f'Здоровье: {self.health}%  Риск заражения: {self.hazard_risk}%  Наличные: {self.cash} Р   На карте: {self.card_money} Р  Баллы: {score}',
                 1, color), (0, 0))
         return canvas
 
@@ -408,12 +443,11 @@ class Player(pygame.sprite.Sprite):
         return res
 
     def update_params(self):
-        if self.role == 'citizen':
-            self.danger_level = 1 - (100 - self.health) / 100
-            self.hazard_timer += self.clock.tick()
-            if self.hazard_timer > Player.infection_rate * self.danger_level:
-                self.hazard_risk += 1
-                self.hazard_timer = 0
+        self.danger_level = 1 - (100 - self.health) / 100
+        self.hazard_timer += self.clock.tick()
+        if self.hazard_timer > self.infection_rate * self.danger_level:
+            self.hazard_risk += 1
+            self.hazard_timer = 0
 
         if self.health <= 0:
             self.health = 0
@@ -1107,6 +1141,7 @@ class Hospital(pygame.sprite.Sprite):
         return False
 
     def enter(self):
+        global score
         button_group.empty()
         if player.role != 'citizen':
             return
@@ -1192,11 +1227,14 @@ class Hospital(pygame.sprite.Sprite):
                         if btn.rect.collidepoint(event.pos):
                             if not btn.id:
                                 running = btn.run()
-                            elif mode == 'error':
-                                mode = 'main'
+                            elif mode == 'error' or btn.id == 'clear':
                                 current_year = ''
-                                math = ''
                                 answer = ''
+                                if mode == 'error':
+                                    mode = 'main'
+                                    math = ''
+
+
                             elif mode == 'main' and btn.id.isdigit():
                                 current_year += btn.id
                             elif btn.id == 'enter' and mode == 'main':
@@ -1260,6 +1298,7 @@ class Hospital(pygame.sprite.Sprite):
                                   (10, main_display.get_height() // 2 - 50))
                 main_display.blit(render_text('Срочно необходима строгая изоляция!', color=(232, 208, 79), size=35),
                                   (10, main_display.get_height() // 2))
+
             elif mode == 'ok':
                 main_display.blit(render_text('Вы здоровы!', color=(232, 208, 79)),
                                   (main_display.get_width() // 4, main_display.get_height() // 2 - 50))
@@ -1274,6 +1313,7 @@ class Hospital(pygame.sprite.Sprite):
             screen.blit(main_display, (100, 70))
             pygame.display.flip()
             clock.tick(fps)
+        score += 100
         bank_buttons.empty()
         button_group.empty()
 
@@ -1479,7 +1519,7 @@ class Camera:
 
     def apply(self, obj):
         obj.rect.x += self.dx
-        if player.rect.y < 0 or player.rect.y > height or player.rect.y - terrain.rect.y < 750:
+        if player.rect.y < 0 or player.rect.y > height - 100 or player.rect.y - terrain.rect.y < 650:
             obj.rect.y += self.dy
 
     def update(self, target):
@@ -1655,16 +1695,14 @@ info_clock = pygame.time.Clock()
 pos = (0, 0)
 
 # menu()
-# internal_id = input('Enter internal id:   ')
-internal_id = str(randint(1000, 9999))
 
 backgr = pygame.sprite.Sprite(background_group)
 backgr.image = load_image('data/textures/background.png', size=size)
 backgr.rect = backgr.image.get_rect()
 
-role = ['policeman', 'citizen']
-#player = Player(3850, 1050, input('enter role:     '), player_group)
-player = Player(3850, 1050, choice(role), player_group)
+# player = Player(3850, 1050, input('enter role:     '), player_group)
+role = 'volunteer'
+player = Player(3850, 1050, role, player_group)
 player.id = internal_id
 terrain = Terrain(0, 0, all_sprites, terrain_group)
 bank = Bank(350, 900, all_sprites, building_group)
@@ -1679,6 +1717,8 @@ pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None,
 # print("client connected to server")
 thread = threading.Thread(target=operate_player_data)
 thread.start()
+cleaning_thread = threading.Thread(target=clean_params)
+cleaning_thread.start()
 # thread.join(0.01)
 connect_tick = 0
 
@@ -1736,6 +1776,12 @@ while running:
                         i.caught += 1
                         if i.caught >= 3:
                             caught_ids.append(i.id)
+                            if i.infected == 2:
+                                score -= 50
+                                if score < 0:
+                                    score = 0
+                            elif i.infected == 3:
+                                score += 100
                         arrest_rate = 0
 
     if data[97]:

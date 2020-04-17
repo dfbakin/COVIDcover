@@ -28,6 +28,14 @@ def operate_connection():
             continue
 
 
+def clean_params():
+    while True:
+        global players
+        players = dict()
+        print('[OK] cleaned  ', players)
+        sleep(3)
+
+
 host = '127.0.0.1'
 port = 9000
 so = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -46,3 +54,6 @@ thread_3.start()
 
 thread_4 = threading.Thread(target=operate_connection)
 thread_4.start()
+
+clean_thread = threading.Thread(target=clean_params)
+clean_thread.start()

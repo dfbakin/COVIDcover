@@ -5,9 +5,17 @@ from data.__all_models import User, Server
 from flask_restful import Api
 from forms import RegisterForm, LoginForm
 from game_api import bp as bp1
+from admin_panel import bp as bp2
+from orders_resource import OrdersResource, OrdersListResource
+from users_resource import UsersResource, UsersListResource
+from servers_resource import ServersResource, ServersListResource
+
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '9527b0ae-7ffa-11ea-b268-48f17f5e03f3'
+api = Api(app)
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -83,8 +91,19 @@ def monitor_servers():
     servers = session.query(Server).filter(Server.limit > Server.players_n, Server.running)
     return render_template('monitor_servers.html', title='COVIDCover - Сервера', servers=servers, message=message)
 
+@app.route('/rules')
+def rules():
+    return render_template('rules.html', title='COVIDCover - Правила')
+
 
 if __name__ == '__main__':
     global_init('db/db.sqlite')
     app.register_blueprint(bp1)
+    app.register_blueprint(bp2)
+    api.add_resource(OrdersResource, '/api/orders/<int:ord_id>/token/<token>')
+    api.add_resource(OrdersListResource, '/api/orders/token/<token>')
+    api.add_resource(UsersResource, '/api/users/<int:user_id>/token/<token>')
+    api.add_resource(UsersListResource, '/api/users/token/<token>')
+    api.add_resource(ServersResource, '/api/servers/<int:ser_id>/token/<token>')
+    api.add_resource(ServersListResource, '/api/servers//token/<token>')
     app.run('127.0.0.1', port='8080')

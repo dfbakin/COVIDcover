@@ -1,15 +1,6 @@
 import pygame
 from random import randint, random, choice, shuffle
-import sys
-import socket, time, threading
-import requests
-import json, os, sys, shutil, getpass, webbrowser, time, requests
-from zipfile import ZipFile
-from traceback import format_exc
-import getpass
-import winshell
-import time
-import webbrowser
+import socket, time, threading, requests, sys
 
 global_exit = False
 
@@ -18,7 +9,8 @@ def exit_game():
     global global_exit
     global_exit = True
     time.sleep(0.5)
-    print(score)
+    with open('score.dat', mode='w', encoding='utf-8') as file:
+        file.write(str(score))
     sys.exit()
 
 
@@ -71,7 +63,7 @@ effects_on = True
 orders = None
 
 # internal_id = input('Enter internal id:   ')
-role, score, ip, port, internal_id = args
+role, score, host, port, internal_id = args
 score = int(score)
 port = int(port)
 
@@ -83,8 +75,6 @@ api_port = 8080
 # ip = socket.gethostbyname('0.tcp.ngrok.io')
 # host = ip
 # host = '84.201.168.123'
-host = '127.0.0.1'
-port = 9000
 
 caught_ids = []
 

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block body %}
+<h1>{{ title }}</h1>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.ip.label }}<br>
+        {{ form.ip(class="form-control") }}<br>
+        {% for error in form.ip.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.limit.label }}<br>
+        {{ form.limit(class="form-control") }}<br>
+        {% for error in form.limit.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.players.label }}<br>
+        {{ form.players(class="form-control") }}<br>
+        {% for error in form.players.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.players_n.label }}<br>
+        {{ form.players_n(class="form-control") }}<br>
+        {% for error in form.players_n.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+        <p>
+        {{ form.token.label }}<br>
+        {{ form.token(class="form-control") }}<br>
+        {% for error in form.token.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+        <p>
+        {{ form.orders.label }}<br>
+        {{ form.orders(class="form-control") }}<br>
+        {% for error in form.orders.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+        <p>
+        {{ form.roles.label }}<br>
+        {{ form.roles(class="form-control") }}<br>
+        {% for error in form.roles.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>{{ form.running }}{{ form.running.label }}</p>
+    <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+</form>
+{% endblock %}

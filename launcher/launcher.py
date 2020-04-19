@@ -111,7 +111,7 @@ class Ui_MainWindow(object):
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
-    host = '127.0.0.1'
+    host = '84.201.144.88'
     port = '8080'
 
     def __init__(self):
@@ -218,26 +218,27 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             print('invalid role')
             return
 
-        cmd = f"cd multi_build && multi_main {role} {self.user['score']} {data['ip']} {data['port']} {self.user['token']}"
-        print(cmd)
+        with open('launch.bat', mode='w', encoding='utf-8') as f:
+            f.write('cd multi_build\n')
+            f.write(f"multi_main {role} {self.user['score']} {data['ip']} {data['port']} {self.user['token']}")
 
-        self.hide()
         try:
-            info = str(os.popen(cmd).read())
-            score = info.strip()
+            os.system('launch')
+            with open('multi_build/score.dat', mode='r', encoding='utf-8') as file:
+                score = file.read().strip()
             if not score.isdigit():
                 print('wrong score value', score)
 
         except Exception as e:
             self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + str(e) + '\n\n')
         finally:
-            self.show()
             if not score or not score.isdigit() or len(score) > 7:
                 requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
                              params={'user_token': self.user['token'], 'score': self.user['score']})
             else:
                 print(requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
                                    params={'user_token': self.user['token'], 'score': int(score)}).content)
+            os.remove('launch.bat')
 
     def launch_single(self):
         user = getpass.getuser()

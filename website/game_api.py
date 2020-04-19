@@ -42,7 +42,7 @@ def auth():
     print(request.args['email'])
     session = create_session()
     user = session.query(User).filter(User.email == request.args['email']).first()
-    if not user:
+    if not user or not user.privilege_obj.playable:
         abort(404)
     if user.check_password(request.args['password']):
         return jsonify({'success': True, 'score': user.score, 'username': user.username, 'token': user.token})
@@ -62,7 +62,7 @@ def join():
     useless_server = session.query(Server).filter(Server.players.like(f'% {user.id} %')).first()
     if useless_server:
         abort(406)
-    server = session.query(Server).filter(Server.players_n < Server.limit).first()
+    server = session.query(Server).filter(Server.players_n < Server.limit, Server.running).first()
     if not server:
         abort(406)
 

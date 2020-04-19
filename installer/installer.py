@@ -1,8 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
-import yadisk, json, os, sys, shutil
+import os, sys, shutil
 from zipfile import ZipFile
-from traceback import format_exc
 import getpass
 import winshell
 import time
@@ -100,7 +99,7 @@ def loading():
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
-    host = '127.0.0.1'
+    host = '84.201.144.88'
     port = '8080'
 
     def __init__(self):

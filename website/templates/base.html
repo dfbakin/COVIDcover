@@ -18,12 +18,20 @@
       <li class="nav-item active">
         <a class="nav-link" href="/monitor_servers">Сервера</a>
       </li>
+<li class="nav-item active">
+        <a class="nav-link" href="/rules" role="button">Правила</a>
+      </li>
     </ul>
     <ul class="navbar-nav">
     {% if current_user.is_authenticated %}
       <li class="nav-item active">
           <a class="nav-link disabled" href="/logout">{{ current_user.username }}</a>
       </li>
+        {% if current_user.privilege == 1 %}
+        <li class="nav-item active">
+            <a class="btn btn-success" href="/admin">В Админ панель</a>
+        </li>
+        {% endif %}
         <li class="nav-item active">
           <a class="btn btn-danger" href="/logout">Выйти</a>
       </li>

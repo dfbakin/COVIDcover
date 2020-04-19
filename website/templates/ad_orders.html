@@ -1,0 +1,42 @@
+{% extends 'base.html'%}
+{% block body %}
+<ul class="nav nav-pills">
+  <li class="nav-item">
+    <a class="nav-link" href="/admin">Серверы</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="/admin/users">Пользователи</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link active" href="/admin/orders">Заказы</a>
+  </li>
+</ul>
+<br><a href="/admin/orders/add" class="btn btn-primary">Добавить заказ</a><br><br>
+
+<div>
+    <table class="table bg-info">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Имя создателя/ID</th>
+                <th scope="col">Изменить</th>
+                <th scope="col">Удалить</th>
+            </tr>
+        </thead>
+    <tbody>
+        {% for order in orders %}
+        <tr>
+            <th scope="row">{{ order.id }}</th>
+            <td>{{ order.user.username }}/{{ order.author }}</td>
+            <td>
+                <a class="btn btn-primary" href="/admin/orders/edit?order={{ order.token }}">Изменить</a>
+            </td>
+            <td>
+                <a class="btn btn-danger" href="/admin/orders/delete?order={{ order.token }}">Удалить</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+</div>
+{% endblock %}

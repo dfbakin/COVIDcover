@@ -1,0 +1,2 @@
+color A
+tree

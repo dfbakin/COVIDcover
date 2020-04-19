@@ -34,20 +34,6 @@
   ('selectors',
    'c:\\program files (x86)\\python37-32\\lib\\selectors.py',
    'PYMODULE'),
-  ('bz2', 'c:\\program files (x86)\\python37-32\\lib\\bz2.py', 'PYMODULE'),
-  ('_compression',
-   'c:\\program files (x86)\\python37-32\\lib\\_compression.py',
-   'PYMODULE'),
-  ('stringprep',
-   'c:\\program files (x86)\\python37-32\\lib\\stringprep.py',
-   'PYMODULE'),
-  ('quopri',
-   'c:\\program files (x86)\\python37-32\\lib\\quopri.py',
-   'PYMODULE'),
-  ('tokenize',
-   'c:\\program files (x86)\\python37-32\\lib\\tokenize.py',
-   'PYMODULE'),
-  ('token', 'c:\\program files (x86)\\python37-32\\lib\\token.py', 'PYMODULE'),
   ('doctest',
    'c:\\program files (x86)\\python37-32\\lib\\doctest.py',
    'PYMODULE'),
@@ -186,6 +172,9 @@
   ('email.feedparser',
    'c:\\program files (x86)\\python37-32\\lib\\email\\feedparser.py',
    'PYMODULE'),
+  ('quopri',
+   'c:\\program files (x86)\\python37-32\\lib\\quopri.py',
+   'PYMODULE'),
   ('uu', 'c:\\program files (x86)\\python37-32\\lib\\uu.py', 'PYMODULE'),
   ('optparse',
    'c:\\program files (x86)\\python37-32\\lib\\optparse.py',
@@ -227,6 +216,10 @@
   ('urllib.parse',
    'c:\\program files (x86)\\python37-32\\lib\\urllib\\parse.py',
    'PYMODULE'),
+  ('tokenize',
+   'c:\\program files (x86)\\python37-32\\lib\\tokenize.py',
+   'PYMODULE'),
+  ('token', 'c:\\program files (x86)\\python37-32\\lib\\token.py', 'PYMODULE'),
   ('platform',
    'c:\\program files (x86)\\python37-32\\lib\\platform.py',
    'PYMODULE'),
@@ -324,14 +317,21 @@
   ('__future__',
    'c:\\program files (x86)\\python37-32\\lib\\__future__.py',
    'PYMODULE'),
-  ('_py_abc',
-   'c:\\program files (x86)\\python37-32\\lib\\_py_abc.py',
-   'PYMODULE'),
   ('tracemalloc',
    'c:\\program files (x86)\\python37-32\\lib\\tracemalloc.py',
    'PYMODULE'),
   ('typing',
    'c:\\program files (x86)\\python37-32\\lib\\typing.py',
+   'PYMODULE'),
+  ('_py_abc',
+   'c:\\program files (x86)\\python37-32\\lib\\_py_abc.py',
+   'PYMODULE'),
+  ('stringprep',
+   'c:\\program files (x86)\\python37-32\\lib\\stringprep.py',
+   'PYMODULE'),
+  ('bz2', 'c:\\program files (x86)\\python37-32\\lib\\bz2.py', 'PYMODULE'),
+  ('_compression',
+   'c:\\program files (x86)\\python37-32\\lib\\_compression.py',
    'PYMODULE'),
   ('threading',
    'c:\\program files (x86)\\python37-32\\lib\\threading.py',
@@ -659,6 +659,30 @@
    'c:\\program files '
    '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\constant_time.py',
    'PYMODULE'),
+  ('cryptography.hazmat.backends.openssl',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\__init__.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.backends.openssl.dh',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\dh.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.backends.openssl.rsa',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\rsa.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.primitives.asymmetric.padding',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\asymmetric\\padding.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.backends.interfaces',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\interfaces.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.backends',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\__init__.py',
+   'PYMODULE'),
   ('cryptography.hazmat.backends.openssl.encode_asn1',
    'c:\\program files '
    '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\encode_asn1.py',
@@ -667,17 +691,57 @@
    'c:\\program files '
    '(x86)\\python37-32\\lib\\site-packages\\cryptography\\x509\\name.py',
    'PYMODULE'),
+  ('cryptography.hazmat.backends.openssl.dsa',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\dsa.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.backends.openssl.poly1305',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\poly1305.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.backends.openssl.hashes',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\hashes.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.backends.openssl.x25519',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\x25519.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.primitives.asymmetric.x25519',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\asymmetric\\x25519.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.backends.openssl.ed448',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\ed448.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.primitives.asymmetric.ed448',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\asymmetric\\ed448.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.backends.openssl.utils',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\utils.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.primitives.asymmetric.utils',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\asymmetric\\utils.py',
+   'PYMODULE'),
+  ('cryptography.hazmat._der',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\_der.py',
+   'PYMODULE'),
   ('cryptography.hazmat.backends.openssl.hmac',
    'c:\\program files '
    '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\hmac.py',
    'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.aead',
+  ('cryptography.hazmat.backends.openssl.cmac',
    'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\aead.py',
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\cmac.py',
    'PYMODULE'),
-  ('cryptography.hazmat.primitives.ciphers.aead',
+  ('cryptography.hazmat.primitives.ciphers.modes',
    'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\ciphers\\aead.py',
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\ciphers\\modes.py',
    'PYMODULE'),
   ('cryptography.hazmat.primitives.ciphers',
    'c:\\program files '
@@ -687,21 +751,21 @@
    'c:\\program files '
    '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\ciphers\\base.py',
    'PYMODULE'),
-  ('cryptography.hazmat.primitives.ciphers.modes',
+  ('cryptography.hazmat.backends.openssl.x509',
    'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\ciphers\\modes.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.hashes',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\hashes.py',
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\x509.py',
    'PYMODULE'),
   ('cryptography.hazmat.backends.openssl.ciphers',
    'c:\\program files '
    '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\ciphers.py',
    'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.backend',
+  ('cryptography.hazmat.backends.openssl.ed25519',
    'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\backend.py',
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\ed25519.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.backends.openssl.ocsp',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\ocsp.py',
    'PYMODULE'),
   ('cryptography.x509.ocsp',
    'c:\\program files '
@@ -723,6 +787,22 @@
    'c:\\program files '
    '(x86)\\python37-32\\lib\\site-packages\\cryptography\\x509\\certificate_transparency.py',
    'PYMODULE'),
+  ('cryptography.hazmat.backends.openssl.decode_asn1',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\decode_asn1.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.backends.openssl.aead',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\aead.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.primitives.ciphers.aead',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\ciphers\\aead.py',
+   'PYMODULE'),
+  ('cryptography.hazmat.backends.openssl.backend',
+   'c:\\program files '
+   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\backend.py',
+   'PYMODULE'),
   ('cryptography.hazmat.primitives.kdf.scrypt',
    'c:\\program files '
    '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\kdf\\scrypt.py',
@@ -735,42 +815,6 @@
    'c:\\program files '
    '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\ciphers\\algorithms.py',
    'PYMODULE'),
-  ('cryptography.hazmat.primitives.asymmetric.padding',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\asymmetric\\padding.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.primitives.asymmetric.ed448',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\asymmetric\\ed448.py',
-   'PYMODULE'),
-  ('cryptography.hazmat._der',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\_der.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.interfaces',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\interfaces.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.x509',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\x509.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.ed25519',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\ed25519.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.ed448',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\ed448.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.cmac',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\cmac.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.rsa',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\rsa.py',
-   'PYMODULE'),
   ('cryptography.hazmat.backends.openssl.x448',
    'c:\\program files '
    '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\x448.py',
@@ -778,50 +822,6 @@
   ('cryptography.hazmat.primitives.asymmetric.x448',
    'c:\\program files '
    '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\asymmetric\\x448.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.utils',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\utils.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.primitives.asymmetric.utils',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\asymmetric\\utils.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.dsa',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\dsa.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.decode_asn1',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\decode_asn1.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.dh',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\dh.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\__init__.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.x25519',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\x25519.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.primitives.asymmetric.x25519',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\primitives\\asymmetric\\x25519.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\__init__.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.poly1305',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\poly1305.py',
-   'PYMODULE'),
-  ('cryptography.hazmat.backends.openssl.ocsp',
-   'c:\\program files '
-   '(x86)\\python37-32\\lib\\site-packages\\cryptography\\hazmat\\backends\\openssl\\ocsp.py',
    'PYMODULE'),
   ('cryptography.x509',
    'c:\\program files '

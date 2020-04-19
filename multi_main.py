@@ -3,7 +3,28 @@ from random import randint, random, choice, shuffle
 import sys
 import socket, time, threading
 import requests
+import json, os, sys, shutil, getpass, webbrowser, time, requests
+from zipfile import ZipFile
+from traceback import format_exc
+import getpass
+import winshell
+import time
+import webbrowser
 
+global_exit = False
+
+
+def exit_game():
+    global global_exit
+    global_exit = True
+    time.sleep(0.5)
+    print(score)
+    sys.exit()
+
+
+if len(sys.argv) != 6:
+    exit_game()
+args = sys.argv[1:]
 pygame.init()
 
 size = width, height = 1280, 720
@@ -46,15 +67,18 @@ gravity = 1
 menu_is_on = False
 music_on = True
 effects_on = True
-global_exit = False
 
 orders = None
 
 # internal_id = input('Enter internal id:   ')
-internal_id = str(randint(1000, 9999))
-role = choice(['policeman', 'citizen'])
-score = 0
-api_port = 80
+role, score, ip, port, internal_id = args
+score = int(score)
+port = int(port)
+
+# internal_id = '0515d797-6ff2-49ee-99c4-3f1dd0362eea'  # str(randint(1000, 9999))
+# role = choice(['policeman', 'citizen'])
+# score = 0
+api_port = 8080
 
 # ip = socket.gethostbyname('0.tcp.ngrok.io')
 # host = ip
@@ -117,18 +141,13 @@ def operate_player_data():
 
 def clean_params():
     global global_exit, player_params
-    print('[OK] cleaning thread started')
     while True:
         try:
             for i in player_params:
                 player_params[i].kill()
                 player_params = dict()
-            print('cleaned', player_params)
-        except Exception as e:
-            print('[ERROR]   ', e)
         finally:
             if global_exit:
-                print('[OK] cleaning thread stopped')
                 break
             time.sleep(3)
 
@@ -218,7 +237,6 @@ class RemotePlayer(pygame.sprite.Sprite):
             assert data[3] in ['left', 'right'] and str(data[3]).isalpha()
             infected = str(data[4])
         except Exception as e:
-            print('error', e)
             return
         self.set_position((new_x + terrain.rect.x, new_y + terrain.rect.y))
         self.is_moving = moving
@@ -242,8 +260,6 @@ class RemotePlayer(pygame.sprite.Sprite):
             self.infected = None
         elif infected.isdigit():
             self.infected = int(infected)
-        else:
-            print('[ERROR] value infection:', infected)
 
     def update_images(self):
         if not self.role:
@@ -317,7 +333,8 @@ class Player(pygame.sprite.Sprite):
         self.hazard_timer = 0
         self.id = None
 
-        self.card_money = 0
+        # TODO fix it
+        self.card_money = 2500
         self.cash = 5000
 
         self.objects = []
@@ -807,13 +824,11 @@ class MainHouse(pygame.sprite.Sprite):
                             product = choice(goods)
                             current_order['goods'].append(product)
                             goods.remove(product)
-                        print(current_order)
+                        current_order['goods'] = ', '.join(current_order['goods'])
 
                     if mode == 'final' and current_order:
-                        print(current_order)
                         url = f'http://{host}:{api_port}/game_api/create_order'
                         response = requests.get(url, params=current_order).json()
-                        print(response)
                         mode = 'success'
                         current_order = None
 
@@ -823,9 +838,9 @@ class MainHouse(pygame.sprite.Sprite):
                             render_text('Заказать', color=(232, 208, 79)),
                             (main_display.get_width() // 8, main_display.get_height() // 2 - 50 * 2))
                     elif mode == 'order':
-                        for i in range(len(current_order['goods'])):
+                        for i in range(len(current_order['goods'].split(', '))):
                             main_display.blit(
-                                render_text(current_order['goods'][i], color=(232, 208, 79)),
+                                render_text(current_order['goods'].split(', ')[i], color=(232, 208, 79)),
                                 (main_display.get_width() // 8, main_display.get_height() // 2 - 50 + 35 * i))
                         main_display.blit(
                             render_text('Подтвердить', color=(232, 208, 79)),
@@ -961,21 +976,20 @@ class MainHouse(pygame.sprite.Sprite):
                                     running = btn.run()
                                 elif mode == 'main':  # author choice
                                     if btn.id == 'first' and len(orders) >= 1:
-                                        mode = 1
+                                        mode = '0'
                                     elif btn.id == 'second' and len(orders) >= 2:
-                                        mode = 2
+                                        mode = '1'
                                     elif btn.id == 'third' and len(orders) >= 3:
-                                        mode = 3
-                                elif mode.isdigit():
+                                        mode = '2'
+                                if mode.isdigit():
                                     if player.order['nickname'] == orders[int(mode)]['nickname']:
                                         aims = orders[int(mode)]['goods']
                                         for i in player.get_objects():
                                             if i.name in aims:
                                                 aims.remove(i.name)
                                         if not aims:
-                                            url = f'http://{host}:{api_port}/game_api/delete_order/{player.order["token"]}'
+                                            url = f'http://{host}:{api_port}/game_api/delete_order?user_token={player.order["token"]}'
                                             response = requests.get(url)
-                                            print(response.content)
                                             player.order = None
                                             player.card_money += 750
                                             score += 500
@@ -1001,7 +1015,7 @@ class MainHouse(pygame.sprite.Sprite):
                 else:
                     main_display.blit(
                         render_text(mode, color=(232, 208, 79)),
-                        (main_display.get_width() // 8, main_display.get_height() // 2 - 50 + 50 * i))
+                        (main_display.get_width() // 5, main_display.get_height() // 2))
 
                 screen.fill((156, 65, 10))
                 player.update_params()
@@ -1043,8 +1057,6 @@ class Shop(pygame.sprite.Sprite):
                 summ = sum([i.get_price() for i in cart])
                 if player.spend_money(summ):
                     player.add_objects(*cart)
-                    for i in cart:
-                        i.buy()
                     return False, True, 'success'
                 return False, True, 'error'
 
@@ -1177,8 +1189,6 @@ class SecondShop(pygame.sprite.Sprite):
                 summ = sum([i.get_price() for i in cart])
                 if player.spend_money(summ):
                     player.add_objects(*cart)
-                    for i in cart:
-                        i.buy()
                     return False, True, 'success'
                 return False, True, 'error'
 
@@ -1302,8 +1312,6 @@ class Pharmacy(pygame.sprite.Sprite):
                 summ = sum([i.get_price() for i in cart])
                 if player.spend_money(summ):
                     player.add_objects(*cart)
-                    for i in cart:
-                        i.buy()
                     return False, True, 'success'
                 return False, True, 'error'
 
@@ -1704,13 +1712,14 @@ class Volunteers(pygame.sprite.Sprite):
                                 running = btn.run()
                             elif mode == 'main':  # order choice
                                 if btn.id == 'first' and len(orders) >= 1:
-                                    mode = 1
+                                    mode = '0'
                                 elif btn.id == 'second' and len(orders) >= 2:
-                                    mode = 2
+                                    mode = '1'
                                 elif btn.id == 'third' and len(orders) >= 3:
-                                    mode = 3
+                                    mode = '2'
                             elif mode.isdigit() and btn.id == 'sixth':
                                 player.order = orders[int(mode)]
+                                mode = 'success'
                             pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
             data = pygame.key.get_pressed()
             player.set_moving(False)
@@ -1719,16 +1728,12 @@ class Volunteers(pygame.sprite.Sprite):
                 button_group.empty()
                 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
             if mode == 'main' and not orders:
-                try:
-                    url = None
-                    url = f'http://{host}:{api_port}/game_api/get_orders/{internal_id}'
-                    json_response = requests.get(url).json()
-                    orders = json_response['data'][:3]
-                    print('[OK]  get orders')
-                except Exception as e:
-                    print('[ERROR]  ', e)
-                    if url:
-                        print('url:  ', url)
+                url = None
+                url = f'http://{host}:{api_port}/game_api/get_orders?user_token={internal_id}'
+                json_response = requests.get(url).json()
+                if not json_response['success']:
+                    exit_game()
+                orders = json_response['data'][:3]
             main_display.fill((0, 0, 0))
             if mode == 'main':
                 for i in range(len(orders)):
@@ -1743,6 +1748,10 @@ class Volunteers(pygame.sprite.Sprite):
                 main_display.blit(
                     render_text('Принять', color=(232, 208, 79)),
                     (main_display.get_width() - 300, 300))
+            elif mode == 'success':
+                main_display.blit(
+                    render_text('Успешно!', color=(232, 208, 79), size=65),
+                    (main_display.get_width() // 2 - 75, main_display.get_height() // 2))
 
             screen.fill((156, 65, 10))
             player.update_params()
@@ -1965,13 +1974,6 @@ class Camera:
         self.dy = -(target.rect.y + target.rect.h // 2 - height // 2 - 150)
 
 
-def exit_game():
-    global global_exit
-    global_exit = True
-    time.sleep(0.5)
-    sys.exit()
-
-
 def menu(pause=False):
     global menu_is_on
     if menu_is_on:
@@ -2140,7 +2142,7 @@ backgr.image = load_image('data/textures/background.png', size=size)
 backgr.rect = backgr.image.get_rect()
 
 # player = Player(3850, 1050, input('enter role:     '), player_group)
-role = 'citizen'
+# role = 'volunteer'
 player = Player(3850, 1050, role, player_group)
 player.id = internal_id
 terrain = Terrain(0, 0, all_sprites, terrain_group)
@@ -2184,13 +2186,11 @@ while running:
         if event.type == pygame.KEYUP:
             if player.role == 'policeman' and event.key == 99:
                 scanner_on = False
-                print('scanner off')
             if event.key == 9:  # TAB
                 eq = Equipment(player)
                 eq.enter()
         if event.type == pygame.KEYDOWN:
             if player.role == 'policeman' and event.key == 99:
-                print('scanner on')
                 scanner_on = True
 
     data = pygame.key.get_pressed()

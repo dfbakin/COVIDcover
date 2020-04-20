@@ -10,13 +10,14 @@ def exit_game():
     global_exit = True
     time.sleep(0.5)
     with open('score.dat', mode='w', encoding='utf-8') as file:
-        file.write(str(score))
+        file.write(str(score) + ' ' + str(error_code))
     sys.exit()
 
 
-if len(sys.argv) != 6:
-    exit_game()
-args = sys.argv[1:]
+# TODO add args
+# if len(sys.argv) != 6:
+# exit_game()
+# args = sys.argv[1:]
 pygame.init()
 
 size = width, height = 1280, 720
@@ -63,14 +64,16 @@ effects_on = True
 orders = None
 
 # internal_id = input('Enter internal id:   ')
-role, score, host, port, internal_id = args
-score = int(score)
-port = int(port)
-
-# internal_id = '0515d797-6ff2-49ee-99c4-3f1dd0362eea'  # str(randint(1000, 9999))
-# role = choice(['policeman', 'citizen'])
-# score = 0
+# role, score, host, port, internal_id = args
+# score = int(score)
+# port = int(port)
+host = '127.0.0.1'
+port = 9000
+internal_id = str(randint(1000, 9999))
+role = choice(['policeman', 'citizen'])
+score = 0
 api_port = 8080
+error_code = 0
 
 # ip = socket.gethostbyname('0.tcp.ngrok.io')
 # host = ip
@@ -121,6 +124,7 @@ def operate_player_data():
                     time.sleep(0.002)
                 player_params[id].set_params(params)
                 time.sleep(0.002)
+            print(remote_players)
 
         except Exception:
             continue
@@ -255,6 +259,7 @@ class RemotePlayer(pygame.sprite.Sprite):
         if not self.role:
             self.kill()
         self.frames = {'left': [], 'right': []}
+        role = self.role
         if self.role == 'volunteer':
             role = 'citizen'
         self.frames['left'].append(
@@ -709,7 +714,7 @@ class MainHouse(pygame.sprite.Sprite):
 
         def simple_house():
             def order_terminal():
-                global orders, score
+                global orders, score, error_code
 
                 running = True
                 mode = 'main'
@@ -818,7 +823,18 @@ class MainHouse(pygame.sprite.Sprite):
 
                     if mode == 'final' and current_order:
                         url = f'http://{host}:{api_port}/game_api/create_order'
-                        response = requests.get(url, params=current_order).json()
+                        try:
+                            response = requests.get(url, params=current_order, timeout=1.).json()
+                        except requests.exceptions.ConnectionError:
+                            error_code = -5
+                            exit_game()
+                        except requests.exceptions.Timeout:
+                            error_code = -6
+                            exit_game()
+                        if not response['success']:
+                            error_code = -7
+                            exit_game()
+
                         mode = 'success'
                         current_order = None
 
@@ -887,11 +903,14 @@ class MainHouse(pygame.sprite.Sprite):
                 clock.tick(fps)
 
         def delivery_terminal():
-            global orders, score
-            shuffle(orders)
-
+            global orders, score, error_code
             running = True
             mode = 'main'
+
+            if orders:
+                shuffle(orders)
+            else:
+                mode = 'нет заказов'
 
             main_display = pygame.Surface((width // 2, height // 3 + 150))
             main_display.fill((0, 0, 0))
@@ -979,7 +998,18 @@ class MainHouse(pygame.sprite.Sprite):
                                                 aims.remove(i.name)
                                         if not aims:
                                             url = f'http://{host}:{api_port}/game_api/delete_order?user_token={player.order["token"]}'
-                                            response = requests.get(url)
+                                            try:
+                                                response = requests.get(url, timeout=1.)
+                                            except requests.exceptions.ConnectionError:
+                                                error_code = -5
+                                                exit_game()
+                                            except requests.exceptions.Timeout:
+                                                error_code = -6
+                                                exit_game()
+                                            if not response['success']:
+                                                    error_code = -7
+                                                    exit_game()
+
                                             player.order = None
                                             player.card_money += 750
                                             score += 500
@@ -1619,7 +1649,7 @@ class Volunteers(pygame.sprite.Sprite):
         return False
 
     def enter(self):
-        global orders
+        global orders, error_code
         orders = None
         button_group.empty()
         if player.role != 'volunteer':
@@ -1720,8 +1750,16 @@ class Volunteers(pygame.sprite.Sprite):
             if mode == 'main' and not orders:
                 url = None
                 url = f'http://{host}:{api_port}/game_api/get_orders?user_token={internal_id}'
-                json_response = requests.get(url).json()
+                try:
+                    json_response = requests.get(url, timeout=1.).json()
+                except requests.exceptions.Timeout:
+                    error_code = -6
+                    exit_game()
+                except requests.exceptions.ConnectionError:
+                    error_code = -5
+                    exit_game()
                 if not json_response['success']:
+                    error_code = -7
                     exit_game()
                 orders = json_response['data'][:3]
             main_display.fill((0, 0, 0))
@@ -2150,7 +2188,7 @@ pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None,
 thread = threading.Thread(target=operate_player_data)
 thread.start()
 cleaning_thread = threading.Thread(target=clean_params)
-cleaning_thread.start()
+# cleaning_thread.start()
 # thread.join(0.01)
 connect_tick = 0
 

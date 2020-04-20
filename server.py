@@ -31,12 +31,13 @@ def operate_connection():
 def clean_params():
     while True:
         global players
+        print(players)
         players = dict()
         print('[OK] cleaned  ', players)
         sleep(3)
 
 
-host = '0.0.0.0'
+host = '127.0.0.1'
 port = 9000
 so = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 so.bind((host, port))

@@ -2,20 +2,8 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 import json, os, sys, shutil, getpass, webbrowser, time, requests
 from zipfile import ZipFile
-from traceback import format_exc
-from threading import Thread
 
 stop = False
-
-
-def loading(ex):
-    global stop
-    while ex.progressBar.value() != 100:
-        ex.progressBar.setValue(ex.progressBar.value() + 1)
-        time.sleep(0.15)
-        if stop:
-            ex.progressBar.setValue(100)
-            break
 
 
 class Ui_MainWindow(object):
@@ -31,10 +19,6 @@ class Ui_MainWindow(object):
         self.pushButton_3 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_3.setGeometry(QtCore.QRect(870, 700, 181, 61))
         self.pushButton_3.setObjectName("pushButton_3")
-        self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar.setGeometry(QtCore.QRect(20, 210, 991, 31))
-        self.progressBar.setProperty("value", 0)
-        self.progressBar.setObjectName("progressBar")
         self.pushButton_4 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_4.setGeometry(QtCore.QRect(410, 700, 121, 61))
         self.pushButton_4.setObjectName("pushButton_4")
@@ -76,8 +60,17 @@ class Ui_MainWindow(object):
         self.pushButton.setGeometry(QtCore.QRect(40, 460, 241, 51))
         self.pushButton.setObjectName("pushButton")
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
-        self.label_3.setGeometry(QtCore.QRect(50, 330, 221, 21))
+        self.label_3.setGeometry(QtCore.QRect(40, 330, 251, 21))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
+        self.label_4 = QtWidgets.QLabel(self.centralwidget)
+        self.label_4.setGeometry(QtCore.QRect(360, 340, 671, 111))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.label_4.setFont(font)
+        self.label_4.setObjectName("label_4")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 21))
@@ -107,11 +100,12 @@ class Ui_MainWindow(object):
         self.lineEdit_2.setPlaceholderText(_translate("MainWindow", "Пароль"))
         self.pushButton.setText(_translate("MainWindow", "Войти"))
         self.label_3.setText(_translate("MainWindow", "Auth status here"))
+        self.label_4.setText(_translate("MainWindow", "Все системы функционируют нормально."))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
-    host = '84.201.144.88'
+    host = '127.0.0.1'
     port = '8080'
 
     def __init__(self):
@@ -134,7 +128,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
         self.user = None
 
-        self.update_game()
+        #self.update_game()
 
     def auth(self):
         email = self.lineEdit.text()
@@ -153,58 +147,73 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.label_3.setText(self.user['username'])
 
     def update_game(self):
-        try:
-            errors = ''
-            Thread(target=loading, args=(self,)).start()
+        user = getpass.getuser()
+        path = f'C:/Users/{user}/COVIDcover/'
 
-            user = getpass.getuser()
-            path = f'C:/Users/{user}/COVIDcover/'
-
-            update_needed = True
-            if os.path.isfile(path + 'versions.json'):
-                versions_list = json.loads(requests.get(
-                    f'http://{MyWidget.host}:{MyWidget.port}/static/releases/versions.json').content.decode('utf-8'))
-                with open(path + 'versions.json', mode='r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    update_needed = data['last_version'] != versions_list['last_version']
-            if update_needed:
-                for i in os.listdir(path):
-                    if i == 'launcher.exe':
-                        continue
-                    if '.' in i:
-                        os.remove(path + i)
-                    else:
+        update_needed = True
+        if os.path.isfile(path + 'versions.json'):
+            try:
+                response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/static/releases/versions.json',
+                                        timeout=5.)
+            except requests.exceptions.ConnectionError:
+                self.show_error('Отсутствует интернет. Запустите программу позже.')
+                return
+            except requests.exceptions.Timeout:
+                self.show_error('Видимо, у наш сервер сейчас отдыхает ;)')
+                return
+            except Exception:
+                self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
+                return
+            versions_list = json.loads(response.content.decode('utf-8'))
+            with open(path + 'versions.json', mode='r', encoding='utf-8') as f:
+                data = json.load(f)
+                update_needed = data['last_version'] != versions_list['last_version']
+        if update_needed:
+            for i in os.listdir(path):
+                if i == 'launcher.exe':
+                    continue
+                if '.' in i:
+                    os.remove(path + i)
+                else:
+                    try:
                         shutil.rmtree(path + i)
+                    except PermissionError:
+                        self.show_error('Закройте посторонние программы и перезагрузите лончер')
+                        return
 
-                with open(path + 'game.zip', mode='wb') as f:
-                    f.write(requests.get(f'http://{MyWidget.host}:{MyWidget.port}/static/releases/game.zip').content)
+            with open(path + 'game.zip', mode='wb') as f:
+                f.write(requests.get(f'http://{MyWidget.host}:{MyWidget.port}/static/releases/game.zip').content)
 
-                with ZipFile(path + 'game.zip') as myzip:
-                    myzip.extractall(path)
+            with ZipFile(path + 'game.zip') as myzip:
+                myzip.extractall(path)
 
-                os.remove(path + 'game.zip')
-            self.pushButton_3.setVisible(True)
-            self.label_3.setVisible(True)
-
-
-        except:
-            errors = ''
-            for s in format_exc().splitlines():
-                errors += s + '\n'
-            errors += '\n'
-        finally:
-            if errors:
-                self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + errors)
-
-            global stop
-            stop = True
-            time.sleep(0.1)
+            os.remove(path + 'game.zip')
+        self.pushButton_3.setVisible(True)
+        self.label_3.setVisible(True)
 
     def launch_multi(self):
         if not self.user:
             return
-        response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/join',
-                                params={'user_token': self.user['token']})
+        try:
+            response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/join',
+                                    params={'user_token': self.user['token']}, timeout=3.)
+        except requests.exceptions.ConnectionError:
+            self.show_error('Отсутствует интернет. Запустите программу позже.')
+            return
+        except requests.exceptions.Timeout:
+            self.show_error('Видимо, у наш сервер сейчас отдыхает ;)')
+            return
+        except Exception:
+            self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
+            return
+        stat = response.status_code
+        if stat == 404:
+            self.show_error('Возникла проблема с Вашей учетной записью. Напишите нам.')
+            return
+        elif stat == 406:
+            self.show_error('Все сервера сейчас заняты. Попробуйте позднее.')
+            return
+
         data = response.json()
         if not data['success']:
             return
@@ -223,18 +232,28 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             f.write(f"multi_main {role} {self.user['score']} {data['ip']} {data['port']} {self.user['token']}")
 
         try:
+            self.hide()
             os.system('launch')
+            self.show()
             with open('multi_build/score.dat', mode='r', encoding='utf-8') as file:
-                score = file.read().strip()
+                score, error_code = file.read().strip().split()
+                error_code = int(error_code)
             if not score.isdigit():
-                print('wrong score value', score)
+                self.show_error('Ошибка клиента игры. Напишите нам.')
+            if error_code == -5:
+                self.show_error('Отсутствует интернет. Запустите программу позже.')
+            elif error_code == -6:
+                self.show_error('Видимо, у наш сервер сейчас отдыхает ;)')
+            elif error_code == -7:
+                self.show_error('Ошибка игры. Мы уже работаем над ее устранением.')
 
         except Exception as e:
             self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + str(e) + '\n\n')
         finally:
-            if not score or not score.isdigit() or len(score) > 7:
+            self.show()
+            if not score or not score.isdigit() or len(score) > 9 or error_code != 0:
                 requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
-                             params={'user_token': self.user['token'], 'score': self.user['score']})
+                             params={'user_token': self.user['token'], 'score': int(self.user['score'])})
             else:
                 print(requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
                                    params={'user_token': self.user['token'], 'score': int(score)}).content)
@@ -247,6 +266,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.hide()
         os.system(cmd)
         self.show()
+
+    def show_error(self, error):
+        self.label_4.setText(error)
 
 
 if __name__ == '__main__':

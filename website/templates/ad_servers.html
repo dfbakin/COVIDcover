@@ -1,0 +1,53 @@
+{% extends 'base.html'%}
+{% block body %}
+<ul class="nav nav-pills">
+  <li class="nav-item">
+    <a class="nav-link active" href="/admin">Серверы</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="/admin/users">Пользователи</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="/admin/orders">Заказы</a>
+  </li>
+</ul>
+<br><a href="/admin/add" class="btn btn-primary">Добавить сервер</a><br><br>
+<div>
+    <table class="table bg-info">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">IP:Port</th>
+                <th scope="col">Игроки</th>
+                <th scope="col">Включить/Выключить</th>
+                <th scope="col">Изменить</th>
+                <th scope="col">Удалить</th>
+            </tr>
+        </thead>
+    <tbody>
+        {% for server in servers %}
+        <tr>
+            <th scope="row">{{ server.id }}</th>
+            <td>{{ server.ip }}</td>
+            <td>{{ server.players_n }}/{{ server.limit }}</td>
+            <td>
+                <a href="/admin/switch?server={{ server.token }}" class="btn btn-primary">
+                  {% if server.running %}
+                  Выключить
+                  {% else %}
+                  Включить
+                  {% endif %}
+                </a>
+            </td>
+            <td>
+                <a class="btn btn-primary" href="/admin/edit?server={{ server.token }}">Изменить</a>
+            </td>
+            <td>
+                <a class="btn btn-danger" href="/admin/delete?server={{ server.token }}">Удалить</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+</div>
+{% endblock %}

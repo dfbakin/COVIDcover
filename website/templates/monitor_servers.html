@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block body %}
+<div>
+    <table class="table bg-info">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">IP:Port</th>
+                <th scope="col">Игроки</th>
+            </tr>
+        </thead>
+    <tbody>
+        {% for server in servers %}
+        <tr>
+            <th scope="row">{{ loop.index }}</th>
+            <td>{{ server.ip }}</td>
+            <td>{{ server.players_n }}/{{ server.limit }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+</div>
+{% endblock %}

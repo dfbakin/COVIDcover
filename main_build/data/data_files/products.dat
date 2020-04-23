@@ -1,0 +1,8 @@
+alcohol\tСпирт\tdata/objects/bottle.png\t550\tОчищает поверхности, \nуменьшает риск заражения. \nИспользовать ТОЛЬКО в \nконцентрации 10-20%!
+mask\tМаска\tdata/objects/mask.png\t450\tУменьшает риск\nзаражения.
+apple\tЯблоко\tdata/objects/apple.png\t250\tДает чрезвычайно\nнеобходимые организму\n витамины и вещества
+carrot\tМорковь\tdata/objects/carrot.png\t300\tДает чрезвычайно\nнеобходимые организму\n витамины и вещества
+potato\tКартофель\tdata/objects/potato.png\t450\tДает чрезвычайно\nнеобходимые организму\n витамины и вещества
+pills\tВитамины\tdata/objects/pills.png\t50\tПовышают устойчивость\nорганизма к инфекциям
+soap\tМыло\tdata/objects/soap.png\t450\tУменьшает вероятность\nзаражения коронавирусом\nи другими инфекциями
+card\tБанковская карта\tdata/objects/bank_card.png\t0\tПин код:

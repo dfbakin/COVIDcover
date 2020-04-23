@@ -1,3 +1,4 @@
 import requests
-print(requests.get('http://127.0.0.1:8080/game_api/quit',
-             params={'user_token': '0515d797-6ff2-49ee-99c4-3f1dd0362eea', 'score': 0}).content)
+
+print(requests.get('http://127.0.0.1:8080/game_api/quit', params={'user_token': '0c4b8f94-b0d1-4731-8566-0bfa4a989610',
+                                                                  'score': 0}).content)

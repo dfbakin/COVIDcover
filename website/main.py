@@ -106,4 +106,4 @@ if __name__ == '__main__':
     api.add_resource(UsersListResource, '/api/users/token/<token>')
     api.add_resource(ServersResource, '/api/servers/<int:ser_id>/token/<token>')
     api.add_resource(ServersListResource, '/api/servers//token/<token>')
-    app.run('127.0.0.1', port='8080')
+    app.run('0.0.0.0', port='8080')

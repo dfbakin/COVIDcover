@@ -54,6 +54,16 @@ speeches = {'intro': pygame.mixer.Sound('data/speech/intro.wav'),
 music = {'main': pygame.mixer.Sound('data/music/main_music.ogg')}
 music['main'].play(-1)
 
+sounds = {'apple': pygame.mixer.Sound('data/sounds/apple_crunch.wav'),
+          'atm_button': pygame.mixer.Sound('data/sounds/atm_button.wav'),
+          'bottle_open': pygame.mixer.Sound('data/sounds/bottle_open.wav'),
+          'cashbox': pygame.mixer.Sound('data/sounds/cashbox.wav'),
+          'close_door': pygame.mixer.Sound('data/sounds/close_door.wav'),
+          'drink_gulp': pygame.mixer.Sound('data/sounds/drink_gulp.wav'),
+          'open_door': pygame.mixer.Sound('data/sounds/open_door.wav'),
+          }
+
+
 player_params = dict()
 products = dict()
 
@@ -103,7 +113,7 @@ def render_text(line, size=50, color=(255, 255, 255)):
 class Player(pygame.sprite.Sprite):
     speed = 5
     jump_power = 17
-    infection_rate = 1500
+    infection_rate = 1200
 
     def __init__(self, x, y, *groups):
         super().__init__(groups)
@@ -121,7 +131,6 @@ class Player(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = x, y
         self.side = 'right'
         self.image_num = 0
-
 
         self.prev_coords = x, y
         self.is_moving = False
@@ -271,7 +280,7 @@ class Player(pygame.sprite.Sprite):
             text = render_text('Вы мертвы!!!')
             screen.blit(text, (width // 2 - text.get_width() // 2, height // 2))
             pygame.display.flip()
-            for i in range(5):
+            for i in range(2):
                 self.clock.tick(1)
             global level
             level = None
@@ -411,6 +420,8 @@ class Bank(pygame.sprite.Sprite):
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for btn in bank_buttons:
                         if btn.rect.collidepoint(event.pos):
+                            if effects_on:
+                                sounds['atm_button'].play()
                             if not btn.id:
                                 running = btn.run()
                             elif btn.id == 'card':
@@ -444,7 +455,7 @@ class Bank(pygame.sprite.Sprite):
                                     deposit_summ += btn.id
                             elif mode == 'error' or mode == 'success':
                                 mode = 'main'
-                            #button_group.empty()
+                            # button_group.empty()
                             pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
             data = pygame.key.get_pressed()
             player.set_moving(False)
@@ -1061,6 +1072,8 @@ class Product(pygame.sprite.Sprite):
             player.health += 10
             if player.health > 100:
                 player.health = 100
+        if self.name == 'Яблоко':
+            sounds['apple'].play()
         self.is_used = True
         return True
 
@@ -1106,7 +1119,8 @@ class Equipment:
                                     if use_btn:
                                         use_btn.kill()
                                     if self.products[int(btn.id)].name != 'Банковская карта':
-                                        use_btn = Button(width - 300, height - 150, 300, 75, render_text('Использовать'),
+                                        use_btn = Button(width - 300, height - 150, 300, 75,
+                                                         render_text('Использовать'),
                                                          self.products[int(btn.id)].use, None, product_buttons)
                             else:
                                 btn.run()
@@ -1283,7 +1297,6 @@ def menu(pause=False):
     pos = (0, 0)
     if not level:
         stop_speeches()
-        speeches['intro'].play()
         canvas = pygame.Surface((200, 100))
         canvas.fill((181, 109, 2))
         text = render_text('Уровень 1')
@@ -1332,6 +1345,7 @@ def menu(pause=False):
                         canvas.get_height() // 2 - text.get_height() // 2))
         Button(width // 2 - delt_width, height // 4, 200, 100, canvas, start, None, button_group)
 
+    speeches['intro'].play()
     canvas = pygame.Surface((200, 100))
     canvas.fill((181, 109, 2))
     text = render_text('Настройки')
@@ -1445,12 +1459,14 @@ while running:
         for i in all_sprites:
             i.kill()
         player.kill()
-        player = Player(4000, 500, player_group)
+
+        player = Player(3850, 500, player_group)
         terrain = Terrain(0, 0, all_sprites, terrain_group)
         bank = Bank(350, 350, all_sprites, building_group)
         home = MainHouse(3710, 125, building_group, all_sprites)
         pharmacy = Pharmacy(5050, 100, building_group, all_sprites)
         shop = Shop(5750, 80, building_group, all_sprites)
+        second_shop = SecondShop(6000, 120, building_group, all_sprites)
 
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
 
@@ -1472,6 +1488,8 @@ while running:
             if event.key == 9:  # TAB
                 eq = Equipment(player)
                 eq.enter()
+                pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
+
     data = pygame.key.get_pressed()
     player.set_moving(False)
     if data[27]:
@@ -1480,7 +1498,12 @@ while running:
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
     if data[101]:
         if near_building:
+            if effects_on:
+                sounds['open_door'].play()
             near_building.enter()
+            if effects_on:
+                sounds['close_door'].play()
+            pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
             if not level:
                 continue
 

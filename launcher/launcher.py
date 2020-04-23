@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
-import json, os, sys, shutil, getpass, webbrowser, time, requests
+import json, os, sys, shutil, webbrowser, requests
 from zipfile import ZipFile
 
 stop = False
@@ -105,7 +105,7 @@ class Ui_MainWindow(object):
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
-    host = '127.0.0.1'
+    host = '84.201.144.88'
     port = '8080'
 
     def __init__(self):
@@ -121,14 +121,13 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.pushButton.clicked.connect(self.auth)
 
         self.pushButton_3.setVisible(False)
-        self.label_3.setVisible(False)
         self.pushButton_5.setVisible(False)
 
         self.label_3.setText('Войдите в учетную запись')
 
         self.user = None
 
-        #self.update_game()
+        self.update_game()
 
     def auth(self):
         email = self.lineEdit.text()
@@ -136,8 +135,19 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         if not email or not password:
             self.label_3.setText('Заполните все поля!')
             return
-        response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/auth',
-                                params={'email': email, 'password': password})
+        try:
+            response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/auth',
+                                    params={'email': email, 'password': password}, timeout=2.5)
+        except requests.exceptions.ConnectionError:
+            self.show_error('Отсутствует интернет. Запустите программу позже.')
+            return
+        except requests.exceptions.Timeout:
+            self.show_error('Видимо, у наш сервер сейчас отдыхает ;)')
+            return
+        except Exception:
+            self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
+            return
+
         data = response.json()
         if not data['success']:
             self.label_3.setText('Неверные данные')
@@ -147,8 +157,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.label_3.setText(self.user['username'])
 
     def update_game(self):
-        user = getpass.getuser()
-        path = f'C:/Users/{user}/COVIDcover/'
+        path = ''
 
         update_needed = True
         if os.path.isfile(path + 'versions.json'):
@@ -260,8 +269,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             os.remove('launch.bat')
 
     def launch_single(self):
-        user = getpass.getuser()
-        path = f'C:/Users/{user}/COVIDcover/'
+        path = ''
         cmd = f"cd main_build && {path}main_build/main.exe"
         self.hide()
         os.system(cmd)

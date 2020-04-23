@@ -1,5 +1,6 @@
 import socket, threading
 from time import sleep
+from sys import argv
 
 players = dict()
 
@@ -31,14 +32,24 @@ def operate_connection():
 def clean_params():
     while True:
         global players
-        print(players)
         players = dict()
-        print('[OK] cleaned  ', players)
         sleep(3)
 
 
-host = '127.0.0.1'
-port = 9000
+host = '0.0.0.0'
+
+if len(argv) <= 1:
+    port = input('enter the port:    ').strip()
+    if not port.isdigit():
+        raise ValueError
+    port = int(port)
+    print(f'starting server on {str(port)} port')
+    a = input('confirm, please')
+else:
+    if not argv[1].isdigit():
+        raise ValueError
+    port = int(argv[1])
+
 so = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 so.bind((host, port))
 so.listen(50)

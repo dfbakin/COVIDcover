@@ -91,7 +91,7 @@ stop = False
 
 def loading():
     global stop
-    while ex.progressBar.value() != 100:
+    while ex.progressBar.value() != 90:
         ex.progressBar.setValue(ex.progressBar.value() + 1)
         time.sleep(0.15)
         if stop:
@@ -136,6 +136,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 link.path = f'C:/Users/{user}/COVIDcover/launcher.exe'
                 link.description = "Game 'COVIDcover'"
                 link.working_directory = f'C:/Users/{user}/COVIDcover'
+            ex.progressBar.setValue(100)
+
         except Exception as e:
             global stop
             stop = True

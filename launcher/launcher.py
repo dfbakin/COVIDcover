@@ -269,11 +269,19 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             os.remove('launch.bat')
 
     def launch_single(self):
-        path = ''
-        cmd = f"cd main_build && {path}main_build/main.exe"
-        self.hide()
-        os.system(cmd)
-        self.show()
+        with open('launch.bat', mode='w', encoding='utf-8') as f:
+            f.write('cd main_build\n')
+            f.write("main")
+
+        try:
+            self.hide()
+            os.system('launch')
+            self.show()
+        except Exception as e:
+            self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + str(e) + '\n\n')
+        finally:
+            self.show()
+            os.remove('launch.bat')
 
     def show_error(self, error):
         self.label_4.setText(error)

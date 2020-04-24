@@ -2200,110 +2200,118 @@ scanner_on = False
 arrest_rate = 0
 
 # home.enter()
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.MOUSEMOTION:
-            pos = event.pos
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            for btn in button_group:
-                if btn.rect.collidepoint(event.pos):
-                    btn.run()
-                    button_group.empty()
+try:
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEMOTION:
+                pos = event.pos
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for btn in button_group:
+                    if btn.rect.collidepoint(event.pos):
+                        btn.run()
+                        button_group.empty()
+                        pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
+            if event.type == pygame.KEYUP:
+                if player.role == 'policeman' and event.key == 99:
+                    scanner_on = False
+                if event.key == 9:  # TAB
+                    eq = Equipment(player)
+                    eq.enter()
                     pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
-        if event.type == pygame.KEYUP:
-            if player.role == 'policeman' and event.key == 99:
-                scanner_on = False
-            if event.key == 9:  # TAB
-                eq = Equipment(player)
-                eq.enter()
-                pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
 
-        if event.type == pygame.KEYDOWN:
-            if player.role == 'policeman' and event.key == 99:
-                scanner_on = True
+            if event.type == pygame.KEYDOWN:
+                if player.role == 'policeman' and event.key == 99:
+                    scanner_on = True
 
-    data = pygame.key.get_pressed()
+        data = pygame.key.get_pressed()
 
-    # if any(data):
-    # print(data.index(1))
+        # if any(data):
+        # print(data.index(1))
 
-    player.set_moving(False)
-    if data[27]:
-        menu(pause=True)
-        button_group.empty()
-        pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
-    if data[101]:
-        if near_building:
-            player.inside = True
-            near_building.enter()
-            player.inside = False
+        player.set_moving(False)
+        if data[27]:
+            menu(pause=True)
+            button_group.empty()
             pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
-    if data[51]:
-        if player.role == 'policeman':
-            for i in remote_players:
-                if pygame.sprite.collide_mask(i, player) and i.role == 'citizen':
-                    if arrest_rate > 5000:
-                        i.caught += 1
-                        if i.caught >= 3:
-                            caught_ids.append(i.id)
-                            if i.infected == 2:
-                                score -= 50
-                                if score < 0:
-                                    score = 0
-                            elif i.infected == 3:
-                                score += 100
-                        arrest_rate = 0
+        if data[101]:
+            if near_building:
+                player.inside = True
+                near_building.enter()
+                player.inside = False
+                pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
+        if data[51]:
+            if player.role == 'policeman':
+                for i in remote_players:
+                    try:
+                        if pygame.sprite.collide_mask(i, player) and i.role == 'citizen':
+                            if arrest_rate > 5000:
+                                i.caught += 1
+                                if i.caught >= 3:
+                                    caught_ids.append(i.id)
+                                    if i.infected == 2:
+                                        score -= 50
+                                        if score < 0:
+                                            score = 0
+                                    elif i.infected == 3:
+                                        score += 100
+                                arrest_rate = 0
+                    except AttributeError:
+                        del player_params[i.id]
+                        i.kill()
 
-    if data[97]:
-        player.move_left()
-        player.set_moving(True)
-    if data[100]:
-        player.move_right()
-        player.set_moving(True)
-    if data[32]:
-        player.jump()
-    screen.fill((0, 0, 0))
-    camera.update(player)
-    for sprite in all_sprites:
+        if data[97]:
+            player.move_left()
+            player.set_moving(True)
+        if data[100]:
+            player.move_right()
+            player.set_moving(True)
+        if data[32]:
+            player.jump()
+        screen.fill((0, 0, 0))
+        camera.update(player)
+        for sprite in all_sprites:
+            try:
+                camera.apply(sprite)
+            except AttributeError:
+                sprite.kill()
+        for sprite in remote_players:
+            try:
+                camera.apply(sprite)
+            except AttributeError:
+                sprite.kill()
+        camera.apply(player)
+
+        all_sprites.update()
+        player_group.update()
+        button_group.update(pos)
+
+        remote_players.update(scanner_on)
+
+        background_group.draw(screen)
         try:
-            camera.apply(sprite)
+            all_sprites.draw(screen)
         except AttributeError:
-            sprite.kill()
-    for sprite in remote_players:
+            pass
+        terrain_group.draw(screen)
+        button_group.draw(screen)
+        screen.blit(player.render_info(), (0, 0))
+        player_group.draw(screen)
         try:
-            camera.apply(sprite)
+            remote_players.draw(screen)
         except AttributeError:
-            sprite.kill()
-    camera.apply(player)
+            pass
 
-    all_sprites.update()
-    player_group.update()
-    button_group.update(pos)
-
-    remote_players.update(scanner_on)
-
-    background_group.draw(screen)
-    try:
-        all_sprites.draw(screen)
-    except AttributeError:
-        pass
-    terrain_group.draw(screen)
-    button_group.draw(screen)
-    screen.blit(player.render_info(), (0, 0))
-    player_group.draw(screen)
-    try:
-        remote_players.draw(screen)
-    except AttributeError:
-        pass
-
-    if near_building_message and near_building:
-        screen.blit(render_text(near_building_message), (0, height - 50))
-    pygame.display.flip()
-    clock.tick(fps)
-    connect_tick += 1
-    arrest_rate += info_clock.tick()
-    if global_exit:
-        break
-exit_game()
+        if near_building_message and near_building:
+            screen.blit(render_text(near_building_message), (0, height - 50))
+        pygame.display.flip()
+        clock.tick(fps)
+        connect_tick += 1
+        arrest_rate += info_clock.tick()
+        if global_exit:
+            break
+except Exception:
+    error_code = -7
+finally:
+    exit_game()

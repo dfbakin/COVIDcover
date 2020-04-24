@@ -237,7 +237,7 @@ def delete_order():
     return redirect('/admin/orders')
 
 
-@bp.route('/admin/users/edit', methods=['GET', 'POST'])
+@bp.route('/admin/orders/edit', methods=['GET', 'POST'])
 def edit_order():
     if not current_user.is_authenticated or not current_user.privilege_obj.admin:
         abort(404)
@@ -245,7 +245,7 @@ def edit_order():
     order = session.query(Order).filter(Order.token == request.args['order']).first()
     form = OrderForm()
     if form.validate_on_submit():
-        order.author = form.order.data
+        order.author = form.author.data
         order.goods = form.goods.data
         if form.token.data:
             order.token = form.token.data
@@ -255,7 +255,7 @@ def edit_order():
         session.commit()
         return redirect('/admin/orders')
     else:
-        form.order.data = order.author
-        form.order.goods = order.goods
+        form.author.data = order.author
+        form.goods.goods = order.goods
         form.token.data = order.token
     return render_template('ad_edit_orders.html', form=form, title='Изменить заказ')

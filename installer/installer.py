@@ -99,7 +99,7 @@ def loading():
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
-    host = '84.201.144.88'
+    host = '130.193.45.158'
     port = '8080'
 
     def __init__(self):

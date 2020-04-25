@@ -14,9 +14,9 @@ def exit_game():
     sys.exit()
 
 
-if len(sys.argv) != 6:
+'''if len(sys.argv) != 6:
     exit_game()
-args = sys.argv[1:]
+args = sys.argv[1:]'''
 
 pygame.init()
 
@@ -60,19 +60,21 @@ gravity = 1
 menu_is_on = False
 music_on = True
 effects_on = True
+arrested = False
 
 orders = None
 
 # internal_id = input('Enter internal id:   ')
-role, score, host, port, internal_id = args
+'''role, score, host, port, internal_id = args
 score = int(score)
-port = int(port)
+port = int(port)'''
 api_port = 8080
 error_code = 0
-'''role = 'citizen'
+role = 'citizen'
 score = 0
 host, port = '127.0.0.1', 9000
-internal_id = '0c4b8f94-b0d1-4731-8566-0bfa4a989610'''
+internal_id = '022837fe-c781-4d47-bd2c-44cb1fc08d3c'
+#internal_id = '0c4b8f94-b0d1-4731-8566-0bfa4a989610'
 # ip = socket.gethostbyname('0.tcp.ngrok.io')
 # host = ip
 # host = '84.201.168.123'
@@ -141,6 +143,22 @@ def clean_params():
             if global_exit:
                 break
             time.sleep(3)
+
+
+def check_order_is_done():
+    global player, error_code
+    if player.order:
+        try:
+            response = requests.get(f'http://{host}:{api_port}/api/orders/{player.order}/token/{internal_id}', timeout=0.25)
+        except requests.exceptions.Timeout:
+            error_code = -6
+            exit_game()
+        except requests.exceptions.ConnectionError:
+            error_code = -5
+            exit_game()
+        print(response.status_code)
+        if response.status_code == 404:
+            player.order = 'done'
 
 
 def stop_speeches():
@@ -238,15 +256,8 @@ class RemotePlayer(pygame.sprite.Sprite):
                 continue
             break
         if internal_id in data[5].split('%'):
-            screen.fill((0, 0, 0))
-            # background_group.draw(screen)
-            text = render_text('Вы арестованы за нарушение карантина!!!')
-            screen.blit(text, (width // 2 - text.get_width() // 2, height // 2))
-            pygame.display.flip()
-            for i in range(5):
-                self.clock.tick(1)
-
-            exit_game()
+            global arrested
+            arrested = True
         if infected == 'None':
             self.infected = None
         elif infected.isdigit():
@@ -504,7 +515,7 @@ class Terrain(pygame.sprite.Sprite):
 class Bank(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(groups)
-        self.image = load_image('data/buildings/bank.png', size=(250, 150))
+        self.image = load_image('data/buildings/bank.png', size=(300, 250))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x, y
         self.mask = pygame.mask.from_surface(self.image)
@@ -710,10 +721,14 @@ class MainHouse(pygame.sprite.Sprite):
 
         def simple_house():
             def order_terminal():
+                if player.role != 'citizen':
+                    return
                 global orders, score, error_code
 
                 running = True
                 mode = 'main'
+                if player.order:
+                    mode = 'Заказ уже оформлен'
                 current_order = None
 
                 main_display = pygame.Surface((width // 2, height // 3 + 150))
@@ -833,6 +848,7 @@ class MainHouse(pygame.sprite.Sprite):
 
                         mode = 'success'
                         current_order = None
+                        player.order = response['token']
 
                     main_display.fill((0, 0, 0))
                     if mode == 'main':
@@ -851,6 +867,10 @@ class MainHouse(pygame.sprite.Sprite):
                         main_display.blit(
                             render_text('Успешно!', color=(232, 208, 79)),
                             (main_display.get_width() - 250, 300))
+                    else:
+                        main_display.blit(
+                            render_text(mode, color=(232, 208, 79)),
+                            (main_display.get_width() // 3, main_display.get_height() // 2))
 
                     screen.fill((156, 65, 10))
                     player.update_params()
@@ -874,6 +894,7 @@ class MainHouse(pygame.sprite.Sprite):
 
             Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
                    100, 50, images['exit_sign'], lambda: False, None, house_buttons)
+            thread_num = 0
             while running:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -889,6 +910,17 @@ class MainHouse(pygame.sprite.Sprite):
                     menu(pause=True)
                     button_group.empty()
                     pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, house_buttons)
+                if player.order == 'done':
+                    screen.fill((177, 170, 142))
+                    text = render_text('Заказ доставлен. Вы спасены! =)')
+                    screen.blit(text, (width // 2 - text.get_width() // 2, height // 2))
+                    pygame.display.flip()
+                    global score
+                    score += 50
+                    for i in range(5):
+                        clock.tick(1)
+                    player.order = None
+
                 screen.fill((177, 170, 142))
                 background_house.draw(screen)
                 button_group.draw(screen)
@@ -897,6 +929,10 @@ class MainHouse(pygame.sprite.Sprite):
                 screen.blit(player.render_info(background=(177, 170, 142)), (0, 0))
                 pygame.display.flip()
                 clock.tick(fps)
+                thread_num += 1
+                if thread_num >= 200:
+                    threading.Thread(target=check_order_is_done).start()
+                    thread_num = 0
 
         def delivery_terminal():
             global orders, score, error_code
@@ -1995,12 +2031,13 @@ class Camera:
 
     def apply(self, obj):
         obj.rect.x += self.dx
-        if player.rect.y < 0 or player.rect.y > height - 100 or player.rect.y - terrain.rect.y < 650:
-            obj.rect.y += self.dy
+        obj.rect.y += self.dy
 
     def update(self, target):
         self.dx = -(target.rect.x + target.rect.w // 2 - width // 2)
-        self.dy = -(target.rect.y + target.rect.h // 2 - height // 2 - 150)
+        self.dy = 0
+        if player.rect.y < 0 or player.rect.y > height - 100 or player.rect.y - terrain.rect.y < 650:
+            self.dy = -(target.rect.y + target.rect.h // 2 - height // 2 - 150)
 
 
 def menu(pause=False):
@@ -2175,13 +2212,13 @@ backgr.rect = backgr.image.get_rect()
 player = Player(3850, 1050, role, player_group)
 player.id = internal_id
 terrain = Terrain(0, 0, all_sprites, terrain_group)
-bank = Bank(350, 900, all_sprites, building_group)
+bank = Bank(350, 875, all_sprites, building_group)
 home = MainHouse(3710, 700, building_group, all_sprites)
 pharmacy = Pharmacy(5050, 675, building_group, all_sprites)
-shop = Shop(5750, 650, building_group, all_sprites)
-second_shop = SecondShop(7250, 720, building_group, all_sprites)
+shop = Shop(5750, 665, building_group, all_sprites)
+second_shop = SecondShop(7250, 750, building_group, all_sprites)
 hospital = Hospital(2200, 800, building_group, all_sprites)
-volunteer = Volunteers(1000, 800, building_group, all_sprites)
+volunteer = Volunteers(1000, 790, building_group, all_sprites)
 
 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
 
@@ -2246,20 +2283,21 @@ try:
                 for i in remote_players:
                     try:
                         if pygame.sprite.collide_mask(i, player) and i.role == 'citizen':
-                            if arrest_rate > 5000:
-                                i.caught += 1
-                                if i.caught >= 3:
-                                    caught_ids.append(i.id)
-                                    if i.infected == 2:
-                                        score -= 50
-                                        if score < 0:
-                                            score = 0
-                                    elif i.infected == 3:
-                                        score += 100
+                            arrest_rate += 1
+                            if arrest_rate >= 60:
+                                caught_ids.append(i.id)
+                                if i.infected == 2:
+                                    score -= 100
+                                    if score < 0:
+                                        score = 0
+                                elif i.infected == 3:
+                                    score += 100
                                 arrest_rate = 0
                     except AttributeError:
                         del player_params[i.id]
                         i.kill()
+                    except Exception as e:
+                        print(e)
 
         if data[97]:
             player.move_left()
@@ -2308,10 +2346,20 @@ try:
         pygame.display.flip()
         clock.tick(fps)
         connect_tick += 1
-        arrest_rate += info_clock.tick()
         if global_exit:
             break
-except Exception:
+        if arrested:
+            screen.fill((0, 0, 0))
+            text = render_text('Вы арестованы за нарушение карантина!!!')
+            screen.blit(text, (width // 2 - text.get_width() // 2, height // 2))
+            pygame.display.flip()
+            score -= 50
+            for i in range(3):
+                clock.tick(1)
+            break
+
+except Exception as e:
+    print(e)
     error_code = -7
 finally:
     exit_game()

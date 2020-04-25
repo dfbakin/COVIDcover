@@ -100,7 +100,7 @@ if __name__ == '__main__':
     global_init('db/db.sqlite')
     app.register_blueprint(bp1)
     app.register_blueprint(bp2)
-    api.add_resource(OrdersResource, '/api/orders/<int:ord_id>/token/<token>')
+    api.add_resource(OrdersResource, '/api/orders/<ord_id>/token/<token>')
     api.add_resource(OrdersListResource, '/api/orders/token/<token>')
     api.add_resource(UsersResource, '/api/users/<int:user_id>/token/<token>')
     api.add_resource(UsersListResource, '/api/users/token/<token>')

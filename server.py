@@ -36,7 +36,7 @@ def clean_params():
         sleep(3)
 
 
-host = '0.0.0.0'
+host = '127.0.0.1'
 
 if len(argv) <= 1:
     port = input('enter the port:    ').strip()

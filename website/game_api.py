@@ -122,7 +122,6 @@ def create_order():
     session.add(order)
     session.commit()
 
-    session = create_session()
     server = session.query(Server).filter(Server.players.like(f'% {str(user.id)} %')).first()
     if not server:
         abort(406)

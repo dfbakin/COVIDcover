@@ -33,7 +33,7 @@ def clean_params():
     while True:
         global players
         players = dict()
-        sleep(3)
+        sleep(5)
 
 
 host = '127.0.0.1'

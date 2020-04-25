@@ -65,16 +65,18 @@ arrested = False
 orders = None
 
 # internal_id = input('Enter internal id:   ')
-'''role, score, host, port, internal_id = args
+'''role, score, host, port, internal_id, player_name = args
 score = int(score)
 port = int(port)'''
 api_port = 8080
 error_code = 0
-role = 'citizen'
+role = 'volunteer'
 score = 0
 host, port = '127.0.0.1', 9000
-internal_id = '022837fe-c781-4d47-bd2c-44cb1fc08d3c'
+player_name = '123456'
+#internal_id = '9f8e6b0c-62c7-4b09-b6d3-f923f3bf9860'
 #internal_id = '0c4b8f94-b0d1-4731-8566-0bfa4a989610'
+internal_id = '2a288d46-b3bf-4669-a938-dbaa6e8d9126'
 # ip = socket.gethostbyname('0.tcp.ngrok.io')
 # host = ip
 # host = '84.201.168.123'
@@ -105,7 +107,7 @@ def operate_player_data():
             except ConnectionRefusedError:
                 con.close()
 
-            con.send((player.id + r'\t' + player.get_pos_info() + r'\t' + '%'.join(caught_ids)).encode('utf-8'))
+            con.send((player.id + r'\t' + player_name + r'\t' + player.get_pos_info() + r'\t' + '%'.join(caught_ids)).encode('utf-8'))
 
             end = False
             while not end:
@@ -115,17 +117,18 @@ def operate_player_data():
                     data = data[:data.index('end')]
                 elif data == 'end':
                     break
-                id, params = data.split(r'\t')[0], r'\t'.join(data.split(r'\t')[1:])
+                id, name, params = data.split(r'\t')[0], data.split(r'\t')[1], r'\t'.join(data.split(r'\t')[2:])
                 if str(id) not in player_params.keys() and id != player.id:
                     role = params.split(r'\t')[0]
-                    player_params[id] = RemotePlayer(str(id), 0, 0, role, remote_players)
-                    if len(remote_players.sprites()) == 0:
-                        player_params[id] = RemotePlayer(str(id), 0, 0, role, remote_players)
+                    player_params[id] = RemotePlayer(str(id), 0, 0, role, name, remote_players)
+                    if len(player_params[id].groups()) == 0:
+                        player_params[id] = RemotePlayer(str(id), 0, 0, role, name, remote_players)
                     time.sleep(0.002)
                 player_params[id].set_params(params)
                 time.sleep(0.002)
 
-        except Exception:
+        except Exception as e:
+            print(e)
             continue
         finally:
             if global_exit:
@@ -136,13 +139,14 @@ def clean_params():
     global global_exit, player_params
     while True:
         try:
+            print(player_params)
             for i in player_params:
                 player_params[i].kill()
-                player_params = dict()
+            player_params = dict()
         finally:
             if global_exit:
                 break
-            time.sleep(3)
+            time.sleep(5)
 
 
 def check_order_is_done():
@@ -204,8 +208,9 @@ def render_text(line, size=50, color=(255, 255, 255)):
 
 
 class RemotePlayer(pygame.sprite.Sprite):
-    def __init__(self, id, x, y, role, *groups):
+    def __init__(self, id, x, y, role, name, *groups):
         self.id = id
+        self.name = name
         super().__init__(groups)
         self.role = role
         self.scanner_is_on = False
@@ -215,6 +220,7 @@ class RemotePlayer(pygame.sprite.Sprite):
         self.image = self.frames['right'][0]
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x, y
+        self.mask = pygame.mask.from_surface(self.image)
 
         self.is_moving = False
         self.clock = pygame.time.Clock()
@@ -272,6 +278,11 @@ class RemotePlayer(pygame.sprite.Sprite):
             role = 'citizen'
         self.frames['left'].append(
             pygame.transform.flip(load_image(f'data/characters/{role}_right_5.png', size=(80, 110)), 1, 0))
+        try:
+            self.frames['left'][0].blit(render_text(self.name, 17, (255, 0, 0)), (0, 0))
+        except Exception as e:
+            print(e)
+
         if self.scanner_is_on:
             if self.infected == 1:
                 self.frames['left'][0].blit(load_image('data/characters/not_stated.png', size=(20, 20)), (60, 0))
@@ -282,6 +293,10 @@ class RemotePlayer(pygame.sprite.Sprite):
 
         self.frames['right'].append(
             load_image(f'data/characters/{role}_right_5.png', size=(80, 110)))
+        try:
+            self.frames['right'][0].blit(render_text(self.name, 17, (255, 0, 0)), (0, 0))
+        except Exception as e:
+            print(e)
         if self.scanner_is_on:
             if self.infected == 1:
                 self.frames['right'][0].blit(load_image('data/characters/not_stated.png', size=(20, 20)), (60, 0))
@@ -353,6 +368,8 @@ class Player(pygame.sprite.Sprite):
             self.infection_rate = 2000
 
         self.order = None
+        self.id = None
+        self.name = None
 
     def get_objects(self):
         return self.objects
@@ -2211,6 +2228,7 @@ backgr.rect = backgr.image.get_rect()
 # role = 'volunteer'
 player = Player(3850, 1050, role, player_group)
 player.id = internal_id
+player.name = player_name
 terrain = Terrain(0, 0, all_sprites, terrain_group)
 bank = Bank(350, 875, all_sprites, building_group)
 home = MainHouse(3710, 700, building_group, all_sprites)
@@ -2282,20 +2300,26 @@ try:
             if player.role == 'policeman':
                 for i in remote_players:
                     try:
-                        if pygame.sprite.collide_mask(i, player) and i.role == 'citizen':
+                        if pygame.sprite.collide_mask(i, player):
                             arrest_rate += 1
+                            print(arrest_rate)
                             if arrest_rate >= 60:
                                 caught_ids.append(i.id)
-                                if i.infected == 2:
-                                    score -= 100
-                                    if score < 0:
-                                        score = 0
-                                elif i.infected == 3:
+                                if i.infected == 3:
                                     score += 100
+                                elif i.role == 'policeman':
+                                    score -= 120
+                                elif i.role == 'volunteer':
+                                    score -= 100
+                                elif i.infected == 2:
+                                    score -= 100
+                                elif i.infected == 1:
+                                    score -= 25
                                 arrest_rate = 0
                     except AttributeError:
-                        del player_params[i.id]
-                        i.kill()
+                        if i.id in player_params.keys():
+                            del player_params[i.id]
+                            i.kill()
                     except Exception as e:
                         print(e)
 

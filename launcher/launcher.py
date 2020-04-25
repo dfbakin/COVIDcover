@@ -238,7 +238,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
         with open('launch.bat', mode='w', encoding='utf-8') as f:
             f.write('cd multi_build\n')
-            f.write(f"multi_main {role} {self.user['score']} {data['ip']} {data['port']} {self.user['token']}")
+            f.write(f"multi_main {role} {self.user['score']} {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
 
         try:
             self.hide()

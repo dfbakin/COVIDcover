@@ -34,7 +34,6 @@ put_parser.add_argument('goods', required=False)
 def abort_if_order_not_found(ord_id):
     session = create_session()
     order = session.query(Order).filter(Order.token == ord_id).first()
-    print(order)
     if not order:
         abort(404, message=f"Order {ord_id} not found")
 

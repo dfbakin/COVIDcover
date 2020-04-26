@@ -6,7 +6,7 @@ from random import shuffle
 
 bp = Blueprint('game_api', __name__)
 # hash
-HASH = 'Сюда хэш'
+HASH = '9122f5fa6deb50a16835268a2fb1875d'
 
 
 def jlst(lst):
@@ -71,7 +71,7 @@ def join():
     server.players = edit_lst(server.players, user.id, True)
     server.players_n = len(server.players.split())
 
-    if not user.role.strip():
+    if not user.role:
         roles = server.roles.split()
         shuffle(roles)
         role = roles.pop()
@@ -83,7 +83,7 @@ def join():
     session.commit()
 
     ip, port = server.ip.split(':')
-    return jsonify({'success': True, 'role': role, 'ip': ip, 'port': port})
+    return jsonify({'success': True, 'role': user.role, 'ip': ip, 'port': port})
 
 
 @bp.route('/game_api/quit')

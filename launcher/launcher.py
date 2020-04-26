@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLineEdit
 from PyQt5 import QtCore, QtGui, QtWidgets
-import json, os, sys, shutil, webbrowser, requests
+import json, os, sys, shutil, webbrowser, requests, hashlib
 from zipfile import ZipFile
 
 stop = False
@@ -155,6 +155,35 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
         self.update_game()
 
+    def check_hash(self, script_path='.'):
+        lst = []
+        hash = hashlib.md5()
+        for path, dirs, files in os.walk(script_path):
+            for file in files:
+                if 'launcher' not in file:
+                    with open(os.path.join(path, file), mode='rb') as f:
+                        hash.update(f.read())
+                    lst.append(hash.digest())
+        hash.update(b''.join(lst))
+        output = hash.hexdigest()
+        try:
+            response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/check_hash/{output}')
+        except requests.exceptions.ConnectionError:
+            self.show_error('Отсутствует интернет. Запустите программу позже.')
+            return False
+        except requests.exceptions.Timeout:
+            self.show_error('Видимо, у наш сервер сейчас отдыхает ;)')
+            return False
+        except Exception:
+            self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
+            return False
+        if response.status_code != 200:
+            self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
+            return False
+        if response:
+            return response.json()['success']
+        return False
+
     def auth(self):
         email = self.lineEdit.text()
         password = self.lineEdit_2.text()
@@ -202,6 +231,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             with open('versions.json', mode='r', encoding='utf-8') as f:
                 data = json.load(f)
                 update_needed = data['last_version'] != versions_list['last_version']
+        if not update_needed:
+            update_needed = not self.check_hash()
         if update_needed:
             for i in os.listdir():
                 if i == 'launcher.exe':
@@ -229,6 +260,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def launch_multi(self):
         if not self.user:
+            return
+        if not self.check_hash():
+            self.show_error('Файлы игры повреждены. Попробуйте позже.')
             return
         try:
             response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/join',
@@ -270,9 +304,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.hide()
             os.system('launch')
             self.show()
-            with open('multi_build/score.dat', mode='r', encoding='utf-8') as file:
+            with open('score.dat', mode='r', encoding='utf-8') as file:
                 score, error_code = file.read().strip().split()
                 error_code = int(error_code)
+            os.remove('score.dat')
             if not score.isdigit():
                 self.show_error('Ошибка клиента игры. Напишите нам.')
             if error_code == -5:
@@ -285,13 +320,22 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + str(e) + '\n\n')
         finally:
             self.show()
-            if not score or not score.isdigit() or len(score) > 11 or error_code != 0:
+            try:
+                if not score or not score.isdigit() or len(score) > 6 or error_code != 0:
+                    requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
+                                 params={'user_token': self.user['token'], 'score': int(self.user['score'])})
+                else:
+                    requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
+                                       params={'user_token': self.user['token'], 'score': int(score)})
+            except Exception as e:
+                self.plainTextEdit.appendPlainText(str(e) + '\n')
                 requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
-                             params={'user_token': self.user['token'], 'score': int(self.user['score'])})
-            else:
-                print(requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
-                                   params={'user_token': self.user['token'], 'score': int(score)}).content)
-            os.remove('launch.bat')
+                                   params={'user_token': self.user['token'], 'score': 0})
+            finally:
+                if os.path.isfile('launch.bat'):
+                    os.remove('launch.bat')
+                if os.path.isfile('score.dat'):
+                    os.remove('score.dat')
 
     def launch_single(self):
         with open('launch.bat', mode='w', encoding='utf-8') as f:
@@ -305,7 +349,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + str(e) + '\n\n')
         finally:
             self.show()
-            os.remove('launch.bat')
+            if os.path.isfile('launch.bat'):
+                os.remove('launch.bat')
 
     def show_error(self, error):
         self.label_4.setText(error)

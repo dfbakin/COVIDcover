@@ -1,6 +1,6 @@
 from cx_Freeze import setup, Executable
 
-executables = [Executable('multi_main.py')]
+executables = [Executable('main.py')]
 
 setup(name='COVIDcover',
       version='1.0.0',

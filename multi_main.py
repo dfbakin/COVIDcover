@@ -15,10 +15,11 @@ def exit_game():
 
 
 error_code = 0
-'''if len(sys.argv) != 6:
+score = None
+if len(sys.argv) != 7:
     error_code = -7
     exit_game()
-args = sys.argv[1:]'''
+args = sys.argv[1:]
 
 pygame.init()
 
@@ -67,17 +68,18 @@ arrested = False
 orders = None
 
 # internal_id = input('Enter internal id:   ')
-'''role, score, host, port, internal_id, player_name = args
+role, score, host, port, internal_id, player_name = args
 score = int(score)
-port = int(port)'''
+port = int(port)
 api_port = 8080
-role = 'volunteer'
+
+'''role = 'volunteer'
 score = 0
 host, port = '127.0.0.1', 9000
 player_name = '123456'
 # internal_id = '9f8e6b0c-62c7-4b09-b6d3-f923f3bf9860'
 # internal_id = '0c4b8f94-b0d1-4731-8566-0bfa4a989610'
-internal_id = '2a288d46-b3bf-4669-a938-dbaa6e8d9126'
+internal_id = '2a288d46-b3bf-4669-a938-dbaa6e8d9126'''
 # ip = socket.gethostbyname('0.tcp.ngrok.io')
 # host = ip
 # host = '84.201.168.123'

@@ -5,7 +5,7 @@ import requests
 
 def check_hash(script_path, ip_and_port):
     lst = []
-    hash = hashlib.sha224()
+    hash = hashlib.md5()
     for path, dirs, files in os.walk(script_path):
         for file in files:
             if 'launcher' not in file:

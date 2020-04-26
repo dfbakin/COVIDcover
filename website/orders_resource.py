@@ -8,16 +8,9 @@ def check_token(token):
     session = create_session()
     user = session.query(User).filter(User.token == token).first()
     if not user:
-        abort(406)
+        abort(404)
     if not user.privilege_obj.admin:
         abort(404)
-
-
-def check_not_admin_token(token):
-    session = create_session()
-    user = session.query(User).filter(User.token == token).first()
-    if not user:
-        abort(406)
 
 
 parser = reqparse.RequestParser()
@@ -33,17 +26,17 @@ put_parser.add_argument('goods', required=False)
 
 def abort_if_order_not_found(ord_id):
     session = create_session()
-    order = session.query(Order).filter(Order.token == ord_id).first()
+    order = session.query(Order).get(ord_id)
     if not order:
         abort(404, message=f"Order {ord_id} not found")
 
 
 class OrdersResource(Resource):
     def get(self, ord_id, token):
-        check_not_admin_token(token)
+        check_token(token)
         abort_if_order_not_found(ord_id)
         session = create_session()
-        order = session.query(Order).filter(Order.token == ord_id).first()
+        order = session.query(Order).get(ord_id)
         return jsonify(
             order.to_dict(only=('author', 'goods')))
 

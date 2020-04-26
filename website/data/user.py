@@ -18,7 +18,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     order = relation('Order', back_populates='user')
     privilege_obj = relation('Privilege')
     score = Column(Integer, default=0, unique=False)
-    role = Column(String, unique=False, nullable=True)
+    role = Column(String, unique=False, default='', nullable=True)
     # issue_rel = relation('Issue', back_populates='creator_obj')
 
     def set_password(self, password):

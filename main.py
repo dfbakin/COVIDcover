@@ -5,7 +5,7 @@ import sys
 pygame.init()
 
 size = width, height = 1280, 720
-screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size)  # , pygame.FULLSCREEN)
 
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -37,7 +37,7 @@ product_buttons = pygame.sprite.Group()
 building_collide_step = 0
 near_building_message = None
 near_building = None
-gravity = 1
+gravity = 0.5
 menu_is_on = False
 music_on = True
 effects_on = True
@@ -61,8 +61,7 @@ sounds = {'apple': pygame.mixer.Sound('data/sounds/apple_crunch.wav'),
           'close_door': pygame.mixer.Sound('data/sounds/close_door.wav'),
           'drink_gulp': pygame.mixer.Sound('data/sounds/drink_gulp.wav'),
           'open_door': pygame.mixer.Sound('data/sounds/open_door.wav'),
-          }
-
+          'step': pygame.mixer.Sound('data/sounds/step.wav')}
 
 player_params = dict()
 products = dict()
@@ -112,8 +111,8 @@ def render_text(line, size=50, color=(255, 255, 255)):
 
 class Player(pygame.sprite.Sprite):
     speed = 5
-    jump_power = 17
-    infection_rate = 1200
+    jump_power = 10
+    infection_rate = 1100
 
     def __init__(self, x, y, *groups):
         super().__init__(groups)
@@ -152,6 +151,7 @@ class Player(pygame.sprite.Sprite):
         elif level == 3:
             self.card_money = 0
             self.cash = 3000
+            self.infection_rate = 750
 
         self.objects = []
         pin = str(randint(1000, 9999))
@@ -216,7 +216,7 @@ class Player(pygame.sprite.Sprite):
         if check_collisions(self):
             self.rect.y -= 10
         if check_collisions(self):
-            self.rect.y -= 15
+            self.rect.y -= 11
         if check_collisions(self):
             self.rect.x = self.prev_coords[0]
             self.rect.y = self.prev_coords[1]
@@ -231,7 +231,7 @@ class Player(pygame.sprite.Sprite):
         if check_collisions(self):
             self.rect.y -= 10
         if check_collisions(self):
-            self.rect.y -= 15
+            self.rect.y -= 11
         if check_collisions(self):
             self.rect.x = self.prev_coords[0]
             self.rect.y = self.prev_coords[1]
@@ -240,8 +240,8 @@ class Player(pygame.sprite.Sprite):
         self.prev_coords = self.get_coords()
         self.rect.y -= value
         if check_collisions(self):
-            if self.grav < -20:
-                self.health -= abs(self.grav) - 10
+            if self.grav < -13:
+                self.health -= abs(self.grav) - 5
             self.rect.x = self.prev_coords[0]
             self.rect.y = self.prev_coords[1]
             self.grav = -5
@@ -258,14 +258,14 @@ class Player(pygame.sprite.Sprite):
         font = pygame.font.Font(None, 30)
         canvas.blit(
             font.render(
-                f'Здоровье: {self.health}%   Риск заражения: {self.hazard_risk}%    Наличные: {self.cash} Р     На карте: {self.card_money} Р',
+                f'Здоровье: {int(self.health)}%   Риск заражения: {self.hazard_risk}%    Наличные: {self.cash} Р     На карте: {self.card_money} Р',
                 1, color), (0, 0))
         return canvas
 
     def update_params(self):
         self.danger_level = 1 - (100 - self.health) / 100
         self.hazard_timer += self.clock.tick()
-        if self.hazard_timer > Player.infection_rate * self.danger_level:
+        if self.hazard_timer > self.infection_rate * self.danger_level:
             self.hazard_risk += 1
             self.hazard_timer = 0
 
@@ -280,7 +280,7 @@ class Player(pygame.sprite.Sprite):
             text = render_text('Вы мертвы!!!')
             screen.blit(text, (width // 2 - text.get_width() // 2, height // 2))
             pygame.display.flip()
-            for i in range(2):
+            for i in range(5):
                 self.clock.tick(1)
             global level
             level = None
@@ -290,6 +290,8 @@ class Player(pygame.sprite.Sprite):
             self.image_num += 1
             if self.image_num >= len(self.frames['right']) * 6:
                 self.image_num = 0
+                # if effects_on:
+                # sounds['step'].play()
             self.image = self.frames[self.side][self.image_num // 6]
         else:
             self.image = self.frames[self.side][4]
@@ -315,7 +317,7 @@ class Terrain(pygame.sprite.Sprite):
 class Bank(pygame.sprite.Sprite):
     def __init__(self, x, y, *groups):
         super().__init__(groups)
-        self.image = load_image('data/buildings/bank.png', size=(250, 150))
+        self.image = load_image('data/buildings/bank.png', size=(300, 250))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x, y
         self.mask = pygame.mask.from_surface(self.image)
@@ -1072,7 +1074,7 @@ class Product(pygame.sprite.Sprite):
             player.health += 10
             if player.health > 100:
                 player.health = 100
-        if self.name == 'Яблоко':
+        if self.name == 'Яблоко' and effects_on:
             sounds['apple'].play()
         self.is_used = True
         return True
@@ -1088,6 +1090,8 @@ class Equipment:
     def enter(self):
         def reset():
             product_buttons.empty()
+            Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
+                   100, 50, images['exit_sign'], lambda: False, 'exit', product_buttons)
             for i in range(Equipment.table_height):
                 for j in range(Equipment.table_width):
                     index = i * Equipment.table_width + j
@@ -1099,8 +1103,6 @@ class Equipment:
 
         running = True
 
-        Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
-               100, 50, images['exit_sign'], lambda: False, 'exit', product_buttons)
         reset()
         info_display = None
         use_btn = None
@@ -1297,6 +1299,7 @@ def menu(pause=False):
     pos = (0, 0)
     if not level:
         stop_speeches()
+        speeches['intro'].play()
         canvas = pygame.Surface((200, 100))
         canvas.fill((181, 109, 2))
         text = render_text('Уровень 1')
@@ -1345,7 +1348,6 @@ def menu(pause=False):
                         canvas.get_height() // 2 - text.get_height() // 2))
         Button(width // 2 - delt_width, height // 4, 200, 100, canvas, start, None, button_group)
 
-    speeches['intro'].play()
     canvas = pygame.Surface((200, 100))
     canvas.fill((181, 109, 2))
     text = render_text('Настройки')
@@ -1421,13 +1423,13 @@ backgr = pygame.sprite.Sprite(background_group)
 backgr.image = load_image('data/textures/background.png', size=size)
 backgr.rect = backgr.image.get_rect()
 
-player = Player(3850, 500, player_group)
+player = Player(3850, 480, player_group)
 terrain = Terrain(0, 0, all_sprites, terrain_group)
-bank = Bank(350, 350, all_sprites, building_group)
+bank = Bank(350, 300, all_sprites, building_group)
 home = MainHouse(3710, 125, building_group, all_sprites)
 pharmacy = Pharmacy(5050, 100, building_group, all_sprites)
 shop = Shop(5750, 80, building_group, all_sprites)
-second_shop = SecondShop(6000, 120, building_group, all_sprites)
+second_shop = SecondShop(6450, 165, building_group, all_sprites)
 
 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
 

@@ -8,6 +8,19 @@ from uuid import uuid4
 bp = Blueprint('admin_panel', __name__)
 
 
+def jlst(lst):
+    return ' ' + ' '.join(lst) + ' '
+
+
+def edit_lst(param, element, way):
+    params = param.split()
+    if way:
+        params.append(str(element))
+    elif str(element) in params:
+        params.remove(str(element))
+    return jlst(params)
+
+
 @bp.route('/admin')
 def admin_servers():
     if not current_user.is_authenticated or not current_user.privilege_obj.admin:
@@ -27,10 +40,43 @@ def switch_server():
     server = session.query(Server).filter(Server.token == request.args['server']).first()
     if not server:
         abort(404)
+    if server.running:
+        for user in server.players.split():
+            user_obj = session.query(User).get(int(user))
+            if user_obj.role:
+                server.roles = edit_lst(server.roles, user_obj.role, False)
+            user_obj.role = ''
+            session.merge(user_obj)
+            session.merge(server)
+
+        server.players = ''
+        server.players_n = 0
     server.running = not server.running
     session.merge(server)
     session.commit()
     return redirect('/admin')
+
+
+@bp.route('/admin/users/disconnect')
+def disconnect():
+    if not current_user.is_authenticated or not current_user.privilege_obj.admin:
+        abort(404)
+    if 'user' not in request.args:
+        abort(404)
+    session = create_session()
+    user = session.query(User).filter(User.token == request.args['user']).first()
+    if not user:
+        abort(404)
+    server = session.query(Server).filter(Server.players.like(f'%{user.id}%')).first()
+    if server:
+        if user.role:
+            server.roles = edit_lst(server.roles, user.role, False)
+            user.role = ''
+            session.merge(user)
+        server.players = edit_lst(server.players, user.id, False)
+        server.players_n = server.players_n - 1
+        session.merge(server)
+    return redirect('/admin/users')
 
 
 @bp.route('/admin/delete')
@@ -60,29 +106,24 @@ def edit_server():
         abort(404)
     form = ServerForm()
     if form.validate_on_submit():
-        server.ip = form.ip.data
-        server.limit = form.limit.data
-        server.players = form.players.data
-        server.players_n = form.players_n.data
+        if form.ip.data:
+            server.ip = form.ip.data
+        if form.limit.data:
+            server.limit = form.limit.data
+        if form.players.data:
+            server.players = form.players.data
+            server.players_n = len(form.players.data.split())
         if form.token.data:
             server.token = form.token.data
-        else:
+        elif form.regen.data:
             server.token = str(uuid4())
-        server.orders = form.orders.data
-        server.roles = form.roles.data
-        server.running = form.running.data
+        if form.orders.data:
+            server.orders = form.orders.data
+        if form.roles.data:
+            server.roles = form.roles.data
         session.merge(server)
         session.commit()
         return redirect('/admin')
-    else:
-        form.ip.data = server.ip
-        form.limit.data = server.limit
-        form.players.data = server.players
-        form.players_n.data = server.players_n
-        form.token.data = server.token
-        form.orders.data = server.orders
-        form.roles.data = server.roles
-        form.running.data = server.running
     return render_template('ad_edit_servers.html', title='Изменить сервер', form=form)
 
 
@@ -96,14 +137,13 @@ def add_server():
         server.ip = form.ip.data
         server.limit = form.limit.data
         server.players = form.players.data
-        server.players_n = form.players_n.data
+        server.players_n = len(form.players.data.split())
         if form.token.data:
             server.token = form.token.data
-        else:
+        elif form.regen.data:
             server.token = str(uuid4())
         server.orders = form.orders.data
         server.roles = form.roles.data
-        server.running = form.running.data
         session = create_session()
         session.add(server)
         session.commit()
@@ -132,9 +172,8 @@ def add_user():
         user.set_password(form.password.data)
         if form.token.data:
             user.token = form.token.data
-        else:
+        elif form.regen.data:
             user.token = str(uuid4())
-        user.token = form.token.data
         user.privilege = form.privilege.data
         user.score = form.score.data
         user.role = form.role.data
@@ -168,28 +207,25 @@ def edit_user():
     user = session.query(User).filter(User.token == request.args['user']).first()
     form = UserForm()
     if form.validate_on_submit():
-        user.email = form.email.data
-        user.username = form.username.data
+        if form.email.data:
+            user.email = form.email.data
+        if form.username.data:
+            user.username = form.username.data
         if form.password.data:
             user.set_password(form.password.data)
         if form.token.data:
             user.token = form.token.data
-        else:
+        elif form.regen.data:
             user.token = str(uuid4())
-        user.privilege = form.privilege.data
-        user.score = form.score.data
-        user.role = form.role.data
+        if form.privilege.data:
+            user.privilege = form.privilege.data
+        if form.score.data:
+            user.score = form.score.data
+        if form.role.data:
+            user.role = form.role.data
         session.merge(user)
         session.commit()
         return redirect('/admin/users')
-    else:
-        form.email.data = user.email
-        form.username.data = user.username
-        form.password.data = ''
-        form.token.data = user.token
-        form.privilege.data = str(user.privilege)
-        form.score.data = user.score
-        form.role.data = user.role
     return render_template('ad_edit_users.html', form=form, title='Изменить пользователя')
 
 
@@ -213,7 +249,7 @@ def add_order():
         order.goods = form.goods.data
         if form.token.data:
             order.token = form.token.data
-        else:
+        elif form.regen.data:
             order.token = str(uuid4())
         session = create_session()
         session.add(order)
@@ -245,17 +281,15 @@ def edit_order():
     order = session.query(Order).filter(Order.token == request.args['order']).first()
     form = OrderForm()
     if form.validate_on_submit():
-        order.author = form.author.data
-        order.goods = form.goods.data
+        if form.author.data:
+            order.author = form.author.data
+        if form.goods.data:
+            order.goods = form.goods.data
         if form.token.data:
             order.token = form.token.data
-        else:
+        elif form.regen.data:
             order.token = str(uuid4())
         session.merge(order)
         session.commit()
         return redirect('/admin/orders')
-    else:
-        form.author.data = order.author
-        form.goods.goods = order.goods
-        form.token.data = order.token
     return render_template('ad_edit_orders.html', form=form, title='Изменить заказ')

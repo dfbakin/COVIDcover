@@ -14,7 +14,9 @@ def exit_game():
     sys.exit()
 
 
+error_code = 0
 '''if len(sys.argv) != 6:
+    error_code = -7
     exit_game()
 args = sys.argv[1:]'''
 
@@ -69,13 +71,12 @@ orders = None
 score = int(score)
 port = int(port)'''
 api_port = 8080
-error_code = 0
 role = 'volunteer'
 score = 0
 host, port = '127.0.0.1', 9000
 player_name = '123456'
-#internal_id = '9f8e6b0c-62c7-4b09-b6d3-f923f3bf9860'
-#internal_id = '0c4b8f94-b0d1-4731-8566-0bfa4a989610'
+# internal_id = '9f8e6b0c-62c7-4b09-b6d3-f923f3bf9860'
+# internal_id = '0c4b8f94-b0d1-4731-8566-0bfa4a989610'
 internal_id = '2a288d46-b3bf-4669-a938-dbaa6e8d9126'
 # ip = socket.gethostbyname('0.tcp.ngrok.io')
 # host = ip
@@ -93,6 +94,15 @@ speeches = {'intro': pygame.mixer.Sound('data/speech/intro.wav'),
 music = {'main': pygame.mixer.Sound('data/music/main_music.ogg')}
 # music['main'].play(-1)
 
+
+sounds = {'apple': pygame.mixer.Sound('data/sounds/apple_crunch.wav'),
+          'atm_button': pygame.mixer.Sound('data/sounds/atm_button.wav'),
+          'bottle_open': pygame.mixer.Sound('data/sounds/bottle_open.wav'),
+          'cashbox': pygame.mixer.Sound('data/sounds/cashbox.wav'),
+          'close_door': pygame.mixer.Sound('data/sounds/close_door.wav'),
+          'drink_gulp': pygame.mixer.Sound('data/sounds/drink_gulp.wav'),
+          'open_door': pygame.mixer.Sound('data/sounds/open_door.wav')}
+
 player_params = dict()
 products = dict()
 
@@ -107,7 +117,9 @@ def operate_player_data():
             except ConnectionRefusedError:
                 con.close()
 
-            con.send((player.id + r'\t' + player_name + r'\t' + player.get_pos_info() + r'\t' + '%'.join(caught_ids)).encode('utf-8'))
+            con.send(
+                (player.id + r'\t' + player_name + r'\t' + player.get_pos_info() + r'\t' + '%'.join(caught_ids)).encode(
+                    'utf-8'))
 
             end = False
             while not end:
@@ -153,7 +165,8 @@ def check_order_is_done():
     global player, error_code
     if player.order:
         try:
-            response = requests.get(f'http://{host}:{api_port}/api/orders/{player.order}/token/{internal_id}', timeout=0.25)
+            response = requests.get(f'http://{host}:{api_port}/api/orders/{player.order}/token/{internal_id}',
+                                    timeout=0.25)
         except requests.exceptions.Timeout:
             error_code = -6
             exit_game()
@@ -1928,6 +1941,8 @@ class Product(pygame.sprite.Sprite):
             player.health += 10
             if player.health > 100:
                 player.health = 100
+        if self.name == 'Яблоко':
+            sounds['apple'].play()
         self.is_used = True
         return True
 
@@ -2226,7 +2241,7 @@ backgr.rect = backgr.image.get_rect()
 
 # player = Player(3850, 1050, input('enter role:     '), player_group)
 # role = 'volunteer'
-player = Player(3850, 1050, role, player_group)
+player = Player(3850, 1000, role, player_group)
 player.id = internal_id
 player.name = player_name
 terrain = Terrain(0, 0, all_sprites, terrain_group)
@@ -2293,7 +2308,11 @@ try:
         if data[101]:
             if near_building:
                 player.inside = True
+                if effects_on:
+                    sounds['open_door'].play()
                 near_building.enter()
+                if effects_on:
+                    sounds['close_door'].play()
                 player.inside = False
                 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
         if data[51]:

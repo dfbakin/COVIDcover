@@ -5,16 +5,16 @@
     {{ form.hidden_tag() }}
     <p>
         {{ form.author.label }}<br>
-        {{ form.author(class="form-control") }}<br>
+        {{ form.author(class="form-control", placeholder="без изменений") }}<br>
         {% for error in form.author.errors %}
             <p class="alert alert-danger" role="alert">
                 {{ error }}
             </p>
         {% endfor %}
     </p>
-    <p>
+    <p> {{ form.regen}}{{ form.regen.label }}
         {{ form.token.label }}<br>
-        {{ form.token(class="form-control") }}<br>
+        {{ form.token(class="form-control", placeholder="без изменений") }}<br>
         {% for error in form.token.errors %}
             <p class="alert alert-danger" role="alert">
                 {{ error }}
@@ -23,7 +23,7 @@
     </p>
     <p>
         {{ form.goods.label }}<br>
-        {{ form.goods(class="form-control") }}<br>
+        {{ form.goods(class="form-control", placeholder="без изменений") }}<br>
         {% for error in form.goods.errors %}
             <p class="alert alert-danger" role="alert">
                 {{ error }}

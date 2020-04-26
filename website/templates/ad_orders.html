@@ -19,6 +19,8 @@
             <tr>
                 <th scope="col">ID</th>
                 <th scope="col">Имя создателя/ID</th>
+                <th scope="col">Токен</th>
+                <th scope="col">Товары</th>
                 <th scope="col">Изменить</th>
                 <th scope="col">Удалить</th>
             </tr>
@@ -28,6 +30,8 @@
         <tr>
             <th scope="row">{{ order.id }}</th>
             <td>{{ order.user.username }}/{{ order.author }}</td>
+            <td>{{ order.token }}</td>
+            <td>{{ order.goods }}</td>
             <td>
                 <a class="btn btn-primary" href="/admin/orders/edit?order={{ order.token }}">Изменить</a>
             </td>

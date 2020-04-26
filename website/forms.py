@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, BooleanField, SelectField, IntegerField
-from wtforms.validators import Email, DataRequired
+from wtforms.validators import Email, DataRequired, Optional
 
 
 class LoginForm(FlaskForm):
@@ -19,32 +19,33 @@ class RegisterForm(FlaskForm):
 
 
 class ServerForm(FlaskForm):
-    ip = StringField('IP:Порт', validators=[DataRequired()])
-    limit = IntegerField('Лимит игроков', default=5)
-    players = StringField('ID игроков (через пробелы)', default='')
-    players_n = IntegerField('Количество игроков сейчас', default=0)
-    token = StringField('Токен (оставьте пустым чтобы сгенерировать новый)', default='')
-    orders = StringField('ID заказов (через пробел)', default='')
-    roles = StringField('Роли (через пробел)', default='')
-    running = BooleanField('Работает', default=True)
+    ip = StringField('IP:Порт')
+    limit = IntegerField('Лимит игроков', validators=[Optional()])
+    players = StringField('ID игроков (через пробелы)')
+    regen = BooleanField('Сгенерировать')
+    token = StringField('Токен')
+    orders = StringField('ID заказов')
+    roles = StringField('Роли (через пробел)')
     submit = SubmitField('Изменить')
 
 
 class UserForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    username = StringField('Имя пользователя', validators=[DataRequired()])
+    email = StringField('Email')
+    username = StringField('Имя пользователя')
     password = StringField('Пароль (оставте пустым чтобы не изменился)')
-    token = StringField('Токен (оставьте пустым чтобы сгенерировать новый)', default='')
+    regen = BooleanField('Сгенерировать')
+    token = StringField('Токен')
     privilege = SelectField('Привелегии', choices=(('1', 'Админ'), ('2', 'Пользователь'), ('3', 'Забаненный')), default=2)
-    score = IntegerField('Количество очков', default=0)
-    role = StringField('Роль сейчас', default='')
+    score = IntegerField('Количество очков', validators=[Optional()])
+    role = StringField('Роль сейчас')
     submit = SubmitField('Изменить')
 
 
 class OrderForm(FlaskForm):
-    author = IntegerField('ID Создателя', validators=[DataRequired()])
-    token = StringField('Токен (оставьте пустым чтобы сгенерировать новый)', default='')
-    goods = StringField('Товары (через пробелы)', default='')
+    author = IntegerField('ID Создателя', validators=[Optional()])
+    regen = BooleanField('Сгенерировать')
+    token = StringField('Токен (оставьте пустым чтобы сгенерировать новый)')
+    goods = StringField('Товары (через пробелы)')
     submit = SubmitField('Изменить')
 
 

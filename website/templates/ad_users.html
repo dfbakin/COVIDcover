@@ -19,6 +19,12 @@
             <tr>
                 <th scope="col">ID</th>
                 <th scope="col">Имя пользователя</th>
+                <th scope="col">Email</th>
+                <th scope="col">Токен</th>
+                <th scope="col">Привелегия</th>
+                <th scope="col">Очки</th>
+                <th scope="col">Роль</th>
+                <th scope="col">Отключить</th>
                 <th scope="col">Изменить</th>
                 <th scope="col">Удалить</th>
             </tr>
@@ -28,6 +34,14 @@
         <tr>
             <th scope="row">{{ user.id }}</th>
             <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.token }}</td>
+            <td>{{ user.privilege_obj.name }}</td>
+            <td>{{ user.score }}</td>
+            <td>{{ user.role }}</td>
+            <td>
+                <a class="btn btn-primary" href="/admin/users/disconnect?user={{ user.token }}">Отключить</a>
+            </td>
             <td>
                 <a class="btn btn-primary" href="/admin/users/edit?user={{ user.token }}">Изменить</a>
             </td>

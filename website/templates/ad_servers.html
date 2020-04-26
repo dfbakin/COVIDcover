@@ -19,6 +19,9 @@
                 <th scope="col">ID</th>
                 <th scope="col">IP:Port</th>
                 <th scope="col">Игроки</th>
+                <th scope="col">Токен</th>
+                <th scope="col">Заказы</th>
+                <th scope="col">Роли</th>
                 <th scope="col">Включить/Выключить</th>
                 <th scope="col">Изменить</th>
                 <th scope="col">Удалить</th>
@@ -30,6 +33,9 @@
             <th scope="row">{{ server.id }}</th>
             <td>{{ server.ip }}</td>
             <td>{{ server.players_n }}/{{ server.limit }}</td>
+            <td>{{ server.token }}</td>
+            <td>{{ server.orders }}</td>
+            <td>{{ server.roles }}</td>
             <td>
                 <a href="/admin/switch?server={{ server.token }}" class="btn btn-primary">
                   {% if server.running %}

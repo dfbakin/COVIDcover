@@ -5,6 +5,8 @@ from data.__all_models import User, Server, Order
 from random import shuffle
 
 bp = Blueprint('game_api', __name__)
+# hash
+HASH = 'Сюда хэш'
 
 
 def jlst(lst):
@@ -69,11 +71,12 @@ def join():
     server.players = edit_lst(server.players, user.id, True)
     server.players_n = len(server.players.split())
 
-    roles = server.roles.split()
-    shuffle(roles)
-    role = roles.pop()
-    user.role = role
-    server.roles = jlst(roles)
+    if not user.role.strip():
+        roles = server.roles.split()
+        shuffle(roles)
+        role = roles.pop()
+        user.role = role
+        server.roles = jlst(roles)
 
     session.merge(user)
     session.merge(server)
@@ -121,7 +124,6 @@ def create_order():
     order = Order(author=user.id, goods=jlst(goods))
     session.add(order)
     session.commit()
-
     server = session.query(Server).filter(Server.players.like(f'% {str(user.id)} %')).first()
     if not server:
         abort(406)
@@ -145,7 +147,8 @@ def get_orders():
     orders_ids = server.orders.split()
     orders = [session.query(Order).get(int(i)) for i in orders_ids]
     return jsonify(
-        {'success': True, 'data': [{'token': i.token, 'nickname': i.user.username, 'goods': i.goods.split()} for i in orders]})
+        {'success': True,
+         'data': [{'token': i.token, 'nickname': i.user.username, 'goods': i.goods.split()} for i in orders]})
 
 
 @bp.route('/game_api/delete_order')
@@ -162,3 +165,8 @@ def delete_order():
     session.delete(order)
     session.commit()
     return jsonify({'success': True})
+
+
+@bp.route('/game_api/check_hash/<hsh>')
+def check_hash(hsh):
+    return jsonify({'success': hsh == HASH})

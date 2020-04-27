@@ -208,7 +208,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         except Exception:
             self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
             return
-        if response.status_code != 500:
+        if response.status_code == 500:
             self.show_error('Ошибка на сервере. Мы уже работаем.')
             return False
         data = response.json()
@@ -235,7 +235,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             except Exception:
                 self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
                 return
-            if response.status_code != 500:
+            if response.status_code == 500:
                 self.show_error('Ошибка на сервере. Мы уже работаем.')
                 return False
             versions_list = json.loads(response.content.decode('utf-8'))
@@ -269,7 +269,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 except Exception:
                     self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
                     return
-                if response.status_code != 500:
+                if response.status_code == 500:
                     self.show_error('Ошибка на сервере. Мы уже работаем.')
                     return
                 f.write(response.content)
@@ -304,7 +304,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         except Exception:
             self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
             return
-        if response.status_code != 500:
+        if response.status_code == 500:
             self.show_error('Ошибка на сервере. Мы уже работаем.')
             return
         stat = response.status_code

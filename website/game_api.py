@@ -6,7 +6,7 @@ from random import shuffle
 
 bp = Blueprint('game_api', __name__)
 # hash
-HASH = '9122f5fa6deb50a16835268a2fb1875d'
+HASH = 'd186174ba7b6ebb2e804d10e449dcd91'
 
 
 def jlst(lst):

@@ -30,7 +30,7 @@ def index():
     images[0].extend(['Об игре',
                       'COVIDCover - аркадная игра про безопазность в условиях карантина при коронавирусе, разработанная нами - школьниками'])
     images[1].extend(['Об инструментах',
-                      'Игра была полностью разработанна на языке Python при помощи библиотеки pygame. У неё есть лаунчер и даже мультиплеер! Хочешь попробовать? Тогда жми кнопку "Скачать". И прочитай правила, чтобы понять, что происходит'])
+                      'Игра была полностью разработана на языке Python при помощи библиотеки pygame. У неё есть лаунчер и даже мультиплеер! Хочешь попробовать? Тогда жми кнопку "Скачать". И прочитай правила, чтобы понять, что происходит'])
     return render_template('index.html', title='COVIDCover - Главная страница', images=images)
 
 
@@ -105,4 +105,4 @@ if __name__ == '__main__':
     api.add_resource(UsersListResource, '/api/users/token/<token>')
     api.add_resource(ServersResource, '/api/servers/<int:ser_id>/token/<token>')
     api.add_resource(ServersListResource, '/api/servers/token/<token>')
-    app.run('127.0.0.1', port='8080')
+    app.run('0.0.0.0', port='8080')

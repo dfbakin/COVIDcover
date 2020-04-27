@@ -118,9 +118,9 @@ def operate_player_data():
                 con.connect((host, port))
             except ConnectionRefusedError:
                 con.close()
-
+            caught = caught_ids.copy()
             con.send(
-                (player.id + r'\t' + player_name + r'\t' + player.get_pos_info() + r'\t' + '%'.join(caught_ids)).encode(
+                (player.id + r'\t' + player_name + r'\t' + player.get_pos_info() + r'\t' + '%'.join(caught)).encode(
                     'utf-8'))
 
             end = False
@@ -150,7 +150,7 @@ def operate_player_data():
 
 
 def clean_params():
-    global global_exit, player_params
+    global global_exit, player_params, caught_ids
     while True:
         try:
             print(player_params)
@@ -158,6 +158,7 @@ def clean_params():
                 player_params[i].kill()
             player_params = dict()
         finally:
+            caught_ids = []
             if global_exit:
                 break
             time.sleep(5)

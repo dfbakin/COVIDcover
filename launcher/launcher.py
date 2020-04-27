@@ -152,7 +152,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.label_3.setText('Войдите в учетную запись')
 
         self.user = None
-
+        self.password = None
         self.update_game()
 
     def check_hash(self, script_path='.'):
@@ -177,6 +177,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         except Exception:
             self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
             return False
+        if response.status_code == 500:
+            self.show_error('Ошибка на сервере. Мы уже работаем.')
+            return False
         if response.status_code != 200:
             self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
             return False
@@ -186,7 +189,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def auth(self):
         email = self.lineEdit.text()
-        password = self.lineEdit_2.text()
+        if not self.password:
+            self.password = self.lineEdit_2.text()
+        password = self.password
         self.lineEdit_2.setText('')
         if not email or not password:
             self.label_3.setText('Заполните все поля!')
@@ -203,7 +208,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         except Exception:
             self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
             return
-
+        if response.status_code != 500:
+            self.show_error('Ошибка на сервере. Мы уже работаем.')
+            return False
         data = response.json()
         if not data['success']:
             self.label_3.setText('Неверные данные')
@@ -211,6 +218,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.user = data.copy()
         self.pushButton_5.setVisible(True)
         self.label_3.setText(self.user['username'])
+        return True
 
     def update_game(self):
         update_needed = True
@@ -227,6 +235,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             except Exception:
                 self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
                 return
+            if response.status_code != 500:
+                self.show_error('Ошибка на сервере. Мы уже работаем.')
+                return False
             versions_list = json.loads(response.content.decode('utf-8'))
             with open('versions.json', mode='r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -247,7 +258,22 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                         return
             self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + '\n' + 'Загрузка...')
             with open('game.zip', mode='wb') as f:
-                f.write(requests.get(f'http://{MyWidget.host}:{MyWidget.port}/static/releases/game.zip').content)
+                try:
+                    response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/static/releases/game.zip')
+                except requests.exceptions.ConnectionError:
+                    self.show_error('Отсутствует интернет. Запустите программу позже.')
+                    return
+                except requests.exceptions.Timeout:
+                    self.show_error('Видимо, у наш сервер сейчас отдыхает ;)')
+                    return
+                except Exception:
+                    self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
+                    return
+                if response.status_code != 500:
+                    self.show_error('Ошибка на сервере. Мы уже работаем.')
+                    return
+                f.write(response.content)
+
             self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + '\n' + 'Распаковка файлов...')
             with ZipFile('game.zip') as myzip:
                 myzip.extractall('')
@@ -259,6 +285,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.pushButton.setVisible(True)
 
     def launch_multi(self):
+        self.show_error('Все системы функционируют нормально.')
+        self.auth()
         if not self.user:
             return
         if not self.check_hash():
@@ -275,6 +303,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             return
         except Exception:
             self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
+            return
+        if response.status_code != 500:
+            self.show_error('Ошибка на сервере. Мы уже работаем.')
             return
         stat = response.status_code
         if stat == 404:

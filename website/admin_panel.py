@@ -76,6 +76,7 @@ def disconnect():
         server.players = edit_lst(server.players, user.id, False)
         server.players_n = server.players_n - 1
         session.merge(server)
+    session.commit()
     return redirect('/admin/users')
 
 

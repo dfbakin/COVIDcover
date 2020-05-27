@@ -1,14 +1,21 @@
 import pygame
 from random import randint, random, choice, shuffle
-import socket, time, threading, requests, sys
+import socket, time, threading, requests, sys, logging, os
 
+log_filename = 'covid_cover.log'
 global_exit = False
+
+logging.basicConfig(filename=log_filename,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    level=logging.INFO)
+logging.info('game init')
 
 
 def exit_game():
     global global_exit
     global_exit = True
-    time.sleep(0.5)
+    time.sleep(0.25)
+    logging.info(f'exit code: {error_code}')
     with open('score.dat', mode='w', encoding='utf-8') as file:
         file.write(str(score) + ' ' + str(error_code))
     sys.exit()
@@ -559,6 +566,7 @@ class Bank(pygame.sprite.Sprite):
         return False
 
     def enter(self):
+        logging.info('enter Bank')
         button_group.empty()
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
         running = True
@@ -676,6 +684,7 @@ class Bank(pygame.sprite.Sprite):
                                 if btn.id == 'enter':
                                     if deposit_summ.isdigit() and player.give_money(int(deposit_summ)):
                                         player.card_money += int(deposit_summ)
+                                        logging.info('added' + str(deposit_summ) + 'successfully')
                                         mode = 'success'
                                     else:
                                         mode = 'error'
@@ -748,6 +757,8 @@ class MainHouse(pygame.sprite.Sprite):
         return False
 
     def enter(self):
+        logging.info('entered main house:  ' + player.role)
+
         def play_radio_info():
             speeches['news'].play()
             return True
@@ -866,9 +877,11 @@ class MainHouse(pygame.sprite.Sprite):
                         current_order['goods'] = ', '.join(current_order['goods'])
 
                     if mode == 'final' and current_order:
+                        logging.info('creating order...')
                         url = f'http://{host}:{api_port}/game_api/create_order'
                         try:
                             response = requests.get(url, params=current_order, timeout=1.).json()
+                            logging.info('success:' + str(current_order))
                         except requests.exceptions.ConnectionError:
                             error_code = -5
                             exit_game()
@@ -944,6 +957,7 @@ class MainHouse(pygame.sprite.Sprite):
                     button_group.empty()
                     pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, house_buttons)
                 if player.order == 'done':
+                    logging.info('order delivered')
                     screen.fill((177, 170, 142))
                     text = render_text('Заказ доставлен. Вы спасены! =)')
                     screen.blit(text, (width // 2 - text.get_width() // 2, height // 2))
@@ -1064,6 +1078,7 @@ class MainHouse(pygame.sprite.Sprite):
                                         if not aims:
                                             url = f'http://{host}:{api_port}/game_api/delete_order?user_token={player.order["token"]}'
                                             try:
+                                                logging.info(f'deleting order of user token: {player.order["token"]}')
                                                 response = requests.get(url, timeout=1.)
                                             except requests.exceptions.ConnectionError:
                                                 error_code = -5
@@ -1079,10 +1094,13 @@ class MainHouse(pygame.sprite.Sprite):
                                             player.card_money += 750
                                             score += 500
                                             mode = 'Успешно'
+                                            logging.info('order delivered successfully')
                                         else:
                                             mode = 'Неполная комплектация'
+                                            logging.info('few goods')
                                     else:
                                         mode = 'Неверный адрес'
+                                        logging.info('wrong address')
 
                                 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
                 data = pygame.key.get_pressed()
@@ -1139,12 +1157,16 @@ class Shop(pygame.sprite.Sprite):
         return False
 
     def enter(self):
+        logging.info('entered shop')
+
         def checkout():
             def buy():
                 summ = sum([i.get_price() for i in cart])
                 if player.spend_money(summ):
                     player.add_objects(*cart)
+                    logging.info('transaction success')
                     return False, True, 'success'
+                logging.info('transaction error')
                 return False, True, 'error'
 
             running = True
@@ -1255,6 +1277,7 @@ class Shop(pygame.sprite.Sprite):
         shop_buttons.empty()
         shop_group.empty()
         shop_products.empty()
+        logging.info('left shop')
 
 
 class SecondShop(pygame.sprite.Sprite):
@@ -1271,6 +1294,8 @@ class SecondShop(pygame.sprite.Sprite):
         return False
 
     def enter(self):
+        logging.info('entered second shop')
+
         def checkout():
             def buy():
                 summ = sum([i.get_price() for i in cart])
@@ -1378,6 +1403,7 @@ class SecondShop(pygame.sprite.Sprite):
         shop_buttons.empty()
         shop_group.empty()
         shop_products.empty()
+        logging.info('left second shop')
 
 
 class Pharmacy(pygame.sprite.Sprite):
@@ -1394,6 +1420,8 @@ class Pharmacy(pygame.sprite.Sprite):
         return False
 
     def enter(self):
+        logging.info('entered pharmacy')
+
         def checkout():
             def buy():
                 summ = sum([i.get_price() for i in cart])
@@ -1509,6 +1537,7 @@ class Pharmacy(pygame.sprite.Sprite):
             clock.tick(fps)
         pharm_buttons.empty()
         pharm_group.empty()
+        logging.info('left pharmacy')
 
 
 class Hospital(pygame.sprite.Sprite):
@@ -1525,6 +1554,7 @@ class Hospital(pygame.sprite.Sprite):
         return False
 
     def enter(self):
+        logging.info('entered hospital')
         global score
         button_group.empty()
         if player.role != 'citizen':
@@ -1617,8 +1647,6 @@ class Hospital(pygame.sprite.Sprite):
                                 if mode == 'error':
                                     mode = 'main'
                                     math = ''
-
-
                             elif mode == 'main' and btn.id.isdigit():
                                 current_year += btn.id
                             elif btn.id == 'enter' and mode == 'main':
@@ -1634,13 +1662,17 @@ class Hospital(pygame.sprite.Sprite):
                                 answer += btn.id
                             elif mode == 'math' and btn.id == 'enter':
                                 if right_answer == answer:
+                                    logging.info('math answer right')
                                     if random() < 0.75:
                                         player.infected = 3
                                         mode = 'infected'
+                                        logging.info('set infected')
                                     else:
                                         mode = 'ok'
                                         player.infected = 2
+                                        logging.info('set not infected')
                                 else:
+                                    logging.info('math answer wrong')
                                     mode = 'error'
 
                             pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
@@ -1700,6 +1732,7 @@ class Hospital(pygame.sprite.Sprite):
         score += 100
         bank_buttons.empty()
         button_group.empty()
+        logging.info('left hospital')
 
 
 class Volunteers(pygame.sprite.Sprite):
@@ -1716,6 +1749,7 @@ class Volunteers(pygame.sprite.Sprite):
         return False
 
     def enter(self):
+        logging.info('entered voulunteers')
         global orders, error_code
         orders = None
         button_group.empty()
@@ -1815,6 +1849,7 @@ class Volunteers(pygame.sprite.Sprite):
                 button_group.empty()
                 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
             if mode == 'main' and not orders:
+                logging.info('getting orders')
                 url = f'http://{host}:{api_port}/game_api/get_orders?user_token={internal_id}'
                 try:
                     json_response = requests.get(url, timeout=1.).json()
@@ -1827,7 +1862,9 @@ class Volunteers(pygame.sprite.Sprite):
                 if not json_response['success']:
                     error_code = -7
                     exit_game()
+                logging.info(f'response result: {json_response}')
                 orders = json_response['data'][:3]
+                logging.info('got orders')
             main_display.fill((0, 0, 0))
             if mode == 'main':
                 for i in range(len(orders)):
@@ -1857,6 +1894,7 @@ class Volunteers(pygame.sprite.Sprite):
             clock.tick(fps)
         bank_buttons.empty()
         button_group.empty()
+        logging.info('left voulunteers')
 
 
 class Product(pygame.sprite.Sprite):
@@ -2397,6 +2435,7 @@ try:
         if arrested:
             screen.fill((0, 0, 0))
             text = render_text('Вы арестованы за нарушение карантина!!!')
+            logging.info('arrested')
             screen.blit(text, (width // 2 - text.get_width() // 2, height // 2))
             pygame.display.flip()
             score -= 50

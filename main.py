@@ -541,7 +541,7 @@ class MainHouse(pygame.sprite.Sprite):
         elif level == 2:
             aims = ['Спирт', 'Мыло']
         elif level == 3:
-            aims = ['Морковь', 'Картофель', 'Яблоко', 'Маска', 'Спирт']
+            aims = ['Морковь', 'Картофель', 'Яблоко', 'Маска']
         if not aims:
             level = None
             return

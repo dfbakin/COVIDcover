@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, abort
 from flask_login import current_user, login_required, login_user, LoginManager, logout_user
 from data.db_session import global_init, create_session
 from data.__all_models import User, Server
@@ -93,6 +93,16 @@ def monitor_servers():
 @app.route('/rules')
 def rules():
     return render_template('rules.html', title='COVIDCover - Правила')
+
+
+@app.route('/get_leaderboard')
+def get_leaderboard():
+    if current_user.is_authenticated:
+        session = create_session()
+        users = session.query(User).order_by(User.score.desc())
+        return render_template('leaderboard.html', title='Leaderboard', users=users)
+    else:
+        abort(404)
 
 
 if __name__ == '__main__':

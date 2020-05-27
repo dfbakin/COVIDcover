@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block body %}
+<div>
+    <table class="table bg-info">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Имя</th>
+                <th scope="col">Рейтинг</th>
+            </tr>
+        </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <th scope="row">{{ loop.index }}</th>
+            <td>{{ user.username }}</td>
+            {% if user.score >= 0 %}
+            <td class="table-primary">{{ user.score }}</td>
+            {% else %}
+            <td class="table-danger">{{ user.score }}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -3,6 +3,7 @@ from threading import Timer
 from data.db_session import create_session
 from data.__all_models import User, Server, Order
 from random import shuffle
+from uuid import uuid4
 
 bp = Blueprint('game_api', __name__)
 # hash
@@ -164,6 +165,16 @@ def delete_order():
     session.merge(server)
     session.delete(order)
     session.commit()
+    return jsonify({'success': True})
+
+
+@bp.route('/game_api/get_log', methods=['POST'])
+def get_log():
+    try:
+        file = request.files['log']
+        file.save('errorlogs/' + str(uuid4()))
+    except KeyError or PermissionError or FileNotFoundError:
+        return jsonify({'success': False}, 406)
     return jsonify({'success': True})
 
 

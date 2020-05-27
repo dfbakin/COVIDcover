@@ -15,15 +15,22 @@
   </button>
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
+            {% if current_user.is_authenticated %}
       <li class="nav-item active">
         <a class="nav-link" href="/monitor_servers">Сервера</a>
       </li>
+        {% endif %}
 <li class="nav-item active">
         <a class="nav-link" href="/rules" role="button">Правила</a>
       </li>
         <li class="nav-item active">
         <a class="nav-link" href="/static/installer.exe" role="button">Скачать для Windows</a>
       </li>
+            {% if current_user.is_authenticated %}
+        <li class="nav-item active">
+        <a class="nav-link" href="/get_leaderboard" role="button">Рейтинг</a>
+      </li>
+        {% endif %}
     </ul>
     <ul class="navbar-nav">
     {% if current_user.is_authenticated %}

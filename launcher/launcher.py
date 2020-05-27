@@ -4,6 +4,7 @@ import json, os, sys, shutil, webbrowser, requests, hashlib
 from zipfile import ZipFile
 
 stop = False
+log_filename = 'covid_cover.log'
 
 
 class Ui_MainWindow(object):
@@ -189,7 +190,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def auth(self):
         email = self.lineEdit.text()
-        if not self.password:
+        if not self.password or not self.user:
             self.password = self.lineEdit_2.text()
         password = self.password
         self.lineEdit_2.setText('')
@@ -357,16 +358,36 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                                  params={'user_token': self.user['token'], 'score': int(self.user['score'])})
                 else:
                     requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
-                                       params={'user_token': self.user['token'], 'score': int(score)})
+                                 params={'user_token': self.user['token'], 'score': int(score)})
             except Exception as e:
                 self.plainTextEdit.appendPlainText(str(e) + '\n')
                 requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
-                                   params={'user_token': self.user['token'], 'score': 0})
+                             params={'user_token': self.user['token'], 'score': 0})
             finally:
                 if os.path.isfile('launch.bat'):
                     os.remove('launch.bat')
                 if os.path.isfile('score.dat'):
                     os.remove('score.dat')
+                if error_code != 0:
+                    if os.path.isfile(log_filename):
+                        try:
+                            os.remove(log_filename)
+                        except Exception as e:
+                            print(e)
+
+                    with open(log_filename, mode='r', encoding='utf-8') as file:
+                        try:
+                            response = requests.post(f'http://{host}:{port}/game_api/get_log', files={'log': file})
+                        except Exception as e:
+                            self.show_error(str(e))
+                    pass
+                if os.path.isfile(log_filename):
+                    try:
+                        os.remove(log_filename)
+                    except PermissionError:
+                        pass
+                    except Exception as e:
+                        self.show_error(str(e))
 
     def launch_single(self):
         with open('launch.bat', mode='w', encoding='utf-8') as f:

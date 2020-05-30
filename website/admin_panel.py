@@ -70,7 +70,7 @@ def disconnect():
     server = session.query(Server).filter(Server.players.like(f'%{user.id}%')).first()
     if server:
         if user.role:
-            server.roles = edit_lst(server.roles, user.role, False)
+            server.roles = edit_lst(server.roles, user.role, True)
             user.role = ''
             session.merge(user)
         server.players = edit_lst(server.players, user.id, False)

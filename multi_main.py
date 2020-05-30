@@ -68,6 +68,7 @@ house_products = pygame.sprite.Group()
 product_buttons = pygame.sprite.Group()
 
 remote_players = pygame.sprite.Group()
+npc_group = pygame.sprite.Group()
 # remote players are stored in this dict
 online_players = dict()
 # other global vars
@@ -599,6 +600,158 @@ class Player(pygame.sprite.Sprite):
             self.infected = 3
 
     def update(self, *args):
+        self.move_down(self.grav)
+        self.grav -= gravity
+
+        self.update_params()
+
+
+class Character(pygame.sprite.Sprite):
+    speed = 5
+    jump_power = 20
+
+    def __init__(self, *groups):
+        super().__init__(groups)
+        self.first_update = True
+        role = 'citizen'
+        self.frames = {'left': [], 'right': []}
+        for i in range(6):
+            self.frames['left'].append(
+                pygame.transform.flip(load_image(f'data/characters/citizen_right_{i + 1}.png',
+                                                 size=(80 + randint(-10, 10), 110 + randint(-10, 10))), 1, 0))
+        for i in range(6):
+            self.frames['right'].append(
+                load_image(f'data/characters/citizen_right_{i + 1}.png',
+                           size=(80 + randint(-10, 10), 110 + randint(-10, 10))))
+
+        self.image = self.frames['right'][0]
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect()
+        if random() > 0.5:
+            self.rect.x, self.rect.y = randint(100, 4000), randint(200, 300)
+        else:
+            self.rect.x, self.rect.y = randint(4000, 7500), randint(100, 200)
+        self.image_num = 0
+
+        self.prev_coords = 0, 0
+        self.is_moving = False
+        self.grav = 0
+        self.is_jumping = False
+        self.clock = pygame.time.Clock()
+        self.side = 'left'
+
+        self.health = 100
+        self.hazard_risk = 0
+        self.danger_level = 1
+        self.hazard_timer = 0
+
+        self.infected = 1
+        self.infection_rate = 1250
+
+        self.direction = True
+
+    def set_position(self, pos):
+        self.rect.x, self.rect.y = pos
+
+    def set_moving(self, value):
+        self.is_moving = value
+
+    def get_coords(self):
+        return self.rect.x, self.rect.y
+
+    def is_obstacle(self):
+        return False
+
+    def move_left(self):
+        self.side = 'left'
+        self.image = self.frames[self.side][0]
+
+        self.prev_coords = self.get_coords()
+        self.rect.x -= Character.speed
+        if check_collisions(self):
+            self.rect.y -= 5
+        if check_collisions(self):
+            self.rect.y -= 10
+        if check_collisions(self):
+            self.rect.y -= 15
+        if check_collisions(self):
+            self.rect.x = self.prev_coords[0]
+            self.rect.y = self.prev_coords[1]
+
+    def move_right(self):
+        self.side = 'right'
+        self.image = self.frames[self.side][0]
+        self.rect.x += Character.speed
+        if check_collisions(self):
+            self.rect.y -= 5
+        if check_collisions(self):
+            self.rect.y -= 10
+        if check_collisions(self):
+            self.rect.y -= 15
+        if check_collisions(self):
+            self.jump()
+            self.rect.x = self.prev_coords[0]
+            self.rect.y = self.prev_coords[1]
+
+    def move_down(self, value):
+        self.prev_coords = self.get_coords()
+        self.rect.y -= value
+        if check_collisions(self):
+            if self.grav < -20:
+                self.health -= abs(self.grav) - 10
+            self.rect.x = self.prev_coords[0]
+            self.rect.y = self.prev_coords[1]
+            self.grav = -5
+            self.is_jumping = False
+
+    def jump(self):
+        if not self.is_jumping:
+            self.grav = Character.jump_power
+            self.is_jumping = True
+
+    # reducing health, increasing hazard_risk (risk of infection)
+    def update_params(self):
+        self.danger_level = 1 - (100 - self.health) / 100
+        self.hazard_timer += self.clock.tick()
+        if self.hazard_timer > self.infection_rate * self.danger_level:
+            self.hazard_risk += 1
+            self.hazard_timer = 0
+
+        if self.health <= 0:
+            self.health = 0
+        if self.hazard_risk >= 100:
+            self.hazard_risk = 100
+
+        # cheking dead state (added gravity here, in this way we check if player is falling too fast)
+        if self.health == 0 or self.grav < -50:
+            Character(npc_group, all_sprites)
+            self.kill()
+        elif self.hazard_risk == 100:
+            self.infected = 3
+
+    def update(self, *args):
+        if self.first_update:
+            if check_collisions(self):
+                Character(npc_group, all_sprites)
+                self.kill()
+                return
+            else:
+                self.first_update = False
+
+        if self.direction:
+            self.move_left()
+        else:
+            self.move_right()
+        if random() > 0.5:
+            self.image_num += 1
+        if random() > 0.80:
+            self.jump()
+        if self.image_num >= len(self.frames['right']) * 6:
+            self.image_num = 0
+            # if effects_on:
+            # sounds['step'].play()
+        self.image = self.frames[self.side][self.image_num // 6]
+
         self.move_down(self.grav)
         self.grav -= gravity
 
@@ -2428,6 +2581,9 @@ backgr.rect = backgr.image.get_rect()
 # role = 'volunteer'
 
 # generating all objects
+for i in range(25):
+    Character(npc_group, all_sprites)
+
 player = Player(3850, 1000, role, player_group)
 player.id = internal_id
 player.name = player_name

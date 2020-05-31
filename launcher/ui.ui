@@ -213,6 +213,9 @@ background-color: rgb(172, 216, 230);
         <pointsize>12</pointsize>
        </font>
       </property>
+      <property name="echoMode">
+       <enum>QLineEdit::Password</enum>
+      </property>
       <property name="placeholderText">
        <string>Пароль</string>
       </property>
@@ -280,6 +283,9 @@ background-color: rgb(172, 216, 230);
        <font>
         <pointsize>12</pointsize>
        </font>
+      </property>
+      <property name="echoMode">
+       <enum>QLineEdit::Password</enum>
       </property>
       <property name="placeholderText">
        <string>Пароль</string>

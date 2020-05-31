@@ -6,6 +6,8 @@ from zipfile import ZipFile
 stop = False
 log_filename = 'covid_cover.log'
 user_registration = "f5d9063b-ccb1-4a60-b4a1-8abf6ed38708"
+
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -90,6 +92,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(12)
         self.lineEdit_2.setFont(font)
+        self.lineEdit_2.setEchoMode(QtWidgets.QLineEdit.Password)
         self.lineEdit_2.setObjectName("lineEdit_2")
         self.pushButton = QtWidgets.QPushButton(self.tab)
         self.pushButton.setGeometry(QtCore.QRect(100, 130, 81, 51))
@@ -118,6 +121,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(12)
         self.lineEdit_4.setFont(font)
+        self.lineEdit_4.setEchoMode(QtWidgets.QLineEdit.Password)
         self.lineEdit_4.setObjectName("lineEdit_4")
         self.lineEdit_5 = QtWidgets.QLineEdit(self.tab_2)
         self.lineEdit_5.setGeometry(QtCore.QRect(10, 10, 271, 31))
@@ -192,13 +196,12 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.pushButton_3.clicked.connect(self.launch_single)
         self.pushButton_2.clicked.connect(lambda: webbrowser.open(f'http://{MyWidget.host}:{MyWidget.port}', new=0))
         self.pushButton_5.clicked.connect(self.launch_multi)
-        self.pushButton.clicked.connect(self.auth)
+        self.pushButton.clicked.connect(self.login)
 
         self.pushButton_4.clicked.connect(self.register)
 
-        self.pushButton_3.setVisible(False)
         self.pushButton_5.setVisible(False)
-        self.lineEdit_2.setEchoMode(QLineEdit.Password)
+
 
         self.label_3.setText('Войдите в учетную запись')
 
@@ -246,7 +249,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.show_error('Заполните все поля!')
             return
         try:
-            requests.post(f'http://{MyWidget.host}:{MyWidget.port}/api/users/token/{user_registration}', data={'email': email, 'password': password, "username": username})
+            response = requests.post(f'http://{MyWidget.host}:{MyWidget.port}/api/users/token/{user_registration}', data={'email': email, 'password': password, "username": username})
         except requests.exceptions.ConnectionError:
             self.show_error('Отсутствует интернет. Запустите программу позже.')
             return
@@ -262,11 +265,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         elif response.status_code == 406:
             self.show_error('Пользователь с таким именем или адресом был уже зарегестрирован')
         else:
-            self.auth()
+            self.auth(email, password)
 
-
-
-    def auth(self):
+    def login(self):
         email = self.lineEdit.text()
         if not self.password or not self.user:
             self.password = self.lineEdit_2.text()
@@ -275,6 +276,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         if not email or not password:
             self.show_error('Заполните все поля!')
             return
+        self.auth(email, password)
+
+
+    def auth(self, email, password):
         try:
             response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/auth',
                                     params={'email': email, 'password': password}, timeout=3.)

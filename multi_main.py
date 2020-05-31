@@ -34,15 +34,15 @@ def exit_game():
 
 error_code = 0
 # parsing and amount validation for cmd args
-#if len(sys.argv) != 7:
-    #error_code = -7
-    #exit_game()
-#args = sys.argv[1:]
+# if len(sys.argv) != 7:
+# error_code = -7
+# exit_game()
+# args = sys.argv[1:]
 
 pygame.init()
 
 size = width, height = 1280, 720
-screen = pygame.display.set_mode(size)#, pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size)  # , pygame.FULLSCREEN)
 # sprite groups set up
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -87,19 +87,18 @@ arrested = False
 
 orders = None
 
-
 # internal_id = input('Enter internal id:   ')
 # setting vars from args for online mode
-#role, host, port, internal_id, player_name = args
-#port = int(port)
+# role, host, port, internal_id, player_name = args
+# port = int(port)
 api_port = 8080
 # for debug
 role = 'citizen'
 host, port = '127.0.0.1', 9000
 player_name = '123456'
-#internal_id = '9f8e6b0c-62c7-4b09-b6d3-f923f3bf9860'
-internal_id = '0c4b8f94-b0d1-4731-8566-0bfa4a989610'
-#internal_id = '2a288d46-b3bf-4669-a938-dbaa6e8d9126'
+internal_id = '9f8e6b0c-62c7-4b09-b6d3-f923f3bf9860'
+# internal_id = '0c4b8f94-b0d1-4731-8566-0bfa4a989610'
+# internal_id = '2a288d46-b3bf-4669-a938-dbaa6e8d9126'
 # ip = socket.gethostbyname('0.tcp.ngrok.io')
 # host = ip
 # host = '84.201.168.123'
@@ -248,9 +247,11 @@ def load_image(path, colorkey=None, size=None) -> pygame.Surface:
         image = pygame.transform.scale(image, size)
     return image
 
+
 def distance(first, second):
     res = ((second[0] - first[0]) ** 2 + (second[1] - first[1]) ** 2) ** 0.5
     return res
+
 
 def check_collisions(player):
     check_near_building(player)
@@ -284,7 +285,6 @@ class RemotePlayer(pygame.sprite.Sprite):
     def __init__(self, id, x, y, role, name, *groups):
         self.id = id  # internal id of user
         self.name = name  # username
-        super().__init__(groups)
         self.role = role  # policeman, citizen or volunteer
         self.scanner_is_on = False  # only for policemen
         self.side = 'left'  # the sidem direction for drawing sprite
@@ -301,6 +301,8 @@ class RemotePlayer(pygame.sprite.Sprite):
         self.infected = None
 
         self.caught = 0
+
+        super().__init__(groups)
 
     def get_coords(self):
         return self.rect.x, self.rect.y
@@ -408,7 +410,6 @@ class Player(pygame.sprite.Sprite):
     jump_power = 15
 
     def __init__(self, x, y, role, *groups):
-        super().__init__(groups)
         # set role value as an attr
         self.role = role
         # citizen and volunteer each has the same sprite, so, we can change local var after its value is stored
@@ -447,7 +448,6 @@ class Player(pygame.sprite.Sprite):
         self.profit_timer = pygame.time.Clock()
         self.profit_num = 0
 
-
         # generating pin
         self.objects = []
         pin = str(randint(1000, 9999))
@@ -457,14 +457,16 @@ class Player(pygame.sprite.Sprite):
 
         self.infected = 1
 
-        if self.role == 'citizen':
-            self.infection_rate = 1250
-        else:
-            self.infection_rate = 2000
+        # if self.role == 'citizen':
+        # self.infection_rate = 1250
+        # else:
+        self.infection_rate = 2000
 
         self.order = None
         self.id = None
         self.name = None
+
+        super().__init__(groups)
 
     def get_objects(self):
         return self.objects
@@ -595,7 +597,7 @@ class Player(pygame.sprite.Sprite):
         self.hazard_timer += self.clock.tick()
 
         for i in npc_group:
-            if distance(self.get_coords(), i.get_coords()) < 250:
+            if distance(self.get_coords(), i.get_coords()) < 150:
                 self.infection_rate -= 450
         if self.infection_rate < 350:
             self.infection_rate = 350
@@ -633,11 +635,10 @@ class Player(pygame.sprite.Sprite):
 
 
 class Character(pygame.sprite.Sprite):
-    speed = 5
-    jump_power = 20
+    speed = 10
+    jump_power = 17
 
     def __init__(self, *groups):
-        super().__init__(groups)
         self.first_update = True
         role = 'citizen'
         self.frames = {'left': [], 'right': []}
@@ -675,6 +676,9 @@ class Character(pygame.sprite.Sprite):
         self.infection_rate = 1250
 
         self.direction = True
+        self.speed = Player.speed
+
+        super().__init__(groups)
 
     def set_position(self, pos):
         self.rect.x, self.rect.y = pos
@@ -693,7 +697,7 @@ class Character(pygame.sprite.Sprite):
         self.image = self.frames[self.side][0]
 
         self.prev_coords = self.get_coords()
-        self.rect.x -= Character.speed
+        self.rect.x -= self.speed
         if check_collisions(self):
             self.rect.y -= 5
         if check_collisions(self):
@@ -707,7 +711,7 @@ class Character(pygame.sprite.Sprite):
     def move_right(self):
         self.side = 'right'
         self.image = self.frames[self.side][0]
-        self.rect.x += Character.speed
+        self.rect.x += self.speed
         if check_collisions(self):
             self.rect.y -= 5
         if check_collisions(self):
@@ -715,7 +719,7 @@ class Character(pygame.sprite.Sprite):
         if check_collisions(self):
             self.rect.y -= 15
         if check_collisions(self):
-            self.jump()
+            # self.jump()
             self.rect.x = self.prev_coords[0]
             self.rect.y = self.prev_coords[1]
 
@@ -770,8 +774,10 @@ class Character(pygame.sprite.Sprite):
             self.move_right()
         if random() > 0.5:
             self.image_num += 1
-        if random() > 0.80:
+        if random() > 0.75:
             self.jump()
+        if random() < 0.25:
+            self.speed = Character.speed + randint(-5, 5)
         if self.image_num >= len(self.frames['right']) * 6:
             self.image_num = 0
             # if effects_on:
@@ -810,11 +816,15 @@ class Bank(pygame.sprite.Sprite):
 
         # name is displayed when player is near
         self.name = 'Банк'
+        self.was_visited = False
 
     def is_obstacle(self):
         return False
 
     def enter(self):
+        if not self.was_visited:
+            player.profit += 0.1
+            self.was_visited = True
         logging.info('enter Bank')
         button_group.empty()
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
@@ -2614,13 +2624,13 @@ player = Player(3850, 1000, role, player_group)
 player.id = internal_id
 player.name = player_name
 terrain = Terrain(0, 0, all_sprites, terrain_group)
-bank = Bank(350, 875, all_sprites, building_group)
+bank = Bank(1400, 65, all_sprites, building_group)
 home = MainHouse(3710, 700, building_group, all_sprites)
-pharmacy = Pharmacy(5050, 675, building_group, all_sprites)
-shop = Shop(5750, 665, building_group, all_sprites)
-second_shop = SecondShop(7250, 750, building_group, all_sprites)
-hospital = Hospital(2200, 800, building_group, all_sprites)
-volunteer = Volunteers(1000, 790, building_group, all_sprites)
+pharmacy = Pharmacy(6189, 325, building_group, all_sprites)
+shop = Shop(3650, 260, building_group, all_sprites)
+second_shop = SecondShop(7381, 400, building_group, all_sprites)
+hospital = Hospital(580, 305, building_group, all_sprites)
+volunteer = Volunteers(4362, 225, building_group, all_sprites)
 
 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
 
@@ -2734,13 +2744,10 @@ try:
         for sprite in all_sprites:
             try:
                 camera.apply(sprite)
-            except AttributeError:
+            except AttributeError as e:
                 sprite.kill()
         for sprite in remote_players:
-            try:
-                camera.apply(sprite)
-            except AttributeError:
-                sprite.kill()
+            camera.apply(sprite)
         camera.apply(player)
 
         all_sprites.update()
@@ -2748,22 +2755,19 @@ try:
         button_group.update(pos)
 
         remote_players.update(scanner_on)
+        for sprite in npc_group:
+            if random() < 0.01:
+                sprite.direction = not sprite.direction
 
         background_group.draw(screen)
         # the same problem (AttrErr), watch the comment above
-        try:
-            all_sprites.draw(screen)
-        except AttributeError:
-            pass
+        all_sprites.draw(screen)
         terrain_group.draw(screen)
         button_group.draw(screen)
         screen.blit(player.render_info(), (0, 0))
         player_group.draw(screen)
         # the same problem (AttrErr), watch the comment above
-        try:
-            remote_players.draw(screen)
-        except AttributeError:
-            pass
+        remote_players.draw(screen)
 
         if near_building_message and near_building:
             screen.blit(render_text(near_building_message), (0, height - 50))

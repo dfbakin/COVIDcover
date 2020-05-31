@@ -1212,7 +1212,7 @@ class Product(pygame.sprite.Sprite):
     def get_small_image(self):
         return self.small_image
 
-    def render_info(self, background=(0, 0, 0), color=(255, 255, 255)):
+    def render_info(self, background=(156, 65, 10), color=(255, 255, 255)):
         display = pygame.Surface((width // 2, height // 2 * 3))
         display.fill(background)
         # main image

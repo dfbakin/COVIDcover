@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>703</width>
-    <height>465</height>
+    <height>543</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,7 @@
     <property name="geometry">
      <rect>
       <x>420</x>
-      <y>280</y>
+      <y>350</y>
       <width>181</width>
       <height>61</height>
      </rect>
@@ -44,9 +44,9 @@ background-color: rgb(172, 216, 230);
    <widget class="QPushButton" name="pushButton_3">
     <property name="geometry">
      <rect>
-      <x>510</x>
-      <y>360</y>
-      <width>181</width>
+      <x>520</x>
+      <y>430</y>
+      <width>171</width>
       <height>61</height>
      </rect>
     </property>
@@ -89,9 +89,9 @@ background-color: rgb(172, 216, 230);
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>240</y>
+      <y>340</y>
       <width>301</width>
-      <height>181</height>
+      <height>151</height>
      </rect>
     </property>
     <property name="plainText">
@@ -103,8 +103,8 @@ OK</string>
     <property name="geometry">
      <rect>
       <x>320</x>
-      <y>360</y>
-      <width>181</width>
+      <y>430</y>
+      <width>191</width>
       <height>61</height>
      </rect>
     </property>
@@ -121,69 +121,6 @@ background-color: rgb(172, 216, 230);
     </property>
     <property name="text">
      <string>Запустить мультиплеер!</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="lineEdit">
-    <property name="geometry">
-     <rect>
-      <x>12</x>
-      <y>90</y>
-      <width>271</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="placeholderText">
-     <string>Email</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="lineEdit_2">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>130</y>
-      <width>271</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="placeholderText">
-     <string>Пароль</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>180</y>
-      <width>271</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">:!hover{
-background-color: rgb(172, 216, 230);
-}
-
-:hover{
-	border: 4px solid black; 
-    background: rgb(105, 185, 211); 
-    padding: 10px;
-}</string>
-    </property>
-    <property name="text">
-     <string>Войти</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_3">
@@ -207,9 +144,9 @@ background-color: rgb(172, 216, 230);
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>320</x>
       <y>70</y>
-      <width>391</width>
+      <width>371</width>
       <height>111</height>
      </rect>
     </property>
@@ -225,6 +162,176 @@ background-color: rgb(172, 216, 230);
      <string>Все системы функционируют нормально.</string>
     </property>
    </widget>
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>110</y>
+      <width>301</width>
+      <height>221</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>1</number>
+    </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>Войти</string>
+     </attribute>
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>271</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="placeholderText">
+       <string>Email</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>50</y>
+        <width>271</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="placeholderText">
+       <string>Пароль</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>130</y>
+        <width>81</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">:!hover{
+background-color: rgb(172, 216, 230);
+}
+
+:hover{
+	border: 4px solid black; 
+    background: rgb(105, 185, 211); 
+    padding: 10px;
+}</string>
+      </property>
+      <property name="text">
+       <string>Войти</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>Зарегестрироваться</string>
+     </attribute>
+     <widget class="QLineEdit" name="lineEdit_3">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>50</y>
+        <width>271</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="placeholderText">
+       <string>Email</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_4">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>90</y>
+        <width>271</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="placeholderText">
+       <string>Пароль</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_5">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>271</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="placeholderText">
+       <string>Имя пользователя</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_4">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>130</y>
+        <width>181</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">:!hover{
+background-color: rgb(172, 216, 230);
+}
+
+:hover{
+	border: 4px solid black; 
+    background: rgb(105, 185, 211); 
+    padding: 10px;
+}</string>
+      </property>
+      <property name="text">
+       <string>Зарегестрироваться</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -232,7 +339,7 @@ background-color: rgb(172, 216, 230);
      <x>0</x>
      <y>0</y>
      <width>703</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

@@ -73,6 +73,7 @@ product_buttons = pygame.sprite.Group()
 
 remote_players = pygame.sprite.Group()
 npc_group = pygame.sprite.Group()
+box_group = pygame.sprite.Group()
 # remote players are stored in this dict
 online_players = dict()
 # other global vars
@@ -406,7 +407,7 @@ class RemotePlayer(pygame.sprite.Sprite):
 # drawing; storing vars, products, etc; moving; changing health, money, infection % etc
 # is declared before the menu (game startup)
 class Player(pygame.sprite.Sprite):
-    speed = 10
+    speed = 20
     jump_power = 15
 
     def __init__(self, x, y, role, *groups):
@@ -554,7 +555,7 @@ class Player(pygame.sprite.Sprite):
         self.prev_coords = self.get_coords()
         self.rect.y -= value
         if check_collisions(self):
-            if self.grav < -20:
+            if self.grav < -50:
                 self.health -= abs(self.grav) - 10
             self.rect.x = self.prev_coords[0]
             self.rect.y = self.prev_coords[1]
@@ -2620,6 +2621,11 @@ backgr = pygame.sprite.Sprite(background_group)
 backgr.image = load_image('data/textures/background.png', size=size)
 backgr.rect = backgr.image.get_rect()
 
+box = pygame.sprite.Sprite(box_group)
+box.image = load_image('data/objects/treasure_box.png', size=(125, 100))
+box.rect = backgr.image.get_rect()
+box.rect.x, box.rect.y = 408, 1555
+
 # player = Player(3850, 1050, input('enter role:     '), player_group)
 # role = 'volunteer'
 
@@ -2627,7 +2633,7 @@ backgr.rect = backgr.image.get_rect()
 for i in range(25):
     Character(npc_group, all_sprites)
 
-player = Player(3850, 1000, role, player_group)
+player = Player(3850, 1000, role, player_group)  # 3850, 1000
 player.id = internal_id
 player.name = player_name
 terrain = Terrain(0, 0, all_sprites, terrain_group)
@@ -2668,11 +2674,17 @@ try:
             if event.type == pygame.MOUSEMOTION:
                 pos = event.pos
             if event.type == pygame.MOUSEBUTTONDOWN:
-                for btn in button_group:
-                    if btn.rect.collidepoint(event.pos):
-                        btn.run()
-                        button_group.empty()
-                        pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
+                if event.button == 2:
+                    if box.rect.collidepoint(event.pos):
+                        box.kill()
+                        player.card_money += 250
+                else:
+                    for btn in button_group:
+                        if btn.rect.collidepoint(event.pos):
+                            btn.run()
+                            button_group.empty()
+                            pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None,
+                                                  button_group)
             if event.type == pygame.KEYUP:
                 # disable scanner on KEYUP
                 if player.role == 'policeman' and event.key == 99:
@@ -2756,6 +2768,7 @@ try:
         for sprite in remote_players:
             camera.apply(sprite)
         camera.apply(player)
+        camera.apply(box)
 
         all_sprites.update()
         player_group.update()
@@ -2767,6 +2780,7 @@ try:
                 sprite.direction = not sprite.direction
 
         background_group.draw(screen)
+        box_group.draw(screen)
         # the same problem (AttrErr), watch the comment above
         all_sprites.draw(screen)
         terrain_group.draw(screen)

@@ -150,6 +150,8 @@ class Player(pygame.sprite.Sprite):
         self.danger_level = 1
         self.hazard_timer = 0
 
+        self.speed = Player.speed
+
         if level == 1:
             self.card_money = 500
             self.cash = 0
@@ -218,7 +220,7 @@ class Player(pygame.sprite.Sprite):
         self.image = self.frames[self.side][0]
 
         self.prev_coords = self.get_coords()
-        self.rect.x -= Player.speed
+        self.rect.x -= self.speed
         if check_collisions(self):
             self.rect.y -= 5
         if check_collisions(self):
@@ -233,7 +235,7 @@ class Player(pygame.sprite.Sprite):
         self.side = 'right'
         self.image = self.frames[self.side][0]
         self.prev_coords = self.get_coords()
-        self.rect.x += Player.speed
+        self.rect.x += self.speed
         if check_collisions(self):
             self.rect.y -= 5
         if check_collisions(self):
@@ -271,6 +273,10 @@ class Player(pygame.sprite.Sprite):
         return canvas
 
     def update_params(self):
+        self.speed = Player.speed * self.health / 100
+        if self.speed <= self.speed // 2:
+            self.speed //= 2
+
         prev_infect = self.infection_rate
         self.danger_level = 1 - (100 - self.health) / 100
         self.hazard_timer += self.clock.tick()

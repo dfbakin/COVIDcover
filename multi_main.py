@@ -441,6 +441,7 @@ class Player(pygame.sprite.Sprite):
         self.danger_level = 1
         self.hazard_timer = 0
         self.id = None
+        self.speed = Player.speed
 
         self.card_money = 2500
         self.cash = 5000
@@ -472,6 +473,8 @@ class Player(pygame.sprite.Sprite):
         return self.objects
 
     def add_objects(self, *objects):
+        self.speed = Player.speed
+
         player.card_money += 10 * len(objects)
         for i in objects:
             self.objects.append(i)
@@ -520,7 +523,7 @@ class Player(pygame.sprite.Sprite):
         self.image = self.frames[self.side][0]
 
         self.prev_coords = self.get_coords()
-        self.rect.x -= Player.speed
+        self.rect.x -= self.speed
         # it's the "auto jumping"
         # if we can jums so that move further, we just jump
         if check_collisions(self):
@@ -536,7 +539,7 @@ class Player(pygame.sprite.Sprite):
     def move_right(self):
         self.side = 'right'
         self.image = self.frames[self.side][0]
-        self.rect.x += Player.speed
+        self.rect.x += self.speed
         if check_collisions(self):
             self.rect.y -= 5
         if check_collisions(self):
@@ -591,6 +594,10 @@ class Player(pygame.sprite.Sprite):
                 self.profit_num = 0
                 self.card_money = int(self.card_money + 10 * self.profit)
             return
+
+        self.speed = Player.speed * self.health / 100
+        if self.speed <= self.speed // 2:
+            self.speed //= 2
 
         prev_infect = self.infection_rate
         self.danger_level = 1 - (100 - self.health) / 100

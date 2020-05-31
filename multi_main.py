@@ -6,6 +6,11 @@ import socket, time, threading, requests, sys, logging, os
 log_filename = 'covid_cover.log'
 global_exit = False
 
+if os.path.isfile(log_filename):
+    try:
+        os.remove(log_filename)
+    except PermissionError:
+        pass
 logging.basicConfig(filename=log_filename,
                     format='%(asctime)s %(levelname)s %(message)s',
                     level=logging.INFO)
@@ -23,22 +28,21 @@ def exit_game():
     time.sleep(0.25)
     logging.info(f'exit code: {error_code}')
     with open('score.dat', mode='w', encoding='utf-8') as file:
-        file.write(str(score) + ' ' + str(error_code))
+        file.write(str(player.card_money) + ' ' + str(error_code))
     sys.exit()
 
 
 error_code = 0
-score = None
 # parsing and amount validation for cmd args
-if len(sys.argv) != 7:
-    error_code = -7
-    exit_game()
-args = sys.argv[1:]
+#if len(sys.argv) != 7:
+    #error_code = -7
+    #exit_game()
+#args = sys.argv[1:]
 
 pygame.init()
 
 size = width, height = 1280, 720
-screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size)#, pygame.FULLSCREEN)
 # sprite groups set up
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -83,20 +87,19 @@ arrested = False
 
 orders = None
 
+
 # internal_id = input('Enter internal id:   ')
 # setting vars from args for online mode
-role, score, host, port, internal_id, player_name = args
-score = int(score)
-port = int(port)
+#role, host, port, internal_id, player_name = args
+#port = int(port)
 api_port = 8080
 # for debug
-'''role = 'volunteer'
-score = 0
+role = 'citizen'
 host, port = '127.0.0.1', 9000
 player_name = '123456'
-# internal_id = '9f8e6b0c-62c7-4b09-b6d3-f923f3bf9860'
-# internal_id = '0c4b8f94-b0d1-4731-8566-0bfa4a989610'
-internal_id = '2a288d46-b3bf-4669-a938-dbaa6e8d9126'''
+#internal_id = '9f8e6b0c-62c7-4b09-b6d3-f923f3bf9860'
+internal_id = '0c4b8f94-b0d1-4731-8566-0bfa4a989610'
+#internal_id = '2a288d46-b3bf-4669-a938-dbaa6e8d9126'
 # ip = socket.gethostbyname('0.tcp.ngrok.io')
 # host = ip
 # host = '84.201.168.123'
@@ -245,6 +248,9 @@ def load_image(path, colorkey=None, size=None) -> pygame.Surface:
         image = pygame.transform.scale(image, size)
     return image
 
+def distance(first, second):
+    res = ((second[0] - first[0]) ** 2 + (second[1] - first[1]) ** 2) ** 0.5
+    return res
 
 def check_collisions(player):
     check_near_building(player)
@@ -437,6 +443,10 @@ class Player(pygame.sprite.Sprite):
 
         self.card_money = 2500
         self.cash = 5000
+        self.profit = 0.1
+        self.profit_timer = pygame.time.Clock()
+        self.profit_num = 0
+
 
         # generating pin
         self.objects = []
@@ -460,8 +470,7 @@ class Player(pygame.sprite.Sprite):
         return self.objects
 
     def add_objects(self, *objects):
-        global score
-        score += 10 * len(objects)
+        player.card_money += 10 * len(objects)
         for i in objects:
             self.objects.append(i)
 
@@ -558,7 +567,7 @@ class Player(pygame.sprite.Sprite):
         font = pygame.font.Font(None, 30)
         canvas.blit(
             font.render(
-                f'Здоровье: {self.health}%  Риск заражения: {self.hazard_risk}%  Наличные: {self.cash} Р   На карте: {self.card_money} Р  Баллы: {score}',
+                f'Здоровье: {self.health}%  Риск заражения: {self.hazard_risk}%  Наличные: {self.cash} Р   На карте: {self.card_money} Р',
                 1, color), (0, 0))
         return canvas
 
@@ -573,12 +582,29 @@ class Player(pygame.sprite.Sprite):
         return res
 
     # reducing health, increasing danger_level (risk of infection)
-    def update_params(self):
+    def update_params(self, at_work=False):
+        if at_work and self.role == 'citizen':
+            self.profit_num += self.profit_timer.tick()
+            if self.profit_num >= 1000:
+                self.profit_num = 0
+                self.card_money = int(self.card_money + 10 * self.profit)
+            return
+
+        prev_infect = self.infection_rate
         self.danger_level = 1 - (100 - self.health) / 100
         self.hazard_timer += self.clock.tick()
+
+        for i in npc_group:
+            if distance(self.get_coords(), i.get_coords()) < 250:
+                self.infection_rate -= 450
+        if self.infection_rate < 350:
+            self.infection_rate = 350
+
         if self.hazard_timer > self.infection_rate * self.danger_level:
             self.hazard_risk += 1
             self.hazard_timer = 0
+
+        self.infection_rate = prev_infect
 
         if self.health <= 0:
             self.health = 0
@@ -722,7 +748,7 @@ class Character(pygame.sprite.Sprite):
         if self.hazard_risk >= 100:
             self.hazard_risk = 100
 
-        # cheking dead state (added gravity here, in this way we check if player is falling too fast)
+        # checking dead state (added gravity here, in this way we check if player is falling too fast)
         if self.health == 0 or self.grav < -50:
             Character(npc_group, all_sprites)
             self.kill()
@@ -1003,7 +1029,7 @@ class MainHouse(pygame.sprite.Sprite):
                 # similar to bank terminal
                 if player.role != 'citizen':
                     return
-                global orders, score, error_code
+                global orders, error_code
 
                 running = True
                 mode = 'main'
@@ -1157,7 +1183,7 @@ class MainHouse(pygame.sprite.Sprite):
                             (main_display.get_width() // 3, main_display.get_height() // 2))
 
                     screen.fill((156, 65, 10))
-                    player.update_params()
+                    player.update_params(at_work=True)
                     button_group.draw(screen)
                     bank_buttons.draw(screen)
                     screen.blit(player.render_info(background=(156, 65, 10)), (0, 0))
@@ -1200,13 +1226,15 @@ class MainHouse(pygame.sprite.Sprite):
                     text = render_text('Заказ доставлен. Вы спасены! =)')
                     screen.blit(text, (width // 2 - text.get_width() // 2, height // 2))
                     pygame.display.flip()
-                    global score
-                    score += 50
+                    player.card_money += 50
                     for i in range(5):
                         clock.tick(1)
                     player.order = None
 
                 screen.fill((177, 170, 142))
+                player.update_params(at_work=True)
+                screen.blit(player.render_info(), (0, 0))
+
                 background_house.draw(screen)
                 button_group.draw(screen)
                 house_buttons.draw(screen)
@@ -1221,7 +1249,7 @@ class MainHouse(pygame.sprite.Sprite):
 
         def delivery_terminal():
             # very-very similar to the bank
-            global orders, score, error_code
+            global orders, error_code
             running = True
             mode = 'main'
 
@@ -1331,7 +1359,6 @@ class MainHouse(pygame.sprite.Sprite):
 
                                             player.order = None
                                             player.card_money += 750
-                                            score += 500
                                             mode = 'Успешно'
                                             logging.info('order delivered successfully')
                                         else:
@@ -1808,7 +1835,6 @@ class Hospital(pygame.sprite.Sprite):
 
     def enter(self):
         logging.info('entered hospital')
-        global score
         button_group.empty()
         if player.role != 'citizen':
             return
@@ -1985,7 +2011,7 @@ class Hospital(pygame.sprite.Sprite):
             screen.blit(main_display, (100, 70))
             pygame.display.flip()
             clock.tick(fps)
-        score += 100
+        player.card_money += 100
         bank_buttons.empty()
         button_group.empty()
         logging.info('left hospital')
@@ -2675,15 +2701,15 @@ try:
                             if arrest_rate >= 60:
                                 caught_ids.append(i.id)
                                 if i.infected == 3:
-                                    score += 100
+                                    player.card_money += 100
                                 elif i.role == 'policeman':
-                                    score -= 120
+                                    player.card_money -= 120
                                 elif i.role == 'volunteer':
-                                    score -= 100
+                                    player.card_money -= 100
                                 elif i.infected == 2:
-                                    score -= 100
+                                    player.card_money -= 100
                                 elif i.infected == 1:
-                                    score -= 25
+                                    player.card_money -= 25
                                 arrest_rate = 0
                     # AttrErr is risen if there were an error during RemotePlayer init
                     except AttributeError:
@@ -2753,7 +2779,7 @@ try:
             logging.info('arrested')
             screen.blit(text, (width // 2 - text.get_width() // 2, height // 2))
             pygame.display.flip()
-            score -= 50
+            player.card_money -= 50
             for i in range(3):
                 clock.tick(1)
             break

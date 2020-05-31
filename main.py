@@ -6,7 +6,7 @@ import sys
 pygame.init()
 
 size = width, height = 1280, 720
-screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size)  # , pygame.FULLSCREEN)
 
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -84,6 +84,11 @@ def load_image(path, colorkey=None, size=None) -> pygame.Surface:
     if size:
         image = pygame.transform.scale(image, size)
     return image
+
+
+def distance(first, second):
+    res = ((second[0] - first[0]) ** 2 + (second[1] - first[1]) ** 2) ** 0.5
+    return res
 
 
 def check_collisions(player):
@@ -266,12 +271,18 @@ class Player(pygame.sprite.Sprite):
         return canvas
 
     def update_params(self):
+        prev_infect = self.infection_rate
         self.danger_level = 1 - (100 - self.health) / 100
         self.hazard_timer += self.clock.tick()
+        for i in npc_group:
+            if distance(self.get_coords(), i.get_coords()) < 250:
+                self.infection_rate -= 450
+        if self.infection_rate < 350:
+            self.infection_rate = 350
         if self.hazard_timer > self.infection_rate * self.danger_level:
             self.hazard_risk += 1
             self.hazard_timer = 0
-
+        self.infection_rate = prev_infect
         if self.health <= 0:
             self.health = 0
         if self.hazard_risk >= 100:
@@ -303,9 +314,11 @@ class Player(pygame.sprite.Sprite):
         self.grav -= gravity
 
         self.update_params()
+
+
 class Character(pygame.sprite.Sprite):
     speed = 3
-    jump_power = 14
+    jump_power = 10
 
     def __init__(self, *groups):
         super().__init__(groups)
@@ -441,7 +454,7 @@ class Character(pygame.sprite.Sprite):
             self.move_right()
         if random.random() > 0.5:
             self.image_num += 1
-        if random.random() > 0.80:
+        if random.random() > 0.65:
             self.jump()
         if self.image_num >= len(self.frames['right']) * 6:
             self.image_num = 0
@@ -1676,6 +1689,11 @@ while running:
         player.set_moving(True)
     if data[32]:
         player.jump()
+
+    for sprite in npc_group:
+        if random.random() < 0.005:
+            sprite.direction = not sprite.direction
+
     screen.fill((0, 0, 0))
     camera.update(player)
     for sprite in all_sprites:
@@ -1691,6 +1709,7 @@ while running:
     terrain_group.draw(screen)
     button_group.draw(screen)
     screen.blit(player.render_info(), (0, 0))
+    npc_group.draw(screen)
     player_group.draw(screen)
     if near_building_message and near_building:
         screen.blit(render_text(near_building_message), (0, height - 50))

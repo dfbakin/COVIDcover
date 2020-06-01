@@ -3,6 +3,7 @@ from flask import jsonify
 from data.db_session import create_session
 from data.__all_models import User
 
+user_registration = "f5d9063b-ccb1-4a60-b4a1-8abf6ed38708"
 
 def check_token(token):
     session = create_session()
@@ -30,6 +31,7 @@ put_parser.add_argument('token', required=False)
 put_parser.add_argument('privilege', required=False, type=int)
 put_parser.add_argument('score', required=False, type=int)
 put_parser.add_argument('role', required=False)
+
 
 def abort_if_user_not_found(user_id):
     session = create_session()
@@ -107,18 +109,29 @@ class UsersListResource(Resource):
         return jsonify([user.to_dict(only=('username', 'id', 'email')) for user in users])
 
     def post(self, token):
-        check_token(token)
-        args = parser.parse_args()
-        session = create_session()
-        user = User(
-            email=args['email'],
-            username=args['username'],
-            token=args['token'],
-            privilege=args['token'],
-            score=args['score'],
-            role=args['role']
-        )
-        user.set_password(args['password'])
-        session.add(User)
+        if token == user_registration:
+            args = put_parser.parse_args()
+            session = create_session()
+            if session.query(User).filter((User.username == args["username"]) | (User.email == args["email"])).first():
+                abort(406, message=jsonify({'success': 406}))
+            user = User(
+                email=args["email"],
+                username=args["username"],
+            )
+            user.set_password(args["password"])
+        else:
+            check_token(token)
+            args = parser.parse_args()
+            session = create_session()
+            user = User(
+                email=args['email'],
+                username=args['username'],
+                token=args['token'],
+                privilege=args['token'],
+                score=args['score'],
+                role=args['role']
+            )
+            user.set_password(args['password'])
+        session.add(user)
         session.commit()
         return jsonify({'success': 'OK'})

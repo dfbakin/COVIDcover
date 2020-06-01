@@ -5,38 +5,39 @@ from zipfile import ZipFile
 
 stop = False
 log_filename = 'covid_cover.log'
+user_registration = "f5d9063b-ccb1-4a60-b4a1-8abf6ed38708"
 
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(703, 465)
+        MainWindow.resize(703, 543)
         MainWindow.setStyleSheet("background-color: rgb(172, 216, 230);")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_2.setGeometry(QtCore.QRect(420, 280, 181, 61))
+        self.pushButton_2.setGeometry(QtCore.QRect(420, 350, 181, 61))
         self.pushButton_2.setStyleSheet(":!hover{\n"
-                                        "background-color: rgb(172, 216, 230);\n"
-                                        "}\n"
-                                        "\n"
-                                        ":hover{\n"
-                                        "    border: 4px solid black; \n"
-                                        "    background: rgb(105, 185, 211); \n"
-                                        "    padding: 10px;\n"
-                                        "}")
+"background-color: rgb(172, 216, 230);\n"
+"}\n"
+"\n"
+":hover{\n"
+"    border: 4px solid black; \n"
+"    background: rgb(105, 185, 211); \n"
+"    padding: 10px;\n"
+"}")
         self.pushButton_2.setObjectName("pushButton_2")
         self.pushButton_3 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_3.setGeometry(QtCore.QRect(510, 360, 181, 61))
+        self.pushButton_3.setGeometry(QtCore.QRect(520, 430, 171, 61))
         self.pushButton_3.setStyleSheet("backgr:!hover{\n"
-                                        "background-color: rgb(172, 216, 230);\n"
-                                        "}\n"
-                                        "\n"
-                                        ":hover{\n"
-                                        "    border: 4px solid black; \n"
-                                        "    background: rgb(105, 185, 211); \n"
-                                        "    padding: 10px;\n"
-                                        "}ound-color: rgb(172, 216, 230);")
+"background-color: rgb(172, 216, 230);\n"
+"}\n"
+"\n"
+":hover{\n"
+"    border: 4px solid black; \n"
+"    background: rgb(105, 185, 211); \n"
+"    padding: 10px;\n"
+"}ound-color: rgb(172, 216, 230);")
         self.pushButton_3.setObjectName("pushButton_3")
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(80, 0, 721, 41))
@@ -47,45 +48,20 @@ class Ui_MainWindow(object):
         self.label.setFont(font)
         self.label.setObjectName("label")
         self.plainTextEdit = QtWidgets.QPlainTextEdit(self.centralwidget)
-        self.plainTextEdit.setGeometry(QtCore.QRect(10, 240, 301, 181))
+        self.plainTextEdit.setGeometry(QtCore.QRect(10, 340, 301, 151))
         self.plainTextEdit.setObjectName("plainTextEdit")
         self.pushButton_5 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_5.setGeometry(QtCore.QRect(320, 360, 181, 61))
+        self.pushButton_5.setGeometry(QtCore.QRect(320, 430, 191, 61))
         self.pushButton_5.setStyleSheet(":!hover{\n"
-                                        "background-color: rgb(172, 216, 230);\n"
-                                        "}\n"
-                                        "\n"
-                                        ":hover{\n"
-                                        "    border: 4px solid black; \n"
-                                        "    background: rgb(105, 185, 211); \n"
-                                        "    padding: 10px;\n"
-                                        "}")
+"background-color: rgb(172, 216, 230);\n"
+"}\n"
+"\n"
+":hover{\n"
+"    border: 4px solid black; \n"
+"    background: rgb(105, 185, 211); \n"
+"    padding: 10px;\n"
+"}")
         self.pushButton_5.setObjectName("pushButton_5")
-        self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit.setGeometry(QtCore.QRect(12, 90, 271, 31))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.lineEdit.setFont(font)
-        self.lineEdit.setText("")
-        self.lineEdit.setObjectName("lineEdit")
-        self.lineEdit_2 = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit_2.setGeometry(QtCore.QRect(10, 130, 271, 31))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.lineEdit_2.setFont(font)
-        self.lineEdit_2.setObjectName("lineEdit_2")
-        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton.setGeometry(QtCore.QRect(10, 180, 271, 51))
-        self.pushButton.setStyleSheet(":!hover{\n"
-                                      "background-color: rgb(172, 216, 230);\n"
-                                      "}\n"
-                                      "\n"
-                                      ":hover{\n"
-                                      "    border: 4px solid black; \n"
-                                      "    background: rgb(105, 185, 211); \n"
-                                      "    padding: 10px;\n"
-                                      "}")
-        self.pushButton.setObjectName("pushButton")
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
         self.label_3.setGeometry(QtCore.QRect(10, 60, 281, 21))
         font = QtGui.QFont()
@@ -93,15 +69,83 @@ class Ui_MainWindow(object):
         self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
-        self.label_4.setGeometry(QtCore.QRect(300, 70, 391, 111))
+        self.label_4.setGeometry(QtCore.QRect(320, 70, 371, 111))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.label_4.setFont(font)
         self.label_4.setStyleSheet("background-color: rgb(172, 216, 230);")
         self.label_4.setObjectName("label_4")
+        self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
+        self.tabWidget.setGeometry(QtCore.QRect(10, 110, 301, 221))
+        self.tabWidget.setObjectName("tabWidget")
+        self.tab = QtWidgets.QWidget()
+        self.tab.setObjectName("tab")
+        self.lineEdit = QtWidgets.QLineEdit(self.tab)
+        self.lineEdit.setGeometry(QtCore.QRect(10, 10, 271, 31))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.lineEdit.setFont(font)
+        self.lineEdit.setText("")
+        self.lineEdit.setObjectName("lineEdit")
+        self.lineEdit_2 = QtWidgets.QLineEdit(self.tab)
+        self.lineEdit_2.setGeometry(QtCore.QRect(10, 50, 271, 31))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.lineEdit_2.setFont(font)
+        self.lineEdit_2.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.lineEdit_2.setObjectName("lineEdit_2")
+        self.pushButton = QtWidgets.QPushButton(self.tab)
+        self.pushButton.setGeometry(QtCore.QRect(100, 130, 81, 51))
+        self.pushButton.setStyleSheet(":!hover{\n"
+"background-color: rgb(172, 216, 230);\n"
+"}\n"
+"\n"
+":hover{\n"
+"    border: 4px solid black; \n"
+"    background: rgb(105, 185, 211); \n"
+"    padding: 10px;\n"
+"}")
+        self.pushButton.setObjectName("pushButton")
+        self.tabWidget.addTab(self.tab, "")
+        self.tab_2 = QtWidgets.QWidget()
+        self.tab_2.setObjectName("tab_2")
+        self.lineEdit_3 = QtWidgets.QLineEdit(self.tab_2)
+        self.lineEdit_3.setGeometry(QtCore.QRect(10, 50, 271, 31))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.lineEdit_3.setFont(font)
+        self.lineEdit_3.setText("")
+        self.lineEdit_3.setObjectName("lineEdit_3")
+        self.lineEdit_4 = QtWidgets.QLineEdit(self.tab_2)
+        self.lineEdit_4.setGeometry(QtCore.QRect(10, 90, 271, 31))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.lineEdit_4.setFont(font)
+        self.lineEdit_4.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.lineEdit_4.setObjectName("lineEdit_4")
+        self.lineEdit_5 = QtWidgets.QLineEdit(self.tab_2)
+        self.lineEdit_5.setGeometry(QtCore.QRect(10, 10, 271, 31))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.lineEdit_5.setFont(font)
+        self.lineEdit_5.setText("")
+        self.lineEdit_5.setObjectName("lineEdit_5")
+        self.pushButton_4 = QtWidgets.QPushButton(self.tab_2)
+        self.pushButton_4.setGeometry(QtCore.QRect(50, 130, 181, 51))
+        self.pushButton_4.setStyleSheet(":!hover{\n"
+"background-color: rgb(172, 216, 230);\n"
+"}\n"
+"\n"
+":hover{\n"
+"    border: 4px solid black; \n"
+"    background: rgb(105, 185, 211); \n"
+"    padding: 10px;\n"
+"}")
+        self.pushButton_4.setObjectName("pushButton_4")
+        self.tabWidget.addTab(self.tab_2, "")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 703, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 703, 22))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -111,6 +155,7 @@ class Ui_MainWindow(object):
         self.actionExit.setObjectName("actionExit")
 
         self.retranslateUi(MainWindow)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -120,20 +165,28 @@ class Ui_MainWindow(object):
         self.pushButton_3.setText(_translate("MainWindow", "Запустить игру!"))
         self.label.setText(_translate("MainWindow", "Эта программа обновит клиент игры до последней версии."))
         self.plainTextEdit.setPlainText(_translate("MainWindow", "Error logs:\n"
-                                                                 "OK"))
+"OK"))
         self.pushButton_5.setText(_translate("MainWindow", "Запустить мультиплеер!"))
+        self.label_3.setText(_translate("MainWindow", "Auth status here"))
+        self.label_4.setText(_translate("MainWindow", "Все системы функционируют нормально."))
         self.lineEdit.setPlaceholderText(_translate("MainWindow", "Email"))
         self.lineEdit_2.setPlaceholderText(_translate("MainWindow", "Пароль"))
         self.pushButton.setText(_translate("MainWindow", "Войти"))
-        self.label_3.setText(_translate("MainWindow", "Auth status here"))
-        self.label_4.setText(_translate("MainWindow", "Все системы функционируют нормально."))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Войти"))
+        self.lineEdit_3.setPlaceholderText(_translate("MainWindow", "Email"))
+        self.lineEdit_4.setPlaceholderText(_translate("MainWindow", "Пароль"))
+        self.lineEdit_5.setPlaceholderText(_translate("MainWindow", "Имя пользователя"))
+        self.pushButton_4.setText(_translate("MainWindow", "Зарегестрироваться"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Зарегестрироваться"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
-    host = '130.193.46.251'
-    port = '8080'
-
+    """ host = '130.193.46.251'
+        port = '8080'
+    """
+    host = "127.0.0.1"
+    port = "5000"
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -143,18 +196,18 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.pushButton_3.clicked.connect(self.launch_single)
         self.pushButton_2.clicked.connect(lambda: webbrowser.open(f'http://{MyWidget.host}:{MyWidget.port}', new=0))
         self.pushButton_5.clicked.connect(self.launch_multi)
-        self.pushButton.clicked.connect(self.auth)
+        self.pushButton.clicked.connect(self.login)
 
-        self.pushButton_3.setVisible(False)
+        self.pushButton_4.clicked.connect(self.register)
+
         self.pushButton_5.setVisible(False)
-        self.pushButton.setVisible(False)
-        self.lineEdit_2.setEchoMode(QLineEdit.Password)
+
 
         self.label_3.setText('Войдите в учетную запись')
 
         self.user = None
         self.password = None
-        self.update_game()
+#        self.update_game()
 
     def check_hash(self, script_path='.'):
         lst = []
@@ -188,15 +241,45 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             return response.json()['success']
         return False
 
-    def auth(self):
+    def register(self):
+        email = self.lineEdit_3.text()
+        password = self.lineEdit_4.text()
+        username = self.lineEdit_5.text()
+        if not all((email, password, username)):
+            self.show_error('Заполните все поля!')
+            return
+        try:
+            response = requests.post(f'http://{MyWidget.host}:{MyWidget.port}/api/users/token/{user_registration}', data={'email': email, 'password': password, "username": username})
+        except requests.exceptions.ConnectionError:
+            self.show_error('Отсутствует интернет. Запустите программу позже.')
+            return
+        except requests.exceptions.Timeout:
+            self.show_error('Видимо, у наш сервер сейчас отдыхает ;)')
+            return
+        except Exception:
+            self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
+            return
+        if response.status_code == 500:
+            self.show_error('Ошибка на сервере. Мы уже работаем.')
+            return
+        elif response.status_code == 406:
+            self.show_error('Пользователь с таким именем или адресом был уже зарегестрирован')
+        else:
+            self.auth(email, password)
+
+    def login(self):
         email = self.lineEdit.text()
         if not self.password or not self.user:
             self.password = self.lineEdit_2.text()
         password = self.password
         self.lineEdit_2.setText('')
         if not email or not password:
-            self.label_3.setText('Заполните все поля!')
+            self.show_error('Заполните все поля!')
             return
+        self.auth(email, password)
+
+
+    def auth(self, email, password):
         try:
             response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/auth',
                                     params={'email': email, 'password': password}, timeout=3.)
@@ -247,7 +330,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             update_needed = not self.check_hash()
         if update_needed:
             for i in os.listdir():
-                if i == 'launcher.exe':
+                if i in ('launcher.exe', "launcher.py"):
                     continue
                 if '.' in i:
                     os.remove(i)
@@ -287,7 +370,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def launch_multi(self):
         self.show_error('Все системы функционируют нормально.')
-        self.auth()
+        if not self.user:
+            self.auth()
         if not self.user:
             return
         if not self.check_hash():

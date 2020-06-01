@@ -1,20 +1,22 @@
 import os
 import hashlib
-import requests
+import zipfile
+import shutil
 
 
-def check_hash(script_path, ip_and_port):
+def check_hash(path):
     lst = []
     hash = hashlib.md5()
-    for path, dirs, files in os.walk(script_path):
+    with zipfile.ZipFile('static/releases/game.zip') as f:
+        os.mkdir('tmp')
+        f.extractall('tmp')
+    for path, dirs, files in os.walk('tmp'):
         for file in files:
-            if 'launcher' not in file:
-                with open(os.path.join(path, file), mode='rb') as f:
-                    hash.update(f.read())
-                lst.append(hash.digest())
+            with open(os.path.join(path, file), mode='rb') as f:
+                hash.update(f.read())
+            lst.append(hash.digest())
+    shutil.rmtree('tmp')
     hash.update(b''.join(lst))
     output = hash.hexdigest()
-    response = requests.get(f'{ip_and_port}/game_api/check_hash/{output}')
-    if response:
-        return response.json()['success']
-    return False
+
+check_hash('static/releases/game.zip')

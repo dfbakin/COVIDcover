@@ -6,8 +6,8 @@ from random import shuffle
 from uuid import uuid4
 
 bp = Blueprint('game_api', __name__)
-# hash
-HASH = 'd186174ba7b6ebb2e804d10e449dcd91'
+# TODO hash
+HASH = '9787d5d93e05cfcddacba9f503268ae2'
 
 
 def jlst(lst):

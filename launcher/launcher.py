@@ -7,6 +7,120 @@ stop = False
 log_filename = 'covid_cover.log'
 user_registration = "f5d9063b-ccb1-4a60-b4a1-8abf6ed38708"
 
+class Ui_Downloader(object):
+    def setupUi(self, Downloader):
+        Downloader.resize(391, 111)
+        self.centralwidget = QtWidgets.QWidget(Downloader)
+        self.centralwidget.setObjectName("centralwidget")
+        self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
+        self.progressBar.setEnabled(True)
+        self.progressBar.setGeometry(QtCore.QRect(10, 33, 369, 25))
+        self.progressBar.setProperty("value", 0)
+        self.progressBar.setObjectName("progressBar")
+        self.label = QtWidgets.QLabel(self.centralwidget)
+        self.label.setGeometry(QtCore.QRect(10, 10, 369, 17))
+        self.label.setText("")
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setObjectName("label")
+        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton.setEnabled(True)
+        self.pushButton.setGeometry(QtCore.QRect(150, 30, 81, 31))
+        self.pushButton.setObjectName("pushButton")
+        Downloader.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(Downloader)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 391, 22))
+        self.menubar.setObjectName("menubar")
+        Downloader.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(Downloader)
+        self.statusbar.setObjectName("statusbar")
+        Downloader.setStatusBar(self.statusbar)
+
+        self.retranslateUi(Downloader)
+        QtCore.QMetaObject.connectSlotsByName(Downloader)
+
+    def retranslateUi(self, Downloader):
+        _translate = QtCore.QCoreApplication.translate
+        Downloader.setWindowTitle(_translate("Downloader", "Установка обновления"))
+        self.pushButton.setText(_translate("Downloader", "Скачать"))
+
+
+class LoadingWidget(QtWidgets.QMainWindow, Ui_Downloader):
+    host = "127.0.0.1"
+    port = "5000"
+    closed_signal = QtCore.pyqtSignal()
+
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.initUI()
+
+    def initUI(self):
+        self.progressBar.hide()
+        self.pushButton.clicked.connect(self.install)
+        self.show()
+
+    def install(self):
+        self.pushButton.hide()
+        self.progressBar.setValue(0)
+        self.progressBar.show()
+        if os.path.isdir(os.path.join(os.path.dirname(__file__), 'COVIDcover')):
+            try:
+                shutil.rmtree(os.path.join(os.path.dirname(__file__), 'COVIDcover'))
+            except PermissionError:
+                self.show_error('Закройте посторонние программы и перезагрузите лончер')
+                return
+        if self.start_download():
+            self.start_installation()
+        self.closed_signal.emit()
+        self.close()
+
+    def show_message(self, message):
+        buttonReply = QtWidgets.QMessageBox.critical(QtWidgets.QWidget(), 'Ошибка', message,
+                                                     QtWidgets.QMessageBox.Retry, QtWidgets.QMessageBox.Cancel)
+        if buttonReply == QtWidgets.QMessageBox.Cancel:
+            sys.exit(0)
+        else:
+            self.install()
+
+    def start_download(self):
+        self.label.setText('Идёт загрузка игры')
+        try:
+            response = requests.get(f'http://{self.host}:{self.port}/static/releases/game.zip', stream=True)
+            chunks_required = round(int(response.headers.get('content-length', '0')) / 4096)
+            if chunks_required:
+                chunks_downloaded = 0
+                stream = []
+                for chunk in response.iter_content(chunk_size=4096):
+                    stream.append(chunk)
+                    chunks_downloaded += 1
+                    self.progressBar.setValue(int(chunks_downloaded / chunks_required * 100))
+                    QtWidgets.QApplication.processEvents()
+        except requests.exceptions.ConnectionError:
+            self.show_message('Отсутствует интернет. Запустите программу позже.')
+            return
+        except requests.exceptions.Timeout:
+            self.show_message('Видимо, у наш сервер сейчас отдыхает ;)')
+            return
+        except Exception as e:
+            self.show_message('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
+            return
+        if response.status_code == 500:
+            self.show_message('Ошибка на сервере. Мы уже работаем.')
+            return False
+        with open('tmp.zip', mode='wb') as file:
+            file.write(b"".join(stream))
+        return True
+
+    def start_installation(self):
+        self.progressBar.hide()
+        self.label.setText('Идёт установка игры')
+        QtWidgets.QApplication.processEvents()
+        os.mkdir(os.path.join(os.path.dirname(__file__), "COVIDcover"))
+        with ZipFile("tmp.zip") as zp:
+            zp.extractall(os.path.join(os.path.dirname(__file__), "COVIDcover"))
+        os.remove(os.path.join(os.path.dirname(__file__), "tmp.zip"))
+        self.close()
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -191,6 +305,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.initUI()
+        self.show()
 
     def initUI(self):
         self.pushButton_3.clicked.connect(self.launch_single)
@@ -207,17 +322,16 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
         self.user = None
         self.password = None
-#        self.update_game()
+        self.update_game()
 
-    def check_hash(self, script_path='.'):
+    def check_hash(self, script_path=str(os.path.join(os.path.dirname(__file__), "COVIDcover"))):
         lst = []
         hash = hashlib.md5()
         for path, dirs, files in os.walk(script_path):
             for file in files:
-                if 'launcher' not in file:
-                    with open(os.path.join(path, file), mode='rb') as f:
-                        hash.update(f.read())
-                    lst.append(hash.digest())
+                with open(os.path.join(path, file), mode='rb') as f:
+                    hash.update(f.read())
+                lst.append(hash.digest())
         hash.update(b''.join(lst))
         output = hash.hexdigest()
         try:
@@ -305,8 +419,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         return True
 
     def update_game(self):
-        update_needed = True
-        if os.path.isfile('versions.json'):
+        self.update_needed = True
+        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'COVIDcover/versions.json')):
             try:
                 response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/static/releases/versions.json',
                                         timeout=5.)
@@ -323,50 +437,16 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.show_error('Ошибка на сервере. Мы уже работаем.')
                 return False
             versions_list = json.loads(response.content.decode('utf-8'))
-            with open('versions.json', mode='r', encoding='utf-8') as f:
+            with open(os.path.join(os.path.dirname(__file__), 'COVIDcover/versions.json'), mode='r', encoding='utf-8') as f:
                 data = json.load(f)
-                update_needed = data['last_version'] != versions_list['last_version']
-        if not update_needed:
-            update_needed = not self.check_hash()
-        if update_needed:
-            for i in os.listdir():
-                if i in ('launcher.exe', "launcher.py"):
-                    continue
-                if '.' in i:
-                    os.remove(i)
-                else:
-                    try:
-                        shutil.rmtree(i)
-                    except PermissionError:
-                        self.show_error('Закройте посторонние программы и перезагрузите лончер')
-                        return
-            self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + '\n' + 'Загрузка...')
-            with open('game.zip', mode='wb') as f:
-                try:
-                    response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/static/releases/game.zip')
-                except requests.exceptions.ConnectionError:
-                    self.show_error('Отсутствует интернет. Запустите программу позже.')
-                    return
-                except requests.exceptions.Timeout:
-                    self.show_error('Видимо, у наш сервер сейчас отдыхает ;)')
-                    return
-                except Exception:
-                    self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
-                    return
-                if response.status_code == 500:
-                    self.show_error('Ошибка на сервере. Мы уже работаем.')
-                    return
-                f.write(response.content)
+                self.update_needed = data['last_version'] != versions_list['last_version']
+        if not self.update_needed:
+            self.update_needed = not self.check_hash()
+        if self.update_needed:
+            self.hide()
+            self.updater = LoadingWidget() # TODO Update launcher
+            self.updater.closed_signal.connect(self.show)
 
-            self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + '\n' + 'Распаковка файлов...')
-            with ZipFile('game.zip') as myzip:
-                myzip.extractall('')
-            self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + '\n' + 'Удаление...')
-            os.remove('game.zip')
-        self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + '\n' + 'Обновление завершено.')
-        self.pushButton_3.setVisible(True)
-        self.label_3.setVisible(True)
-        self.pushButton.setVisible(True)
 
     def launch_multi(self):
         self.show_error('Все системы функционируют нормально.')
@@ -495,5 +575,4 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = MyWidget()
-    ex.show()
     sys.exit(app.exec())

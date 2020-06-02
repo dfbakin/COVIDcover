@@ -118,7 +118,7 @@ def render_text(line, size=50, color=(255, 255, 255)):
 
 
 class Player(pygame.sprite.Sprite):
-    speed = 5
+    speed = 8
     jump_power = 10
     infection_rate = 1100
 
@@ -824,11 +824,28 @@ class Shop(pygame.sprite.Sprite):
                 clock.tick(fps)
             shop_buttons.empty()
             return run, status
+        def reset():
+            carrot = products['carrot']
+            if carrot.can_be_bought():
+                carrot.set_pos((350, 180))
+                carrot.add_to_groups(shop_products)
+            potato = products['potato']
+            if potato.can_be_bought():
+                potato.set_pos((550, 180))
+                potato.add_to_groups(shop_products)
+            if level == 3:
+                apple = products['apple']
+                if apple.can_be_bought():
+                    apple.set_pos((350, 300))
+                    apple.add_to_groups(shop_products)
 
         button_group.empty()
         if level == 1:
             return
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, pharm_buttons)
+        cancel_button = Button(width - 150, 350, 50, 50,
+                               load_image('data/objects/cancel_button.png', size=(50, 50)),
+                               None, 'clear', shop_buttons)
 
         backgr = pygame.sprite.Sprite(background_shop)
         backgr.image = load_image('data/inside/shop_1_inside.png', size=size)
@@ -836,19 +853,7 @@ class Shop(pygame.sprite.Sprite):
 
         running = True
 
-        carrot = products['carrot']
-        if carrot.can_be_bought():
-            carrot.set_pos((350, 180))
-            carrot.add_to_groups(shop_products)
-        potato = products['potato']
-        if potato.can_be_bought():
-            potato.set_pos((550, 180))
-            potato.add_to_groups(shop_products)
-        if level == 3:
-            apple = products['apple']
-            if apple.can_be_bought():
-                apple.set_pos((350, 300))
-                apple.add_to_groups(shop_products)
+        reset()
 
         cart = []
         cart_rect = pygame.Rect(950, 300, 150, 450)
@@ -863,7 +868,11 @@ class Shop(pygame.sprite.Sprite):
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for btn in shop_buttons:
                         if btn.rect.collidepoint(event.pos):
-                            running = btn.run()
+                            if btn.id == 'clear':
+                                cart = []
+                                reset()
+                            else:
+                                running = btn.run()
                     for product in shop_products:
                         if product.rect.collidepoint(event.pos):
                             cart.append(product)
@@ -959,11 +968,20 @@ class SecondShop(pygame.sprite.Sprite):
                 clock.tick(fps)
             shop_buttons.empty()
             return run, status
+        def reset():
+            if level == 2 or level == 3:
+                soap = products['soap']
+                if soap.can_be_bought():
+                    soap.set_pos((950, 180))
+                    soap.add_to_groups(shop_products)
 
         button_group.empty()
         if level == 1:
             return
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, pharm_buttons)
+        cancel_button = Button(400, 350, 50, 50,
+                               load_image('data/objects/cancel_button.png', size=(50, 50)),
+                               None, 'clear', shop_buttons)
 
         backgr = pygame.sprite.Sprite(background_shop)
         backgr.image = load_image('data/inside/shop_2_inside.png', size=size)
@@ -971,11 +989,7 @@ class SecondShop(pygame.sprite.Sprite):
 
         running = True
 
-        if level == 2 or level == 3:
-            soap = products['soap']
-            if soap.can_be_bought():
-                soap.set_pos((950, 180))
-                soap.add_to_groups(shop_products)
+        reset()
 
         cart = []
         cart_rect = pygame.Rect(300, 327, 80, 200)
@@ -990,7 +1004,11 @@ class SecondShop(pygame.sprite.Sprite):
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for btn in shop_buttons:
                         if btn.rect.collidepoint(event.pos):
-                            running = btn.run()
+                            if btn.id == 'clear':
+                                cart = []
+                                reset()
+                            else:
+                                running = btn.run()
                     for product in shop_products:
                         if product.rect.collidepoint(event.pos):
                             cart.append(product)
@@ -1087,29 +1105,35 @@ class Pharmacy(pygame.sprite.Sprite):
                 clock.tick(fps)
             pharm_buttons.empty()
             return run, status
+        def reset():
+            if level == 2 or level == 3:
+                bottle = products['alcohol']
+                if bottle.can_be_bought():
+                    bottle.set_pos((350, 180))
+                    bottle.add_to_groups(pharm_products)
+            mask = products['mask']
+            if mask.can_be_bought():
+                mask.set_pos((550, 180))
+                mask.add_to_groups(pharm_products)
+
+            pills = products['pills']
+            if pills.can_be_bought():
+                pills.set_pos((750, 180))
+                pills.add_to_groups(pharm_products)
 
         button_group.empty()
         pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, pharm_buttons)
+        cancel_button = Button(width - 150, 350, 50, 50,
+                               load_image('data/objects/cancel_button.png', size=(50, 50)),
+                               None, 'clear', pharm_buttons)
 
         backgr = pygame.sprite.Sprite(background_pharm)
         backgr.image = load_image('data/inside/pharmacy_inside.png', size=size)
         backgr.rect = backgr.image.get_rect()
 
         running = True
-        if level == 2 or level == 3:
-            bottle = products['alcohol']
-            if bottle.can_be_bought():
-                bottle.set_pos((350, 180))
-                bottle.add_to_groups(pharm_products)
-        mask = products['mask']
-        if mask.can_be_bought():
-            mask.set_pos((550, 180))
-            mask.add_to_groups(pharm_products)
 
-        pills = products['pills']
-        if pills.can_be_bought():
-            pills.set_pos((750, 180))
-            pills.add_to_groups(pharm_products)
+        reset()
 
         cart = []
         cart_rect = pygame.Rect(950, 300, 150, 450)
@@ -1124,7 +1148,11 @@ class Pharmacy(pygame.sprite.Sprite):
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for btn in pharm_buttons:
                         if btn.rect.collidepoint(event.pos):
-                            running = btn.run()
+                            if btn.id == 'clear':
+                                cart = []
+                                reset()
+                            else:
+                                running = btn.run()
                     for product in pharm_products:
                         if product.rect.collidepoint(event.pos):
                             cart.append(product)

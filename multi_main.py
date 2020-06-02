@@ -663,9 +663,9 @@ class Character(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         if random() > 0.5:
-            self.rect.x, self.rect.y = randint(100, 4000), randint(200, 300)
+            self.rect.x, self.rect.y = randint(100, 4000) + terrain.rect.x, randint(200, 300) + terrain.rect.y
         else:
-            self.rect.x, self.rect.y = randint(4000, 7500), randint(100, 200)
+            self.rect.x, self.rect.y = randint(4000, 7500) + terrain.rect.x, randint(100, 200) + terrain.rect.y
         self.image_num = 0
 
         self.prev_coords = 0, 0
@@ -675,7 +675,7 @@ class Character(pygame.sprite.Sprite):
         self.clock = pygame.time.Clock()
         self.side = 'left'
 
-        self.health = 100
+        self.health = 1000
         self.hazard_risk = 0
         self.danger_level = 1
         self.hazard_timer = 0
@@ -769,7 +769,7 @@ class Character(pygame.sprite.Sprite):
 
     def update(self, *args):
         if self.first_update:
-            if check_collisions(self):
+            if check_collisions(self) or (0 < self.rect.x < width and 0 < self.rect.y < height):
                 Character(npc_group, all_sprites)
                 self.kill()
                 return
@@ -2630,18 +2630,20 @@ box.rect.x, box.rect.y = 408, 1555
 # role = 'volunteer'
 
 # generating all objects
-for i in range(25):
-    Character(npc_group, all_sprites)
 
 player = Player(3850, 1000, role, player_group)  # 3850, 1000
 player.id = internal_id
 player.name = player_name
 terrain = Terrain(0, 0, all_sprites, terrain_group)
+
+for i in range(25):
+    Character(npc_group, all_sprites)
+
 bank = Bank(1400, 65, all_sprites, building_group)
 home = MainHouse(3710, 700, building_group, all_sprites)
 pharmacy = Pharmacy(6189, 325, building_group, all_sprites)
 shop = Shop(3650, 260, building_group, all_sprites)
-second_shop = SecondShop(7381, 400, building_group, all_sprites)
+second_shop = SecondShop(7350, 475, building_group, all_sprites)
 hospital = Hospital(580, 305, building_group, all_sprites)
 volunteer = Volunteers(4362, 225, building_group, all_sprites)
 

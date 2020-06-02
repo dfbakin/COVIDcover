@@ -65,26 +65,6 @@ background-color: rgb(172, 216, 230);
      <string>Запустить игру!</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>80</x>
-      <y>0</y>
-      <width>721</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Viner Hand ITC</family>
-      <pointsize>14</pointsize>
-      <italic>false</italic>
-     </font>
-    </property>
-    <property name="text">
-     <string>Эта программа обновит клиент игры до последней версии.</string>
-    </property>
-   </widget>
    <widget class="QPlainTextEdit" name="plainTextEdit">
     <property name="geometry">
      <rect>
@@ -127,7 +107,7 @@ background-color: rgb(172, 216, 230);
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>60</y>
+      <y>80</y>
       <width>281</width>
       <height>21</height>
      </rect>
@@ -144,10 +124,10 @@ background-color: rgb(172, 216, 230);
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>70</y>
-      <width>371</width>
-      <height>111</height>
+      <x>10</x>
+      <y>10</y>
+      <width>681</width>
+      <height>61</height>
      </rect>
     </property>
     <property name="font">

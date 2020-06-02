@@ -49,8 +49,8 @@ class LoadingWidget(QtWidgets.QMainWindow, Ui_Downloader):
     port = "5000"
     closed_signal = QtCore.pyqtSignal()
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent):
+        super().__init__(parent)
         self.setupUi(self)
         self.initUI()
 
@@ -153,14 +153,6 @@ class Ui_MainWindow(object):
 "    padding: 10px;\n"
 "}ound-color: rgb(172, 216, 230);")
         self.pushButton_3.setObjectName("pushButton_3")
-        self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(80, 0, 721, 41))
-        font = QtGui.QFont()
-        font.setFamily("Viner Hand ITC")
-        font.setPointSize(14)
-        font.setItalic(False)
-        self.label.setFont(font)
-        self.label.setObjectName("label")
         self.plainTextEdit = QtWidgets.QPlainTextEdit(self.centralwidget)
         self.plainTextEdit.setGeometry(QtCore.QRect(10, 340, 301, 151))
         self.plainTextEdit.setObjectName("plainTextEdit")
@@ -177,17 +169,18 @@ class Ui_MainWindow(object):
 "}")
         self.pushButton_5.setObjectName("pushButton_5")
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
-        self.label_3.setGeometry(QtCore.QRect(10, 60, 281, 21))
+        self.label_3.setGeometry(QtCore.QRect(10, 80, 281, 21))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
-        self.label_4.setGeometry(QtCore.QRect(320, 70, 371, 111))
+        self.label_4.setGeometry(QtCore.QRect(10, 0, 681, 51))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.label_4.setFont(font)
         self.label_4.setStyleSheet("background-color: rgb(172, 216, 230);")
+        self.label_4.setTextFormat(QtCore.Qt.AutoText)
         self.label_4.setObjectName("label_4")
         self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
         self.tabWidget.setGeometry(QtCore.QRect(10, 110, 301, 221))
@@ -277,7 +270,6 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Launcher"))
         self.pushButton_2.setText(_translate("MainWindow", "Открыть сайт"))
         self.pushButton_3.setText(_translate("MainWindow", "Запустить игру!"))
-        self.label.setText(_translate("MainWindow", "Эта программа обновит клиент игры до последней версии."))
         self.plainTextEdit.setPlainText(_translate("MainWindow", "Error logs:\n"
 "OK"))
         self.pushButton_5.setText(_translate("MainWindow", "Запустить мультиплеер!"))
@@ -295,6 +287,7 @@ class Ui_MainWindow(object):
         self.actionExit.setText(_translate("MainWindow", "Exit"))
 
 
+
 class MyWidget(QMainWindow, Ui_MainWindow):
     """ host = '130.193.46.251'
         port = '8080'
@@ -305,7 +298,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.initUI()
-        self.show()
+        self.update_game()
+        if not self.update_needed:
+            self.tabWidget.setVisible(True)
+            self.label_3.setVisible(True)
 
     def initUI(self):
         self.pushButton_3.clicked.connect(self.launch_single)
@@ -314,15 +310,16 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.pushButton.clicked.connect(self.login)
 
         self.pushButton_4.clicked.connect(self.register)
-
         self.pushButton_5.setVisible(False)
-
-
         self.label_3.setText('Войдите в учетную запись')
+
+        self.tabWidget.setVisible(False)
+        self.label_3.setVisible(False)
 
         self.user = None
         self.password = None
-        self.update_game()
+
+        self.show()
 
     def check_hash(self, script_path=str(os.path.join(os.path.dirname(__file__), "COVIDcover"))):
         lst = []
@@ -425,16 +422,16 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/static/releases/versions.json',
                                         timeout=5.)
             except requests.exceptions.ConnectionError:
-                self.show_error('Отсутствует интернет. Запустите программу позже.')
+                self.show_error('Отсутствует интернет. Вам недоступна сетевая игра')
                 return
             except requests.exceptions.Timeout:
-                self.show_error('Видимо, у наш сервер сейчас отдыхает ;)')
+                self.show_error('Видимо, у наш сервер сейчас отдыхает ;) Вам недоступна сетевая игра')
                 return
             except Exception:
-                self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
+                self.show_error('Возникла непредвиденная ошибка.\nВы можете написать в тех. поддержку.\nВам недоступна сетевая игра')
                 return
             if response.status_code == 500:
-                self.show_error('Ошибка на сервере. Мы уже работаем.')
+                self.show_error('Ошибка на сервере. Мы уже работаем.\nВам недоступна сетевая игра')
                 return False
             versions_list = json.loads(response.content.decode('utf-8'))
             with open(os.path.join(os.path.dirname(__file__), 'COVIDcover/versions.json'), mode='r', encoding='utf-8') as f:
@@ -444,7 +441,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.update_needed = not self.check_hash()
         if self.update_needed:
             self.hide()
-            self.updater = LoadingWidget() # TODO Update launcher
+            self.updater = LoadingWidget(self) # TODO Update launcher
             self.updater.closed_signal.connect(self.show)
 
 
@@ -492,13 +489,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         else:
             return
 
-        with open('launch.bat', mode='w', encoding='utf-8') as f:
-            f.write(
-                f"multi_build\multi_main {role} {self.user['score']} {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
-
         try:
             self.hide()
-            os.system('launch')
+            os.system(f"{os.path.abspath(os.path.join(os.path.dirname(__file__), 'multi_build/multi_main.exe'))} {role} {self.user['score']} {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
             self.show()
             with open('score.dat', mode='r', encoding='utf-8') as file:
                 score, error_code = file.read().strip().split()
@@ -528,8 +521,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
                              params={'user_token': self.user['token'], 'score': 0})
             finally:
-                if os.path.isfile('launch.bat'):
-                    os.remove('launch.bat')
                 if os.path.isfile('score.dat'):
                     os.remove('score.dat')
                 if error_code != 0:
@@ -554,19 +545,14 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                         self.show_error(str(e))
 
     def launch_single(self):
-        with open('launch.bat', mode='w', encoding='utf-8') as f:
-            f.write("main_build\main")
-
         try:
             self.hide()
-            os.system('launch')
+            os.system(os.path.abspath(os.path.join(os.path.dirname(__file__), 'main_build/main.exe')))
             self.show()
         except Exception as e:
             self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + str(e) + '\n\n')
         finally:
             self.show()
-            if os.path.isfile('launch.bat'):
-                os.remove('launch.bat')
 
     def show_error(self, error):
         self.label_4.setText(error)

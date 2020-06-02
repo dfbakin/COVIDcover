@@ -181,3 +181,18 @@ def get_log():
 @bp.route('/game_api/check_hash/<hsh>')
 def check_hash(hsh):
     return jsonify({'success': hsh == HASH})
+
+
+@bp.route('/game_api/roles_left')
+def roles_left():
+    if any(i not in request.args for i in ('user_token', 'role')):
+        abort(400)
+    session = create_session()
+    user = session.query(User).filter(User.token == request.args["user_token"]).first()
+    if not user:
+        abort(404)
+    server = session.query(Server).filter(Server.players.like(f'% {str(user.id)} %')).first()
+    if not server:
+        abort(406)
+    roles = server.roles.split()
+    return jsonify({"success": request.args['role'] in roles})

@@ -20,7 +20,7 @@ logging.info('game init')
 # exit point IN ANY WAY
 # is used when game stops
 # saves and logs exit code (error_code)
-def exit_game():
+def exit_game(no_player=False):
     global global_exit
     # setting signal for other threads to stop
     global_exit = True
@@ -28,7 +28,11 @@ def exit_game():
     time.sleep(0.25)
     logging.info(f'exit code: {error_code}')
     with open('score.dat', mode='w', encoding='utf-8') as file:
-        file.write(str(player.card_money) + ' ' + str(error_code))
+        try:
+            money = player.card_money
+        except NameError:
+            money = 0
+        file.write(str(money) + ' ' + str(error_code))
     sys.exit()
 
 
@@ -96,11 +100,11 @@ orders = None
 # port = int(port)
 api_port = 8080
 # for debug
-role = 'citizen'
+role = 'policeman'
 host, port = '127.0.0.1', 9000
 player_name = '123456'
-internal_id = '9f8e6b0c-62c7-4b09-b6d3-f923f3bf9860'
-# internal_id = '0c4b8f94-b0d1-4731-8566-0bfa4a989610'
+# internal_id = '9f8e6b0c-62c7-4b09-b6d3-f923f3bf9860'
+internal_id = '0c4b8f94-b0d1-4731-8566-0bfa4a989610'
 # internal_id = '2a288d46-b3bf-4669-a938-dbaa6e8d9126'
 # ip = socket.gethostbyname('0.tcp.ngrok.io')
 # host = ip
@@ -446,7 +450,7 @@ class Player(pygame.sprite.Sprite):
         self.id = None
         self.speed = Player.speed
 
-        self.card_money = 2500
+        self.card_money = 15500
         self.cash = 5000
         self.profit = 0.1
         self.profit_timer = pygame.time.Clock()
@@ -1236,15 +1240,15 @@ class MainHouse(pygame.sprite.Sprite):
                 # check_res = ('Редактор презентаций' in items_names, 'Текстовый редактор' in items_names,
                 # 'Математический помощник' in items_names)
                 if 'Редактор презентаций' in items_names:
-                    image_icon = Button(250, 100, 200, 200,
-                                        load_image('data/objects/order_icon.png', size=(200, 200)),
+                    image_icon = Button(350, 100, 200, 200,
+                                        load_image('data/objects/image_icon.png', size=(200, 200)),
                                         image_prog, None, tablet_group)
                 if 'Текстовый редактор' in items_names:
-                    word_icon = Button(400, 100, 200, 200,
+                    word_icon = Button(600, 100, 200, 200,
                                        load_image('data/objects/word_icon.png', size=(200, 200)),
                                        text_prog, None, tablet_group)
                 if 'Математический помощник' in items_names:
-                    table_icon = Button(550, 100, 200, 200,
+                    table_icon = Button(850, 100, 200, 200,
                                         load_image('data/objects/table_icon.png', size=(200, 200)),
                                         table_prog, None, tablet_group)
 
@@ -1530,6 +1534,7 @@ class Shop(pygame.sprite.Sprite):
                     return False, True, 'success'
                 logging.info('transaction error')
                 return False, True, 'error'
+
             running = True
             shop_buttons.empty()
             Button(width // 3, height - 100, 200, 50, render_text('Назад'), lambda: (False, True, 'ok'), None,
@@ -1565,6 +1570,7 @@ class Shop(pygame.sprite.Sprite):
                 clock.tick(fps)
             shop_buttons.empty()
             return run, status
+
         def reset():
             carrot = products['carrot']
             if carrot.can_be_bought():
@@ -1880,6 +1886,7 @@ class Pharmacy(pygame.sprite.Sprite):
                 clock.tick(fps)
             pharm_buttons.empty()
             return run, status
+
         def reset():
             bottle = products['alcohol']
             if bottle.can_be_bought():
@@ -1901,7 +1908,6 @@ class Pharmacy(pygame.sprite.Sprite):
         cancel_button = Button(width - 150, 350, 50, 50,
                                load_image('data/objects/cancel_button.png', size=(50, 50)),
                                None, 'clear', pharm_buttons)
-
 
         backgr = pygame.sprite.Sprite(background_pharm)
         backgr.image = load_image('data/inside/pharmacy_inside.png', size=size)
@@ -2720,6 +2726,91 @@ def menu(pause=False):
     return 1
 
 
+def choose_role():
+    global role, error_code
+    running = True
+    pos = (0, 0)
+    message = ''
+    message_clock = pygame.time.Clock()
+    message_num = 0
+
+    canvas = pygame.Surface((160, 225))
+    canvas.fill((181, 109, 2))
+    canvas.blit(load_image('data/characters/citizen_right_5.png'), (0, 0))
+    Button(width // 5 - 50, height // 3, 160, 225, canvas, lambda: 'citizen', 'Обыватель', button_group)
+
+    canvas = pygame.Surface((160, 225))
+    canvas.fill((181, 109, 2))
+    canvas.blit(load_image('data/characters/policeman_right_1.png', size=(160, 225)), (0, 0))
+    Button(width // 2 - 50, height // 3, 160, 225, canvas, lambda: 'policeman', 'Полицейский', button_group)
+
+    canvas = pygame.Surface((160, 225))
+    canvas.fill((181, 109, 2))
+    canvas.blit(pygame.transform.flip(load_image(f'data/characters/citizen_right_5.png'), 1, 0), (0, 0))
+    Button(width // 5 * 4, height // 3, 160, 225, canvas, lambda: 'volunteer', 'Волонтер', button_group)
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit_game(no_player=True)
+            elif event.type == pygame.MOUSEMOTION:
+                pos = event.pos
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                pos = event.pos
+                for btn in button_group:
+                    if btn.rect.collidepoint(pos):
+                        role = btn.run()
+                        logging.info(role)
+                        if role == 'policeman':
+                            role = 'pol'
+                        elif role == 'citizen':
+                            role = 'use'
+                        else:
+                            role == 'cou'
+                        params = {'role': role,
+                                  'user_token': internal_id}
+                        try:
+                            json_response = requests.get(f'http://{host}:{api_port}/game_api/roles_left',
+                                                         params=params).json()
+                        except requests.exceptions.Timeout:
+                            error_code = -6
+                            exit_game(no_player=True)
+                        except requests.exceptions.ConnectionError:
+                            error_code = -5
+                            exit_game(no_player=True)
+                        if json_response['success']:
+                            running = False
+                            logging.info('chose')
+                        else:
+                            message = 'Эта роль уже занята для этого сервера'
+                            logging.info('busy')
+        data = pygame.key.get_pressed()
+        # if esc button is pressed break the loop and continue the game
+        if message:
+            message_num += message_clock.tick()
+        else:
+            message_clock.tick()
+        if message_num >= 3000:
+            message = ''
+            message_num = 0
+
+        screen.fill((219, 146, 72))
+        screen.blit(render_text(message, color=(255, 0, 0), size=50), (200, 150))
+        button_group.update(pos)
+        for btn in button_group:
+            if btn.rect.collidepoint(pos):
+                screen.blit(render_text(btn.id, size=50), (width // 2 - 50, height - 50))
+        button_group.draw(screen)
+        pygame.display.flip()
+        clock.tick(fps)
+    button_group.empty()
+    settings_buttons_group.empty()
+    # bug?
+    menu_is_on = False
+    # returns 1 not to break the main loop (note comments below)
+    return 1
+
+
 # generating all products from the .dat file
 # it makes adding products far easier
 with open('data/data_files/products.dat', mode='r', encoding='utf-8') as f:
@@ -2746,8 +2837,10 @@ clock = pygame.time.Clock()
 info_clock = pygame.time.Clock()
 pos = (0, 0)
 
-# menu func call is commented in multi mode and active in the sibgle mode
+# menu func call is commented in multi mode and active in the single mode
 # menu()
+
+choose_role()
 
 backgr = pygame.sprite.Sprite(background_group)
 backgr.image = load_image('data/textures/background.png', size=size)
@@ -2797,7 +2890,7 @@ camera.update(player)
 scanner_on = False
 arrest_rate = 0
 
-pharmacy.enter()
+# home.enter()
 
 # all exceptions in the loop cause quit and all of exit_game func
 try:
@@ -2808,6 +2901,35 @@ try:
             if event.type == pygame.MOUSEMOTION:
                 pos = event.pos
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if player.role == 'policeman':
+                    for i in remote_players:
+                        try:
+                            if i.rect.collidepoint(event.pos) and distance(player.get_coords(), event.pos) <= 450:
+                                arrest_rate += 1
+                                print(arrest_rate)
+                                # score is changed according to the role of arrested player
+                                if arrest_rate >= 10:
+                                    caught_ids.append(i.id)
+                                    if i.infected == 3:
+                                        player.card_money += 100
+                                    elif i.role == 'policeman':
+                                        player.card_money -= 120
+                                    elif i.role == 'volunteer':
+                                        player.card_money -= 100
+                                    elif i.infected == 2:
+                                        player.card_money -= 100
+                                    elif i.infected == 1:
+                                        player.card_money -= 25
+                                    arrest_rate = 0
+                        # AttrErr is risen if there were an error during RemotePlayer init
+                        except AttributeError:
+                            # we delete the instance with a trouble
+                            if i.id in player_params.keys():
+                                del player_params[i.id]
+                                i.kill()
+                        except Exception as e:
+                            print(e)
+
                 if event.button == 2:
                     if box.rect.collidepoint(event.pos):
                         box.kill()
@@ -2855,7 +2977,7 @@ try:
                     sounds['close_door'].play()
                 player.inside = False
                 pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None, button_group)
-        if data[51]:
+        '''if data[51]:
             if player.role == 'policeman':
                 for i in remote_players:
                     try:
@@ -2883,7 +3005,7 @@ try:
                             del player_params[i.id]
                             i.kill()
                     except Exception as e:
-                        print(e)
+                        print(e)'''
         # check keyboard moving input
         if data[97]:
             player.move_left()

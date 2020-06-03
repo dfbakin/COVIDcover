@@ -824,6 +824,7 @@ class Shop(pygame.sprite.Sprite):
                 clock.tick(fps)
             shop_buttons.empty()
             return run, status
+
         def reset():
             carrot = products['carrot']
             if carrot.can_be_bought():
@@ -968,6 +969,7 @@ class SecondShop(pygame.sprite.Sprite):
                 clock.tick(fps)
             shop_buttons.empty()
             return run, status
+
         def reset():
             if level == 2 or level == 3:
                 soap = products['soap']
@@ -1105,6 +1107,7 @@ class Pharmacy(pygame.sprite.Sprite):
                 clock.tick(fps)
             pharm_buttons.empty()
             return run, status
+
         def reset():
             if level == 2 or level == 3:
                 bottle = products['alcohol']

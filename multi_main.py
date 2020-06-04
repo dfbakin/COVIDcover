@@ -243,6 +243,17 @@ def check_order_is_done():
             player.order = 'done'
 
 
+def count_time():
+    global global_time
+    local_clock = pygame.time.Clock()
+    while not global_exit:
+        global_time -= 1
+        if global_time <= 0:
+            exit_game()
+            break
+        local_clock.tick(1)
+
+
 def stop_speeches():
     for sound in speeches.values():
         sound.stop()
@@ -257,6 +268,22 @@ def load_image(path, colorkey=None, size=None) -> pygame.Surface:
     if size:
         image = pygame.transform.scale(image, size)
     return image
+
+
+def draw_timer():
+    global global_time, total_game_seconds
+    current_time = global_time
+    time_position = (900, 5)
+    minutes, seconds = str(current_time // 60).rjust(2, '0'), str(current_time % 60).rjust(2, '0')
+    rect = pygame.Rect((time_position[0] - 5, time_position[1] - 5,
+                        time_position[1] + 100, time_position[1] + 40))
+    pygame.draw.rect(screen, (236, 222, 181), rect, 0)
+    if current_time > total_game_seconds // 2:
+        screen.blit(render_text(f'{minutes}:{seconds}', size=50, color=(0, 255, 0)), time_position)
+    elif current_time > total_game_seconds // 4:
+        screen.blit(render_text(f'{minutes}:{seconds}', size=50, color=(255, 255, 0)), time_position)
+    else:
+        screen.blit(render_text(f'{minutes}:{seconds}', size=50, color=(255, 0, 0)), time_position)
 
 
 def distance(first, second):
@@ -1289,6 +1316,7 @@ class MainHouse(pygame.sprite.Sprite):
                         if result:
                             # screen.blit(render_text(result, color=(255, 0, 0)), (width // 2, 500))
                             screen.blit(render_text(result, color=(0, 0, 0)), (width // 2, 500))
+                        draw_timer()
                         pygame.display.flip()
                         clock.tick(fps)
                     backgr.kill()
@@ -1393,6 +1421,7 @@ class MainHouse(pygame.sprite.Sprite):
                         screen.blit(player.render_info(background=(177, 170, 142)), (0, 0))
                         if result:
                             screen.blit(render_text(result, color=(0, 0, 0)), (width // 2, 500))
+                        draw_timer()
                         pygame.display.flip()
                         clock.tick(fps)
                     backgr.kill()
@@ -1415,7 +1444,6 @@ class MainHouse(pygame.sprite.Sprite):
                             data = f.readlines()
                             answer = choice(data).strip()
                         return res, answer
-
 
                     result = ''
                     result_clock = pygame.time.Clock()
@@ -1481,6 +1509,7 @@ class MainHouse(pygame.sprite.Sprite):
                             screen.blit(render_text(result, color=(0, 0, 0)), (width // 2, 500))
                         screen.blit(first_label, (500, 100))
                         screen.blit(second_label, (500 + first_label.get_width(), 100))
+                        draw_timer()
                         pygame.display.flip()
                         clock.tick(fps)
                     backgr.kill()
@@ -1541,6 +1570,7 @@ class MainHouse(pygame.sprite.Sprite):
                     tablet_group.draw(screen)
                     button_group.draw(screen)
                     screen.blit(player.render_info(background=(177, 170, 142)), (0, 0))
+                    draw_timer()
                     pygame.display.flip()
                     clock.tick(fps)
                 backgr.kill()
@@ -1595,6 +1625,7 @@ class MainHouse(pygame.sprite.Sprite):
                 house_buttons.draw(screen)
                 house_group.draw(screen)
                 screen.blit(player.render_info(background=(177, 170, 142)), (0, 0))
+                draw_timer()
                 pygame.display.flip()
                 clock.tick(fps)
                 thread_num += 1
@@ -1749,6 +1780,7 @@ class MainHouse(pygame.sprite.Sprite):
                 bank_buttons.draw(screen)
                 screen.blit(player.render_info(background=(156, 65, 10)), (0, 0))
                 screen.blit(main_display, (100, 70))
+                draw_timer()
                 pygame.display.flip()
                 clock.tick(fps)
 
@@ -1827,6 +1859,7 @@ class Shop(pygame.sprite.Sprite):
                 for num in range(len(cart)):
                     screen.blit(render_text(f'{num + 1} -- {cart[num].name} ------ {cart[num].get_price()}'),
                                 (width // 2, height // 2 - 200 + 35 * num))
+                    draw_timer()
                 pygame.display.flip()
                 clock.tick(fps)
             shop_buttons.empty()
@@ -1912,6 +1945,7 @@ class Shop(pygame.sprite.Sprite):
             if status == 'error':
                 screen.blit(render_text('Недостаточно средств! Посетите банк!', color=(255, 0, 0)), (200, 100))
             screen.blit(player.render_info(background=(179, 185, 206)), (0, 0))
+            draw_timer()
             pygame.display.flip()
             clock.tick(fps)
         shop_buttons.empty()
@@ -1984,6 +2018,7 @@ class SecondShop(pygame.sprite.Sprite):
                 for num in range(len(cart)):
                     screen.blit(render_text(f'{num + 1} -- {cart[num].name} ------ {cart[num].get_price()}'),
                                 (width // 4, height // 2 - 200 + 35 * num))
+                    draw_timer()
                 pygame.display.flip()
                 clock.tick(fps)
             shop_buttons.empty()
@@ -2076,6 +2111,7 @@ class SecondShop(pygame.sprite.Sprite):
             if status == 'error':
                 screen.blit(render_text('Недостаточно средств! Посетите банк!', color=(255, 0, 0)), (200, 100))
             screen.blit(player.render_info(background=(179, 185, 206)), (0, 0))
+            draw_timer()
             pygame.display.flip()
             clock.tick(fps)
         shop_buttons.empty()
@@ -2143,6 +2179,7 @@ class Pharmacy(pygame.sprite.Sprite):
                 for num in range(len(cart)):
                     screen.blit(render_text(f'{num + 1} -- {cart[num].name} ------ {cart[num].get_price()}'),
                                 (width // 2, height // 2 - 200 + 35 * num))
+                draw_timer()
                 pygame.display.flip()
                 clock.tick(fps)
             pharm_buttons.empty()
@@ -2226,6 +2263,7 @@ class Pharmacy(pygame.sprite.Sprite):
             if status == 'error':
                 screen.blit(render_text('Недостаточно средств! Посетите банк!', color=(255, 0, 0)), (200, 100))
             screen.blit(player.render_info(background=(179, 185, 206)), (0, 0))
+            draw_timer()
             pygame.display.flip()
             clock.tick(fps)
         pharm_buttons.empty()
@@ -2426,6 +2464,7 @@ class Hospital(pygame.sprite.Sprite):
             bank_buttons.draw(screen)
             screen.blit(player.render_info(background=(156, 65, 10)), (0, 0))
             screen.blit(main_display, (100, 70))
+            draw_timer()
             pygame.display.flip()
             clock.tick(fps)
         player.card_money += 100
@@ -2597,6 +2636,7 @@ class Volunteers(pygame.sprite.Sprite):
             bank_buttons.draw(screen)
             screen.blit(player.render_info(background=(156, 65, 10)), (0, 0))
             screen.blit(main_display, (100, 70))
+            draw_timer()
             pygame.display.flip()
             clock.tick(fps)
         bank_buttons.empty()
@@ -2771,6 +2811,7 @@ class Equipment:
             button_group.draw(screen)
             product_buttons.draw(screen)
             screen.blit(player.render_info(background=(156, 65, 10)), (0, 0))
+            draw_timer()
             pygame.display.flip()
             clock.tick(fps)
         product_buttons.empty()
@@ -2934,6 +2975,7 @@ def menu(pause=False):
             screen.fill((219, 146, 72, 100))
             settings_buttons_group.update(pos)
             settings_buttons_group.draw(screen)
+            draw_timer()
             pygame.display.flip()
             clock.tick(fps)
 
@@ -2981,8 +3023,8 @@ def menu(pause=False):
             running = False
         screen.fill((219, 146, 72))
         button_group.update(pos)
-
         button_group.draw(screen)
+        draw_timer()
         pygame.display.flip()
         clock.tick(fps)
     button_group.empty()
@@ -3111,6 +3153,8 @@ fps = 30
 running = True
 clock = pygame.time.Clock()
 info_clock = pygame.time.Clock()
+total_game_seconds = 600
+global_time = total_game_seconds
 pos = (0, 0)
 
 # menu func call is commented in multi mode and active in the single mode
@@ -3157,6 +3201,8 @@ thread = threading.Thread(target=operate_player_data)
 thread.start()
 cleaning_thread = threading.Thread(target=clean_params)
 cleaning_thread.start()
+timing_thread = threading.Thread(target=count_time)
+timing_thread.start()
 # thread.join(0.01)
 connect_tick = 0
 
@@ -3181,10 +3227,10 @@ try:
                     for i in remote_players:
                         try:
                             if i.rect.collidepoint(event.pos) and distance(player.get_coords(), event.pos) <= 450:
-                                arrest_rate += 1
-                                print(arrest_rate)
+                                i.caught += 1
+                                print(i.caught)
                                 # score is changed according to the role of arrested player
-                                if arrest_rate >= 10:
+                                if i.caight >= 10:
                                     caught_ids.append(i.id)
                                     if i.infected == 3:
                                         player.card_money += 100
@@ -3320,12 +3366,13 @@ try:
         terrain_group.draw(screen)
         button_group.draw(screen)
         screen.blit(player.render_info(), (0, 0))
+        npc_group.draw(screen)
         player_group.draw(screen)
         # the same problem (AttrErr), watch the comment above
         remote_players.draw(screen)
-
         if near_building_message and near_building:
             screen.blit(render_text(near_building_message), (0, height - 50))
+        draw_timer()
         pygame.display.flip()
         clock.tick(fps)
         connect_tick += 1

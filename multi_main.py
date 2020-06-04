@@ -1237,7 +1237,7 @@ class MainHouse(pygame.sprite.Sprite):
 
                         pictures = os.listdir('data/office_images')
                         path = choice(pictures)
-                        canvas = load_image('data/office_images/'+path)
+                        canvas = load_image('data/office_images/' + path)
                         Button(randint(0, width - canvas.get_width()), randint(75, height - canvas.get_height()),
                                canvas.get_width(), canvas.get_height(), canvas, lambda: True, None, prog_buttons)
 
@@ -1263,7 +1263,7 @@ class MainHouse(pygame.sprite.Sprite):
                                         running = btn.run()
                                         if running:
                                             result = choice(['Так держать!', 'Круто!',
-                                                            'Молодец!', 'У тебя прекрано получается!'])
+                                                             'Молодец!', 'У тебя прекрано получается!'])
                                             player.card_money += 50
                                             reset()
 
@@ -1287,7 +1287,8 @@ class MainHouse(pygame.sprite.Sprite):
                         prog_buttons.draw(screen)
                         screen.blit(player.render_info(background=(177, 170, 142)), (0, 0))
                         if result:
-                            screen.blit(render_text(result, color=(255, 0, 0)), (width // 2, 500))
+                            # screen.blit(render_text(result, color=(255, 0, 0)), (width // 2, 500))
+                            screen.blit(render_text(result, color=(0, 0, 0)), (width // 2, 500))
                         pygame.display.flip()
                         clock.tick(fps)
                     backgr.kill()
@@ -1402,7 +1403,91 @@ class MainHouse(pygame.sprite.Sprite):
                     return True
 
                 def text_prog():
-                    print('text_prog')
+                    def reset():
+                        prog_buttons.empty()
+
+                        Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
+                               100, 50, images['exit_sign'], lambda: False, None, prog_buttons)
+
+                        res = ''
+                        answer = ''
+                        with open('data/data_files/new_words.dat', mode='r', encoding='utf-8') as f:
+                            data = f.readlines()
+                            answer = choice(data).strip()
+                        return res, answer
+
+
+                    result = ''
+                    result_clock = pygame.time.Clock()
+                    result_num = 0
+
+                    player.profit += 0.5
+                    backgr = pygame.sprite.Sprite(background_prog)
+                    backgr.image = load_image('data/textures/table_prog.png', size=size)
+                    backgr.rect = backgr.image.get_rect()
+
+                    res, answer = reset()
+                    first_label = render_text(res, size=60, color=(0, 0, 0))
+                    second_label = render_text(answer, size=60, color=(0, 0, 0))
+                    running = True
+                    while running:
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                exit_game()
+                            if event.type == pygame.MOUSEBUTTONDOWN:
+                                for btn in prog_buttons:
+                                    if btn.rect.collidepoint(event.pos):
+                                        running = btn.run()
+                            if event.type == pygame.KEYDOWN:
+                                res += event.unicode
+                                if res == answer:
+                                    player.card_money += 50
+                                    result = choice(['Так держать!', 'Круто!',
+                                                     'Молодец!', 'У тебя прекрано получается!'])
+                                    res, answer = reset()
+                                    first_label = render_text('', size=60, color=(255, 0, 0))
+                                    second_label = render_text(answer, size=60, color=(0, 0, 0))
+                                elif res == answer[:len(res)]:
+                                    first_label = render_text(res, size=60, color=(255, 0, 0))
+                                    second_label = render_text(answer[len(res):], size=60, color=(0, 0, 0))
+                                else:
+                                    result = 'Ошибка'
+                                    player.card_money -= 50
+                                    res, answer = reset()
+                                    first_label = render_text('', size=60, color=(255, 0, 0))
+                                    second_label = render_text(answer, size=60, color=(0, 0, 0))
+
+                        data = pygame.key.get_pressed()
+                        if data[27]:
+                            button_group.empty()
+                            menu(pause=True)
+                            button_group.empty()
+                            pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None,
+                                                  prog_buttons)
+                        if result:
+                            result_num += result_clock.tick()
+                            if result_num >= 1500:
+                                result_num = 0
+                                result = ''
+                        else:
+                            result_clock.tick()
+                        screen.fill((255, 255, 255))
+                        player.update_params(at_work=True)
+                        background_prog.draw(screen)
+                        prog_buttons.draw(screen)
+                        screen.blit(player.render_info(background=(177, 170, 142)), (0, 0))
+                        if result:
+                            # screen.blit(render_text(result, color=(255, 0, 0)), (width // 2, 500))
+                            screen.blit(render_text(result, color=(0, 0, 0)), (width // 2, 500))
+                        screen.blit(first_label, (500, 100))
+                        screen.blit(second_label, (500 + first_label.get_width(), 100))
+                        pygame.display.flip()
+                        clock.tick(fps)
+                    backgr.kill()
+                    prog_buttons.empty()
+                    prog_group.empty()
+                    background_prog.empty()
+                    player.profit -= 0.5
                     return True
 
                 backgr = pygame.sprite.Sprite(background_house)

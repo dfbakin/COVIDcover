@@ -487,8 +487,15 @@ class Player(pygame.sprite.Sprite):
         self.speed = Player.speed
 
         player.card_money += 10 * len(objects)
+        names = ['Редактор презентаций', 'Текстовый редактор', 'Математический помощник']
         for i in objects:
             self.objects.append(i)
+            if i.name == names[0]:
+                self.profit += 0.2
+            elif i.name == names[1]:
+                self.profit += 0.4
+            elif i.name == names[2]:
+                self.profit += 0.7
 
     def get_cash(self):
         return self.cash
@@ -1222,7 +1229,72 @@ class MainHouse(pygame.sprite.Sprite):
                     return True
 
                 def image_prog():
-                    print('image_prog')
+                    def reset():
+                        prog_buttons.empty()
+
+                        Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
+                               100, 50, images['exit_sign'], lambda: False, None, prog_buttons)
+
+                        pictures = os.listdir('data/office_images')
+                        path = choice(pictures)
+                        canvas = load_image('data/office_images/'+path)
+                        Button(randint(0, width - canvas.get_width()), randint(75, height - canvas.get_height()),
+                               canvas.get_width(), canvas.get_height(), canvas, lambda: True, None, prog_buttons)
+
+                    result = ''
+                    result_clock = pygame.time.Clock()
+                    result_num = 0
+
+                    player.profit += 0.5
+                    backgr = pygame.sprite.Sprite(background_prog)
+                    backgr.image = load_image('data/textures/table_prog.png', size=size)
+                    backgr.rect = backgr.image.get_rect()
+
+                    reset()
+
+                    running = True
+                    while running:
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                exit_game()
+                            if event.type == pygame.MOUSEBUTTONDOWN:
+                                for btn in prog_buttons:
+                                    if btn.rect.collidepoint(event.pos):
+                                        running = btn.run()
+                                        if running:
+                                            result = choice(['Так держать!', 'Круто!',
+                                                            'Молодец!', 'У тебя прекрано получается!'])
+                                            player.card_money += 50
+                                            reset()
+
+                        data = pygame.key.get_pressed()
+                        if data[27]:
+                            button_group.empty()
+                            menu(pause=True)
+                            button_group.empty()
+                            pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None,
+                                                  prog_buttons)
+                        if result:
+                            result_num += result_clock.tick()
+                            if result_num >= 500:
+                                result_num = 0
+                                result = ''
+                        else:
+                            result_clock.tick()
+                        screen.fill((255, 255, 255))
+                        player.update_params(at_work=True)
+                        background_prog.draw(screen)
+                        prog_buttons.draw(screen)
+                        screen.blit(player.render_info(background=(177, 170, 142)), (0, 0))
+                        if result:
+                            screen.blit(render_text(result, color=(255, 0, 0)), (width // 2, 500))
+                        pygame.display.flip()
+                        clock.tick(fps)
+                    backgr.kill()
+                    prog_buttons.empty()
+                    prog_group.empty()
+                    background_prog.empty()
+                    player.profit -= 0.5
                     return True
 
                 def table_prog():
@@ -1267,7 +1339,7 @@ class MainHouse(pygame.sprite.Sprite):
                     result_clock = pygame.time.Clock()
                     result_num = 0
 
-                    player.profit += 0.5
+                    player.profit += 0.9
                     backgr = pygame.sprite.Sprite(background_prog)
                     backgr.image = load_image('data/textures/table_prog.png', size=size)
                     backgr.rect = backgr.image.get_rect()
@@ -1326,7 +1398,7 @@ class MainHouse(pygame.sprite.Sprite):
                     prog_buttons.empty()
                     prog_group.empty()
                     background_prog.empty()
-                    player.profit -= 0.5
+                    player.profit -= 0.9
                     return True
 
                 def text_prog():
@@ -2653,7 +2725,7 @@ class Button(pygame.sprite.Sprite):
 
     def create_big_rect(self, delt=50):
         self.collide_rect = pygame.Rect(self.rect.x - delt, self.rect.y - delt,
-                                        self.rect.w + delt*2, self.rect.h + delt*2)
+                                        self.rect.w + delt * 2, self.rect.h + delt * 2)
 
     def is_obstacle(self):
         return False

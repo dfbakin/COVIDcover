@@ -1,3 +1,6 @@
-2020-06-03 11:40:09,858 INFO game init
-2020-06-03 11:40:13,319 INFO policeman
-2020-06-03 11:40:15,631 INFO exit code: -5
+2020-06-04 11:06:34,924 INFO game init
+2020-06-04 11:06:53,328 INFO entered second shop
+2020-06-04 11:07:06,754 INFO left second shop
+2020-06-04 11:07:07,236 INFO entered main house:  citizen
+2020-06-04 11:07:42,904 INFO exit code: 0
+2020-06-04 11:07:43,167 INFO exit code: 0

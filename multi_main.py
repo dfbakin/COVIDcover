@@ -73,6 +73,10 @@ house_group = pygame.sprite.Group()
 background_house = pygame.sprite.Group()
 house_products = pygame.sprite.Group()
 
+prog_buttons = pygame.sprite.Group()
+prog_group = pygame.sprite.Group()
+background_prog = pygame.sprite.Group()
+
 tablet_group = pygame.sprite.Group()
 
 product_buttons = pygame.sprite.Group()
@@ -1222,7 +1226,107 @@ class MainHouse(pygame.sprite.Sprite):
                     return True
 
                 def table_prog():
-                    print('table_prog')
+                    def generate_math():
+                        a = randint(0, 100)
+                        b = randint(0, 100)
+                        sign = randint(1, 2)
+                        if sign == 1:
+                            res = str(a) + '+' + str(b) + '='
+                            answer = a + b
+                        if sign == 2:
+                            res = str(a) + '-' + str(b) + '='
+                            answer = a - b
+                        return res, str(answer)
+
+                    def reset():
+                        prog_buttons.empty()
+
+                        Button(width - images['exit_sign'].get_width(), height - images['exit_sign'].get_height(),
+                               100, 50, images['exit_sign'], lambda: False, None, prog_buttons)
+
+                        message, answer = generate_math()
+                        label = render_text(message, size=30, color=(0, 0, 0))
+                        Button(width // 2, 150, label.get_width(), label.get_height(),
+                               label, None, '', prog_buttons)
+
+                        coords = [(150, 150), (150, 350), (575, 346), (1078, 348), (1039, 140)]
+                        was_answer = False
+                        for coord in coords:
+                            if random() < 0.4 and not was_answer or coord == coords[-1] and not was_answer:
+                                text = answer
+                                was_answer = True
+                            else:
+                                text = str(randint(0, 200))[:-1] + answer[-1]
+                            label = render_text(text, size=30, color=(0, 0, 0))
+                            btn = Button(*coord, label.get_width(), label.get_height(),
+                                         label, lambda: True, text, prog_buttons)
+                            btn.create_big_rect(150)
+                        return answer
+
+                    result = ''
+                    result_clock = pygame.time.Clock()
+                    result_num = 0
+
+                    player.profit += 0.5
+                    backgr = pygame.sprite.Sprite(background_prog)
+                    backgr.image = load_image('data/textures/table_prog.png', size=size)
+                    backgr.rect = backgr.image.get_rect()
+
+                    answer = reset()
+
+                    running = True
+                    while running:
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                exit_game()
+                            if event.type == pygame.MOUSEBUTTONDOWN:
+                                for btn in prog_buttons:
+                                    try:
+                                        collision = btn.collide_rect.collidepoint(event.pos)
+                                    except AttributeError:
+                                        collision = btn.rect.collidepoint(event.pos)
+                                    if collision:
+                                        running = btn.run()
+                                        if running:
+                                            res = btn.id
+                                            print(vars(btn))
+                                            print(answer, res)
+                                            if answer == res:
+                                                result = 'Верно!'
+                                                player.card_money += 50
+                                            else:
+                                                result = 'Ошибка!'
+                                                player.card_money -= 10
+                                            answer = reset()
+
+                        data = pygame.key.get_pressed()
+                        if data[27]:
+                            button_group.empty()
+                            menu(pause=True)
+                            button_group.empty()
+                            pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None,
+                                                  prog_buttons)
+                        if result:
+                            result_num += result_clock.tick()
+                            if result_num >= 1000:
+                                result_num = 0
+                                result = ''
+                        else:
+                            result_clock.tick()
+                        screen.fill((255, 255, 255))
+                        player.update_params(at_work=True)
+                        background_prog.draw(screen)
+                        prog_buttons.draw(screen)
+                        screen.blit(player.render_info(background=(177, 170, 142)), (0, 0))
+                        if result:
+                            screen.blit(render_text(result, color=(0, 0, 0)), (width // 2, 500))
+                        pygame.display.flip()
+                        clock.tick(fps)
+                    backgr.kill()
+                    prog_buttons.empty()
+                    prog_group.empty()
+                    background_prog.empty()
+                    player.profit -= 0.5
                     return True
 
                 def text_prog():
@@ -2537,13 +2641,19 @@ class Button(pygame.sprite.Sprite):
         self.image = self.frames[0]
 
     def run(self, *args):
-        return self.func(*args)
+        if self.func:
+            return self.func(*args)
+        return None
 
     def check_selection(self, pos):
         if self.rect.collidepoint(pos):
             self.image = self.frames[1]
         else:
             self.image = self.frames[0]
+
+    def create_big_rect(self, delt=50):
+        self.collide_rect = pygame.Rect(self.rect.x - delt, self.rect.y - delt,
+                                        self.rect.w + delt*2, self.rect.h + delt*2)
 
     def is_obstacle(self):
         return False
@@ -2760,14 +2870,18 @@ def choose_role():
                 for btn in button_group:
                     if btn.rect.collidepoint(pos):
                         role = btn.run()
+                        # TODO fix debug lines
+                        button_group.empty()
+                        settings_buttons_group.empty()
+                        return
                         logging.info(role)
                         if role == 'policeman':
-                            role = 'pol'
+                            user_role = 'pol'
                         elif role == 'citizen':
-                            role = 'use'
+                            user_role = 'use'
                         else:
-                            role == 'cou'
-                        params = {'role': role,
+                            user_role == 'cou'
+                        params = {'role': user_role,
                                   'user_token': internal_id}
                         try:
                             json_response = requests.get(f'http://{host}:{api_port}/game_api/roles_left',
@@ -2780,7 +2894,12 @@ def choose_role():
                             exit_game(no_player=True)
                         if json_response['success']:
                             running = False
-                            logging.info('chose')
+                            logging.info('chose successfully')
+
+                            screen.fill((219, 146, 72))
+                            screen.blit(render_text('Загрузка...', size=50), (width // 2 - 50, height - 50))
+                            button_group.draw(screen)
+                            pygame.display.flip()
                         else:
                             message = 'Эта роль уже занята для этого сервера'
                             logging.info('busy')
@@ -2890,7 +3009,7 @@ camera.update(player)
 scanner_on = False
 arrest_rate = 0
 
-# home.enter()
+second_shop.enter()
 
 # all exceptions in the loop cause quit and all of exit_game func
 try:

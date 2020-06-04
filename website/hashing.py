@@ -7,7 +7,7 @@ import shutil
 def check_hash(path):
     lst = []
     hash = hashlib.md5()
-    with zipfile.ZipFile('static/releases/game.zip') as f:
+    with zipfile.ZipFile(path) as f:
         os.mkdir('tmp')
         f.extractall('tmp')
     for path, dirs, files in os.walk('tmp'):
@@ -18,5 +18,5 @@ def check_hash(path):
     shutil.rmtree('tmp')
     hash.update(b''.join(lst))
     output = hash.hexdigest()
+    return output
 
-check_hash('static/releases/game.zip')

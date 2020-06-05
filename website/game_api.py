@@ -185,7 +185,7 @@ def ch_hsh(hsh):
     return jsonify({'success': hsh == HASH})
 
 
-@bp.route('/game_api/check_hash/<hsh>')
+@bp.route('/game_api/check_unix_hash/<hsh>')
 def ch_nx_hsh(hsh):
     return jsonify({'success': hsh == UNIX_HASH})
 

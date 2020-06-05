@@ -1,0 +1,21 @@
+INFO 2020-06-05 14:35:19,802  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2020-06-05 14:35:29,589 127.0.0.1 - - [05/Jun/2020 14:35:29] "[37mGET / HTTP/1.1[0m" 200 -
+INFO 2020-06-05 14:35:29,814 127.0.0.1 - - [05/Jun/2020 14:35:29] "[36mGET /static/img/carousel_2.jpg HTTP/1.1[0m" 304 -
+INFO 2020-06-05 14:35:29,817 127.0.0.1 - - [05/Jun/2020 14:35:29] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+INFO 2020-06-05 14:35:29,832 127.0.0.1 - - [05/Jun/2020 14:35:29] "[36mGET /static/img/carousel_1.jpg HTTP/1.1[0m" 304 -
+INFO 2020-06-05 14:35:30,082 127.0.0.1 - - [05/Jun/2020 14:35:30] "[36mGET /static/img/fon.png HTTP/1.1[0m" 304 -
+INFO 2020-06-05 14:35:30,430 127.0.0.1 - - [05/Jun/2020 14:35:30] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO 2020-06-05 14:35:31,809 127.0.0.1 - - [05/Jun/2020 14:35:31] "[37mGET /login HTTP/1.1[0m" 200 -
+INFO 2020-06-05 14:35:33,433 login form valifation OK
+INFO 2020-06-05 14:35:33,748 user checked:{'_sa_instance_state': <sqlalchemy.orm.state.InstanceState object at 0x05003290>, 'email': 'admin@admin.com', 'token': 'c11cc4ab-492c-424c-aec1-e40b6e5236db', 'id': 1, 'username': 'Admin', 'privilege': 1, 'hashed_password': 'pbkdf2:sha256:150000$vH1qzG27$3a53c85ee1f39d93796fb6fc88c561aa31d8d776ab9ebe9e362ea55904f62a29', 'score': 0, 'role': 'use'}
+INFO 2020-06-05 14:35:33,750 127.0.0.1 - - [05/Jun/2020 14:35:33] "[32mPOST /login HTTP/1.1[0m" 302 -
+INFO 2020-06-05 14:35:33,779 127.0.0.1 - - [05/Jun/2020 14:35:33] "[37mGET / HTTP/1.1[0m" 200 -
+INFO 2020-06-05 14:35:36,214 127.0.0.1 - - [05/Jun/2020 14:35:36] "[37mGET /get_leaderboard HTTP/1.1[0m" 200 -
+INFO 2020-06-05 14:35:47,007 127.0.0.1 - - [05/Jun/2020 14:35:47] "[37mGET /admin HTTP/1.1[0m" 200 -
+INFO 2020-06-05 14:35:54,539 127.0.0.1 - - [05/Jun/2020 14:35:54] "[37mGET /admin/orders HTTP/1.1[0m" 200 -
+INFO 2020-06-05 14:36:00,591 127.0.0.1 - - [05/Jun/2020 14:36:00] "[37mGET /admin HTTP/1.1[0m" 200 -
+INFO 2020-06-05 14:36:02,837 127.0.0.1 - - [05/Jun/2020 14:36:02] "[37mGET /admin/users HTTP/1.1[0m" 200 -
+INFO 2020-06-05 14:36:25,694 127.0.0.1 - - [05/Jun/2020 14:36:25] "[37mGET /admin/users/edit?user=c766fae4-2204-44c5-a267-cd9e123d2bb9 HTTP/1.1[0m" 200 -
+INFO 2020-06-05 14:36:31,881 127.0.0.1 - - [05/Jun/2020 14:36:31] "[32mPOST /admin/users/edit?user=c766fae4-2204-44c5-a267-cd9e123d2bb9 HTTP/1.1[0m" 302 -
+INFO 2020-06-05 14:36:31,905 127.0.0.1 - - [05/Jun/2020 14:36:31] "[37mGET /admin/users HTTP/1.1[0m" 200 -
+INFO 2020-06-05 14:37:31,989 127.0.0.1 - - [05/Jun/2020 14:37:31] "[37mGET /admin/users HTTP/1.1[0m" 200 -

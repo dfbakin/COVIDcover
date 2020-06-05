@@ -107,8 +107,8 @@ api_port = 8080
 role = 'policeman'
 host, port = '127.0.0.1', 9000
 player_name = '123456'
-# internal_id = '9f8e6b0c-62c7-4b09-b6d3-f923f3bf9860'
-internal_id = '0c4b8f94-b0d1-4731-8566-0bfa4a989610'
+#internal_id = 'c11cc4ab-492c-424c-aec1-e40b6e5236db'
+internal_id = 'c3288c7b-acd1-4a6c-8e66-5c9b9c0c6fe0'
 # internal_id = '2a288d46-b3bf-4669-a938-dbaa6e8d9126'
 # ip = socket.gethostbyname('0.tcp.ngrok.io')
 # host = ip
@@ -3267,7 +3267,7 @@ try:
                                 i.caught += 1
                                 print(i.caught)
                                 # score is changed according to the role of arrested player
-                                if i.caight >= 10:
+                                if i.caught >= 10:
                                     caught_ids.append(i.id)
                                     if i.infected == 3:
                                         player.card_money += 100

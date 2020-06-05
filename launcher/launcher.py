@@ -298,9 +298,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.initUI()
         self.update_game()
-        if not self.update_needed:
-            self.tabWidget.setVisible(True)
-            self.label_3.setVisible(True)
 
     def initUI(self):
         self.pushButton_3.clicked.connect(self.launch_single)
@@ -310,7 +307,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
         self.pushButton_4.clicked.connect(self.register)
         self.pushButton_5.setVisible(False)
-        self.label_3.setText('Войдите в учетную запись')
+        self.label_3.setText('Войдите в учетную запись, чтобы зайти в мультиплеер')
 
         self.user = None
         self.password = None
@@ -475,14 +472,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
         data = response.json()
         if not data['success']:
-            return
-        if data['role'] == 'cou':
-            role = 'volunteer'
-        elif data['role'] == 'pol':
-            role = 'policeman'
-        elif data['role'] == 'use':
-            role = 'citizen'
-        else:
             return
 
         try:

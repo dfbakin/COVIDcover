@@ -74,19 +74,12 @@ def join():
     server.players = edit_lst(server.players, user.id, True)
     server.players_n = len(server.players.split())
 
-    if not user.role:
-        roles = server.roles.split()
-        shuffle(roles)
-        role = roles.pop()
-        user.role = role
-        server.roles = jlst(roles)
-
     session.merge(user)
     session.merge(server)
     session.commit()
 
     ip, port = server.ip.split(':')
-    return jsonify({'success': True, 'role': user.role, 'ip': ip, 'port': port})
+    return jsonify({'success': True, 'ip': ip, 'port': port})
 
 
 @bp.route('/game_api/quit')
@@ -192,7 +185,7 @@ def ch_nx_hsh(hsh):
 
 @bp.route('/game_api/roles_left')
 def roles_left():
-    if any(i not in request.args for i in ('user_token', 'role')):
+    if any(i not in request.args for i in ('user_token', 'role')) or request.args['role'] not in ('use', "pol", "cou"):
         abort(400)
     session = create_session()
     user = session.query(User).filter(User.token == request.args["user_token"]).first()
@@ -202,4 +195,12 @@ def roles_left():
     if not server:
         abort(406)
     roles = server.roles.split()
-    return jsonify({"success": request.args['role'] in roles})
+    if user.role:
+        abort(400)
+    res = request.args['role'] in roles
+    if res:
+        server.roles = edit_lst(server.roles, request.args['role'], False)
+        session.merge(server)
+        session.commit()
+
+    return jsonify({"success": res})

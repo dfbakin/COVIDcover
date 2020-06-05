@@ -38,10 +38,10 @@ def exit_game(no_player=False):
 
 error_code = 0
 # parsing and amount validation for cmd args
-# if len(sys.argv) != 7:
-# error_code = -7
-# exit_game()
-# args = sys.argv[1:]
+if len(sys.argv) != 5:
+    error_code = -7
+    exit_game()
+    args = sys.argv[1:]
 
 pygame.init()
 
@@ -100,14 +100,14 @@ orders = None
 
 # internal_id = input('Enter internal id:   ')
 # setting vars from args for online mode
-# role, host, port, internal_id, player_name = args
+host, port, internal_id, player_name = args
 # port = int(port)
 api_port = 8080
 # for debug
-role = 'policeman'
+'''role = 'policeman'
 host, port = '127.0.0.1', 9000
 player_name = '123456'
-internal_id = 'c11cc4ab-492c-424c-aec1-e40b6e5236db'
+internal_id = 'c11cc4ab-492c-424c-aec1-e40b6e5236db'''
 #internal_id = 'c3288c7b-acd1-4a6c-8e66-5c9b9c0c6fe0'
 # internal_id = '2a288d46-b3bf-4669-a938-dbaa6e8d9126'
 # ip = socket.gethostbyname('0.tcp.ngrok.io')
@@ -1290,7 +1290,7 @@ class MainHouse(pygame.sprite.Sprite):
 
                         pictures = os.listdir('data/office_images')
                         path = choice(pictures)
-                        canvas = load_image('data/office_images/' + path)
+                        canvas = load_image('data/office_images/' + path, size=(128, 128))
                         Button(randint(0, width - canvas.get_width()), randint(75, height - canvas.get_height()),
                                canvas.get_width(), canvas.get_height(), canvas, lambda: True, None, prog_buttons)
 

@@ -5,6 +5,11 @@ import shutil
 
 
 def check_hash(path):
+    if os.path.isdir('tmp'):
+        try:
+            shutil.rmtree('tmp')
+        except PermissionError:
+            pass
     lst = []
     hash = hashlib.md5()
     with zipfile.ZipFile(path) as f:

@@ -312,9 +312,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.pushButton_5.setVisible(False)
         self.label_3.setText('Войдите в учетную запись')
 
-        self.tabWidget.setVisible(False)
-        self.label_3.setVisible(False)
-
         self.user = None
         self.password = None
 
@@ -490,7 +487,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
         try:
             self.hide()
-            os.system(f"{os.path.join(os.path.dirname(__file__), 'multi_build/multi_main.exe')} {role} {self.user['score']} {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
+            os.system(f"\"{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'COVIDcover', 'multi_build/multi_main.exe')}\" {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
             self.show()
             with open('score.dat', mode='r', encoding='utf-8') as file:
                 score, error_code = file.read().strip().split()
@@ -546,7 +543,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def launch_single(self):
         try:
             self.hide()
-            os.system(os.path.join(os.path.dirname(__file__), 'main_build/main.exe'))
+            os.system('"' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'COVIDcover', 'main_build/main.exe') + '"')
             self.show()
         except Exception as e:
             self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + str(e) + '\n\n')

@@ -303,6 +303,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.show()
 
 
+
     def initUI(self):
         self.pushButton_3.clicked.connect(self.launch_single)
         self.pushButton_2.clicked.connect(lambda: webbrowser.open(f'http://{MyWidget.host}:{MyWidget.port}', new=0))

@@ -293,11 +293,13 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     """
     host = "127.0.0.1"
     port = "8080"
+
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         self.initUI()
         self.update_game()
+
 
     def initUI(self):
         self.pushButton_3.clicked.connect(self.launch_single)
@@ -479,10 +481,14 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.hide()
             os.system(f"cd COVIDcover && \"{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'COVIDcover', 'multi_build/multi_main.exe')}\" {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
             self.show()
-            with open('score.dat', mode='r', encoding='utf-8') as file:
-                score, error_code = file.read().strip().split()
-                error_code = int(error_code)
-            os.remove('score.dat')
+            if os.path.isfile('score.dat'):
+                with open('score.dat', mode='r', encoding='utf-8') as file:
+                    score, error_code = file.read().strip().split()
+                    error_code = int(error_code)
+                os.remove('score.dat')
+            else:
+                score, error_code = 0, -7
+
             if not score.isdigit():
                 self.show_error('Ошибка клиента игры. Напишите нам.')
             if error_code == -5:

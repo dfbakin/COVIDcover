@@ -478,7 +478,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
         try:
             self.hide()
-            os.system(f"{sys.executable} {os.path.join(os.path.abspath(os.path.dirname(__file__)), 'COVIDcover', 'multi_build/multi_main.py')} {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
+            os.system(f"{sys.executable} \"{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'COVIDcover', 'multi_build/multi_main.py')}\" {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
             self.show()
             with open('score.dat', mode='r', encoding='utf-8') as file:
                 score, error_code = file.read().strip().split()
@@ -535,7 +535,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def launch_single(self):
         try:
             self.hide()
-            os.system(f"{sys.executable} {os.path.join(os.path.abspath(os.path.dirname(__file__)), 'COVIDcover', 'main_build/main.py')}")
+            os.system(f"{sys.executable} \"{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'COVIDcover', 'main_build/main.py')}\"")
             self.show()
         except Exception as e:
             self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + str(e) + '\n\n')

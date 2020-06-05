@@ -2,7 +2,6 @@ import pygame
 from random import randint
 import random
 import sys
-
 pygame.init()
 
 size = width, height = 1280, 720

@@ -4,10 +4,12 @@ from data.db_session import create_session
 from data.__all_models import User, Server, Order
 from random import shuffle
 from uuid import uuid4
+from hashing import check_hash
 
 bp = Blueprint('game_api', __name__)
-# hash
-HASH = 'd186174ba7b6ebb2e804d10e449dcd91'
+# TODO hash
+HASH = check_hash("static/releases/game.zip")
+UNIX_HASH = check_hash("static/releases/game.zip")
 
 
 def jlst(lst):
@@ -179,5 +181,25 @@ def get_log():
 
 
 @bp.route('/game_api/check_hash/<hsh>')
-def check_hash(hsh):
+def ch_hsh(hsh):
     return jsonify({'success': hsh == HASH})
+
+
+@bp.route('/game_api/check_hash/<hsh>')
+def ch_nx_hsh(hsh):
+    return jsonify({'success': hsh == UNIX_HASH})
+
+
+@bp.route('/game_api/roles_left')
+def roles_left():
+    if any(i not in request.args for i in ('user_token', 'role')):
+        abort(400)
+    session = create_session()
+    user = session.query(User).filter(User.token == request.args["user_token"]).first()
+    if not user:
+        abort(404)
+    server = session.query(Server).filter(Server.players.like(f'% {str(user.id)} %')).first()
+    if not server:
+        abort(406)
+    roles = server.roles.split()
+    return jsonify({"success": request.args['role'] in roles})

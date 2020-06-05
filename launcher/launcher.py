@@ -168,18 +168,17 @@ class Ui_MainWindow(object):
 "}")
         self.pushButton_5.setObjectName("pushButton_5")
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
-        self.label_3.setGeometry(QtCore.QRect(10, 80, 281, 21))
+        self.label_3.setGeometry(QtCore.QRect(10, 80, 681, 21))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
-        self.label_4.setGeometry(QtCore.QRect(10, 0, 681, 51))
+        self.label_4.setGeometry(QtCore.QRect(10, 10, 681, 61))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.label_4.setFont(font)
         self.label_4.setStyleSheet("background-color: rgb(172, 216, 230);")
-        self.label_4.setTextFormat(QtCore.Qt.AutoText)
         self.label_4.setObjectName("label_4")
         self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
         self.tabWidget.setGeometry(QtCore.QRect(10, 110, 301, 221))
@@ -287,17 +286,22 @@ class Ui_MainWindow(object):
 
 
 
+
 class MyWidget(QMainWindow, Ui_MainWindow):
     """ host = '130.193.46.251'
         port = '8080'
     """
     host = "127.0.0.1"
     port = "8080"
+
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         self.initUI()
         self.update_game()
+        if not self.update_needed:
+            self.show()
+
 
     def initUI(self):
         self.pushButton_3.clicked.connect(self.launch_single)
@@ -312,7 +316,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.user = None
         self.password = None
 
-        self.show()
 
     def check_hash(self, script_path=str(os.path.join(os.path.dirname(__file__), "COVIDcover"))):
         lst = []
@@ -328,22 +331,22 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/check_hash/{output}')
         except requests.exceptions.ConnectionError:
             self.show_error('Отсутствует интернет. Запустите программу позже.')
-            return False
+            return True
         except requests.exceptions.Timeout:
             self.show_error('Видимо, у наш сервер сейчас отдыхает ;)')
-            return False
+            return True
         except Exception:
             self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
-            return False
+            return True
         if response.status_code == 500:
             self.show_error('Ошибка на сервере. Мы уже работаем.')
-            return False
+            return True
         if response.status_code != 200:
             self.show_error('Возникла непредвиденная ошибка. Вы можете написать в тех. поддержку.')
-            return False
+            return True
         if response:
             return response.json()['success']
-        return False
+        return True
 
     def register(self):
         email = self.lineEdit_3.text()
@@ -409,7 +412,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         return True
 
     def update_game(self):
-        self.update_needed = True
+        self.update_needed = False
         if os.path.isfile(os.path.join(os.path.dirname(__file__), 'COVIDcover/versions.json')):
             try:
                 response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/static/releases/versions.json',
@@ -479,10 +482,14 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.hide()
             os.system(f"cd COVIDcover && \"{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'COVIDcover', 'multi_build/multi_main.exe')}\" {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
             self.show()
-            with open('score.dat', mode='r', encoding='utf-8') as file:
-                score, error_code = file.read().strip().split()
-                error_code = int(error_code)
-            os.remove('score.dat')
+            if os.path.isfile('score.dat'):
+                with open('score.dat', mode='r', encoding='utf-8') as file:
+                    score, error_code = file.read().strip().split()
+                    error_code = int(error_code)
+                os.remove('score.dat')
+            else:
+                score, error_code = 0, -7
+
             if not score.isdigit():
                 self.show_error('Ошибка клиента игры. Напишите нам.')
             if error_code == -5:

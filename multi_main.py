@@ -251,6 +251,15 @@ def count_time():
         if global_time <= 0:
             exit_game()
             break
+        try:
+            if global_time % 2 == 0:
+                player.satiety -= 1
+                if player.satiety > Player.satiety:
+                    player.satiety -= 10
+                if player.satiety < 0:
+                    player.satiety = 0
+        except NameError:
+            pass
         local_clock.tick(1)
 
 
@@ -444,8 +453,9 @@ class RemotePlayer(pygame.sprite.Sprite):
 # drawing; storing vars, products, etc; moving; changing health, money, infection % etc
 # is declared before the menu (game startup)
 class Player(pygame.sprite.Sprite):
-    speed = 20
+    speed = 13
     jump_power = 15
+    satiety = 100
 
     def __init__(self, x, y, role, *groups):
         # set role value as an attr
@@ -480,8 +490,9 @@ class Player(pygame.sprite.Sprite):
         self.hazard_timer = 0
         self.id = None
         self.speed = Player.speed
+        self.satiety = Player.satiety
 
-        self.card_money = 15500
+        self.card_money = 2500
         self.cash = 5000
         self.profit = 0.1
         self.profit_timer = pygame.time.Clock()
@@ -599,7 +610,7 @@ class Player(pygame.sprite.Sprite):
         self.prev_coords = self.get_coords()
         self.rect.y -= value
         if check_collisions(self):
-            if self.grav < -50:
+            if self.grav < -20:
                 self.health -= abs(self.grav) - 10
             self.rect.x = self.prev_coords[0]
             self.rect.y = self.prev_coords[1]
@@ -617,7 +628,7 @@ class Player(pygame.sprite.Sprite):
         font = pygame.font.Font(None, 30)
         canvas.blit(
             font.render(
-                f'Здоровье: {self.health}%  Риск заражения: {self.hazard_risk}%  Наличные: {self.cash} Р   На карте: {self.card_money} Р',
+                f'Здоровье: {int(self.health)}%  Заражение: {self.hazard_risk}%  Наличные: {self.cash} Р   На карте: {self.card_money} Р  Сытость: {self.satiety} %',
                 1, color), (0, 0))
         return canvas
 
@@ -633,6 +644,8 @@ class Player(pygame.sprite.Sprite):
 
     # reducing health, increasing danger_level (risk of infection)
     def update_params(self, at_work=False):
+        if self.satiety < Player.satiety // 1.5:
+            self.health -= (1 - self.satiety / Player.satiety) * 0.05
         if at_work and self.role == 'citizen':
             self.profit_num += self.profit_timer.tick()
             if self.profit_num >= 1000:
@@ -687,7 +700,7 @@ class Player(pygame.sprite.Sprite):
 
 
 class Character(pygame.sprite.Sprite):
-    speed = 10
+    speed = 12
     jump_power = 17
 
     def __init__(self, *groups):
@@ -1012,6 +1025,14 @@ class Bank(pygame.sprite.Sprite):
                                 mode = 'main'
                             button_group.empty()
                             pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, button_group)
+                if event.type == pygame.KEYUP:
+                    if event.key == 9:  # TAB
+                        eq = Equipment(player)
+                        eq.enter()
+                        button_group.empty()
+                        pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None,
+                                              button_group)
+
             data = pygame.key.get_pressed()
             player.set_moving(False)
             if data[27]:
@@ -1598,6 +1619,13 @@ class MainHouse(pygame.sprite.Sprite):
                         for btn in house_buttons:
                             if btn.rect.collidepoint(event.pos):
                                 running = btn.run()
+                    if event.type == pygame.KEYUP:
+                        if event.key == 9:  # TAB
+                            eq = Equipment(player)
+                            eq.enter()
+                            button_group.empty()
+                            pause_button = Button(width - 50, 0, 50, 50, images['pause_button'], menu, None,
+                                                  button_group)
 
                 data = pygame.key.get_pressed()
                 player.set_moving(False)
@@ -2649,7 +2677,7 @@ class Volunteers(pygame.sprite.Sprite):
 # 2) drawing at the equipment and shop buildings
 # 3) storage for the vars (health and infection risk addition)
 class Product(pygame.sprite.Sprite):
-    def __init__(self, x, y, name, image, price, describtion, *groups):
+    def __init__(self, x, y, name, image, price, can_be_used, kind, describtion, *groups):
         super().__init__(groups)
 
         self.image = image
@@ -2661,6 +2689,8 @@ class Product(pygame.sprite.Sprite):
         self.name = name
         self.price = price
         self.id = id
+        self.can_be_used = can_be_used
+        self.kind = kind
         self.description = describtion
         self.bought = False
         self.is_used = False
@@ -2707,7 +2737,7 @@ class Product(pygame.sprite.Sprite):
 
     # renders name, price, description
     def render_info(self, background=(156, 65, 10), color=(255, 255, 255)):
-        display = pygame.Surface((width // 2, height // 2 * 3))
+        display = pygame.Surface((width // 2 + 150, height // 2 * 3))
         display.fill(background)
         # main image
         display.blit(self.image, (display.get_width() // 2 - self.image.get_width() // 2, 50))
@@ -2722,6 +2752,11 @@ class Product(pygame.sprite.Sprite):
 
     # changing health and infection risk and setting is_used flag
     def use(self):
+        if self.kind == 'prod':
+            player.satiety += 50
+        elif self.kind == 'med':
+            player.health += 25
+            player.danger_level -= 25
         if self.name == 'Маска':
             player.infection_rate += 300
         elif self.name == 'Спирт':
@@ -2731,7 +2766,7 @@ class Product(pygame.sprite.Sprite):
         elif self.name == 'Витамины':
             player.infection_rate += 100
         else:
-            player.infection_rate += 50
+            player.danger_level -= 25
             player.health += 10
             if player.health > 100:
                 player.health = 100
@@ -2788,8 +2823,9 @@ class Equipment:
                                 if btn.id is not None:
                                     if use_btn:
                                         use_btn.kill()
-                                    use_btn = Button(width - 300, height - 150, 300, 75, render_text('Использовать'),
-                                                     self.products[int(btn.id)].use, None, product_buttons)
+                                    if player.get_objects()[btn.id].can_be_used:
+                                        use_btn = Button(width - 300, height - 150, 300, 75, render_text('Использовать'),
+                                                         self.products[int(btn.id)].use, None, product_buttons)
                             else:
                                 btn.run()
                                 reset()
@@ -2807,7 +2843,7 @@ class Equipment:
             screen.fill((156, 65, 10))
             player.update_params()
             if info_display:
-                screen.blit(info_display, (width // 2, 50))
+                screen.blit(info_display, (width // 3 + 50, 50))
             button_group.draw(screen)
             product_buttons.draw(screen)
             screen.blit(player.render_info(background=(156, 65, 10)), (0, 0))
@@ -3138,7 +3174,8 @@ with open('data/data_files/products.dat', mode='r', encoding='utf-8') as f:
         data = i.split(r'\t')
         # load image of the path from the file
         image = load_image(data[2], size=(50, 90))
-        products[data[0]] = Product(0, 0, data[1], image, int(data[3]), data[4].split(r'\n'))
+        # 4 and 5 are new
+        products[data[0]] = Product(0, 0, data[1], image, int(data[3]), data[4]=='true', data[5], data[6].split(r'\n'))
 # default images
 # rarely used, only images with general meaning
 images = {'pause_button': load_image('data/other/pause_button.png', size=(50, 50)),
@@ -3212,7 +3249,7 @@ camera.update(player)
 scanner_on = False
 arrest_rate = 0
 
-second_shop.enter()
+#second_shop.enter()
 
 # all exceptions in the loop cause quit and all of exit_game func
 try:

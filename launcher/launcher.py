@@ -475,8 +475,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             return
 
         try:
+            error_code = None
             self.hide()
-            os.system(f"\"{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'COVIDcover', 'multi_build/multi_main.exe')}\" {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
+            os.system(f"cd COVIDcover && \"{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'COVIDcover', 'multi_build/multi_main.exe')}\" {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
             self.show()
             with open('score.dat', mode='r', encoding='utf-8') as file:
                 score, error_code = file.read().strip().split()
@@ -508,7 +509,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             finally:
                 if os.path.isfile('score.dat'):
                     os.remove('score.dat')
-                if error_code != 0:
+                if os.path.isfile('covid_cover.log'):
+                    os.remove('covid_cover.log')
+                if error_code and error_code != 0:
                     if os.path.isfile(log_filename):
                         try:
                             os.remove(log_filename)
@@ -520,7 +523,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                             response = requests.post(f'http://{host}:{port}/game_api/get_log', files={'log': file})
                         except Exception as e:
                             self.show_error(str(e))
-                    pass
                 if os.path.isfile(log_filename):
                     try:
                         os.remove(log_filename)
@@ -532,7 +534,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def launch_single(self):
         try:
             self.hide()
-            os.system('"' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'COVIDcover', 'main_build/main.exe') + '"')
+            os.system('cd COVIDcover && "main_build/main"')
             self.show()
         except Exception as e:
             self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + str(e) + '\n\n')

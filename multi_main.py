@@ -41,7 +41,7 @@ error_code = 0
 if len(sys.argv) != 5:
     error_code = -7
     exit_game()
-    args = sys.argv[1:]
+args = sys.argv[1:]
 
 pygame.init()
 

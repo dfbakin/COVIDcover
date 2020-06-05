@@ -4,5 +4,5 @@ executables = [Executable('multi_main.py')]
 
 setup(name='COVIDcover',
       version='1.0.0',
-      description='Educational game about COVID infection',
+      description='Game about COVID infection',
       executables=executables)

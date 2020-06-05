@@ -107,8 +107,8 @@ api_port = 8080
 role = 'policeman'
 host, port = '127.0.0.1', 9000
 player_name = '123456'
-#internal_id = 'c11cc4ab-492c-424c-aec1-e40b6e5236db'
-internal_id = 'c3288c7b-acd1-4a6c-8e66-5c9b9c0c6fe0'
+internal_id = 'c11cc4ab-492c-424c-aec1-e40b6e5236db'
+#internal_id = 'c3288c7b-acd1-4a6c-8e66-5c9b9c0c6fe0'
 # internal_id = '2a288d46-b3bf-4669-a938-dbaa6e8d9126'
 # ip = socket.gethostbyname('0.tcp.ngrok.io')
 # host = ip
@@ -240,6 +240,9 @@ def check_order_is_done():
             exit_game()
         print(response.status_code)
         if response.status_code == 404:
+            objs = [prod for prod in products.values() if prod.name in player.order_goods]
+            player.add_objects(*objs)
+            player.order_goods = None
             player.order = 'done'
 
 
@@ -492,7 +495,7 @@ class Player(pygame.sprite.Sprite):
         self.speed = Player.speed
         self.satiety = Player.satiety
 
-        self.card_money = 2500
+        self.card_money = 15500#2500
         self.cash = 5000
         self.profit = 0.1
         self.profit_timer = pygame.time.Clock()
@@ -513,6 +516,7 @@ class Player(pygame.sprite.Sprite):
         self.infection_rate = 2000
 
         self.order = None
+        self.order_goods = None
         self.id = None
         self.name = None
 
@@ -679,7 +683,7 @@ class Player(pygame.sprite.Sprite):
             self.hazard_risk = 100
 
         # cheking dead state (added gravity here, in this way we check if player is falling too fast)
-        if self.health == 0 or self.grav < -50:
+        if self.health <= 0 or self.grav < -50:
             screen.fill((0, 0, 0))
             # background_group.draw(screen)
             screen.blit(self.render_info(), (0, 0))
@@ -1214,13 +1218,14 @@ class MainHouse(pygame.sprite.Sprite):
                                                   button_group)
                         if mode == 'order' and not current_order:
                             # generating order
-                            goods = ['Маска', 'Спирт', 'Мыло', 'Картофель', 'Яблоко', 'Витамины']
+                            goods = ['Спирт', 'Мыло', 'Картофель', 'Яблоко', 'Морковь']
                             current_order = {'token': internal_id,
                                              'goods': []}
                             for i in range(3):
                                 product = choice(goods)
                                 current_order['goods'].append(product)
                                 goods.remove(product)
+                            player.order_goods = current_order['goods'][:]
                             current_order['goods'] = ', '.join(current_order['goods'])
 
                         if mode == 'final' and current_order:
@@ -2752,8 +2757,11 @@ class Product(pygame.sprite.Sprite):
 
     # changing health and infection risk and setting is_used flag
     def use(self):
-        if self.kind == 'prod':
+        print(player.satiety)
+        if self.kind == 'food':
             player.satiety += 50
+            print(player.satiety)
+            print()
         elif self.kind == 'med':
             player.health += 25
             player.danger_level -= 25
@@ -3247,6 +3255,8 @@ camera = Camera()
 camera.update(player)
 
 scanner_on = False
+was_click = False
+policeman_radius = 450
 arrest_rate = 0
 
 #second_shop.enter()
@@ -3261,9 +3271,11 @@ try:
                 pos = event.pos
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if player.role == 'policeman':
+                    was_click = True
                     for i in remote_players:
                         try:
-                            if i.rect.collidepoint(event.pos) and distance(player.get_coords(), event.pos) <= 450:
+                            if i.rect.collidepoint(event.pos) and\
+                                    distance(player.get_coords(), event.pos) <= policeman_radius:
                                 i.caught += 1
                                 print(i.caught)
                                 # score is changed according to the role of arrested player
@@ -3404,15 +3416,18 @@ try:
         button_group.draw(screen)
         screen.blit(player.render_info(), (0, 0))
         npc_group.draw(screen)
-        player_group.draw(screen)
         # the same problem (AttrErr), watch the comment above
         remote_players.draw(screen)
+        player_group.draw(screen)
+        if was_click:
+            pygame.draw.circle(screen, (255, 0, 0), player.get_coords(), policeman_radius, 2)
         if near_building_message and near_building:
             screen.blit(render_text(near_building_message), (0, height - 50))
         draw_timer()
         pygame.display.flip()
         clock.tick(fps)
         connect_tick += 1
+        was_click = False
         if global_exit:
             break
         # if player is arrested, we load the exit interface

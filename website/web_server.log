@@ -1,21 +1,230 @@
-INFO 2020-06-05 14:35:19,802  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
-INFO 2020-06-05 14:35:29,589 127.0.0.1 - - [05/Jun/2020 14:35:29] "[37mGET / HTTP/1.1[0m" 200 -
-INFO 2020-06-05 14:35:29,814 127.0.0.1 - - [05/Jun/2020 14:35:29] "[36mGET /static/img/carousel_2.jpg HTTP/1.1[0m" 304 -
-INFO 2020-06-05 14:35:29,817 127.0.0.1 - - [05/Jun/2020 14:35:29] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
-INFO 2020-06-05 14:35:29,832 127.0.0.1 - - [05/Jun/2020 14:35:29] "[36mGET /static/img/carousel_1.jpg HTTP/1.1[0m" 304 -
-INFO 2020-06-05 14:35:30,082 127.0.0.1 - - [05/Jun/2020 14:35:30] "[36mGET /static/img/fon.png HTTP/1.1[0m" 304 -
-INFO 2020-06-05 14:35:30,430 127.0.0.1 - - [05/Jun/2020 14:35:30] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
-INFO 2020-06-05 14:35:31,809 127.0.0.1 - - [05/Jun/2020 14:35:31] "[37mGET /login HTTP/1.1[0m" 200 -
-INFO 2020-06-05 14:35:33,433 login form valifation OK
-INFO 2020-06-05 14:35:33,748 user checked:{'_sa_instance_state': <sqlalchemy.orm.state.InstanceState object at 0x05003290>, 'email': 'admin@admin.com', 'token': 'c11cc4ab-492c-424c-aec1-e40b6e5236db', 'id': 1, 'username': 'Admin', 'privilege': 1, 'hashed_password': 'pbkdf2:sha256:150000$vH1qzG27$3a53c85ee1f39d93796fb6fc88c561aa31d8d776ab9ebe9e362ea55904f62a29', 'score': 0, 'role': 'use'}
-INFO 2020-06-05 14:35:33,750 127.0.0.1 - - [05/Jun/2020 14:35:33] "[32mPOST /login HTTP/1.1[0m" 302 -
-INFO 2020-06-05 14:35:33,779 127.0.0.1 - - [05/Jun/2020 14:35:33] "[37mGET / HTTP/1.1[0m" 200 -
-INFO 2020-06-05 14:35:36,214 127.0.0.1 - - [05/Jun/2020 14:35:36] "[37mGET /get_leaderboard HTTP/1.1[0m" 200 -
-INFO 2020-06-05 14:35:47,007 127.0.0.1 - - [05/Jun/2020 14:35:47] "[37mGET /admin HTTP/1.1[0m" 200 -
-INFO 2020-06-05 14:35:54,539 127.0.0.1 - - [05/Jun/2020 14:35:54] "[37mGET /admin/orders HTTP/1.1[0m" 200 -
-INFO 2020-06-05 14:36:00,591 127.0.0.1 - - [05/Jun/2020 14:36:00] "[37mGET /admin HTTP/1.1[0m" 200 -
-INFO 2020-06-05 14:36:02,837 127.0.0.1 - - [05/Jun/2020 14:36:02] "[37mGET /admin/users HTTP/1.1[0m" 200 -
-INFO 2020-06-05 14:36:25,694 127.0.0.1 - - [05/Jun/2020 14:36:25] "[37mGET /admin/users/edit?user=c766fae4-2204-44c5-a267-cd9e123d2bb9 HTTP/1.1[0m" 200 -
-INFO 2020-06-05 14:36:31,881 127.0.0.1 - - [05/Jun/2020 14:36:31] "[32mPOST /admin/users/edit?user=c766fae4-2204-44c5-a267-cd9e123d2bb9 HTTP/1.1[0m" 302 -
-INFO 2020-06-05 14:36:31,905 127.0.0.1 - - [05/Jun/2020 14:36:31] "[37mGET /admin/users HTTP/1.1[0m" 200 -
-INFO 2020-06-05 14:37:31,989 127.0.0.1 - - [05/Jun/2020 14:37:31] "[37mGET /admin/users HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:05:33,055  * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
+INFO 2020-06-05 15:05:37,417 127.0.0.1 - - [05/Jun/2020 15:05:37] "[37mGET /admin/orders HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:09:10,115 127.0.0.1 - - [05/Jun/2020 15:09:10] "[37mGET /game_api/create_order?token=c11cc4ab-492c-424c-aec1-e40b6e5236db&goods=Яблоко%2C+Мыло%2C+Морковь HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:09:19,395 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:09:19,396 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:09:19,396 Split author into author and []
+INFO 2020-06-05 15:09:19,397 Split goods into goods and []
+INFO 2020-06-05 15:09:19,398 Call serializer for type:Order
+INFO 2020-06-05 15:09:19,398 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:09:19,398 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:09:19,398 Skip key:user of model:Order
+INFO 2020-06-05 15:09:19,398 Skip key:token of model:Order
+INFO 2020-06-05 15:09:19,399 Skip key:id of model:Order
+INFO 2020-06-05 15:09:19,400 127.0.0.1 - - [05/Jun/2020 15:09:19] "[37mGET /api/orders/926b5dbd-e6ed-4c01-a801-5cbb35b2eaf3/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:09:26,347 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:09:26,347 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:09:26,347 Split author into author and []
+INFO 2020-06-05 15:09:26,347 Split goods into goods and []
+INFO 2020-06-05 15:09:26,347 Call serializer for type:Order
+INFO 2020-06-05 15:09:26,347 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:09:26,347 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:09:26,348 Skip key:user of model:Order
+INFO 2020-06-05 15:09:26,348 Skip key:token of model:Order
+INFO 2020-06-05 15:09:26,348 Skip key:id of model:Order
+INFO 2020-06-05 15:09:26,349 127.0.0.1 - - [05/Jun/2020 15:09:26] "[37mGET /api/orders/926b5dbd-e6ed-4c01-a801-5cbb35b2eaf3/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:09:33,232 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:09:33,232 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:09:33,232 Split author into author and []
+INFO 2020-06-05 15:09:33,233 Split goods into goods and []
+INFO 2020-06-05 15:09:33,233 Call serializer for type:Order
+INFO 2020-06-05 15:09:33,233 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:09:33,233 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:09:33,233 Skip key:user of model:Order
+INFO 2020-06-05 15:09:33,233 Skip key:token of model:Order
+INFO 2020-06-05 15:09:33,233 Skip key:id of model:Order
+INFO 2020-06-05 15:09:33,234 127.0.0.1 - - [05/Jun/2020 15:09:33] "[37mGET /api/orders/926b5dbd-e6ed-4c01-a801-5cbb35b2eaf3/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:09:40,138 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:09:40,138 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:09:40,138 Split author into author and []
+INFO 2020-06-05 15:09:40,139 Split goods into goods and []
+INFO 2020-06-05 15:09:40,139 Call serializer for type:Order
+INFO 2020-06-05 15:09:40,139 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:09:40,139 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:09:40,140 Skip key:user of model:Order
+INFO 2020-06-05 15:09:40,140 Skip key:token of model:Order
+INFO 2020-06-05 15:09:40,140 Skip key:id of model:Order
+INFO 2020-06-05 15:09:40,141 127.0.0.1 - - [05/Jun/2020 15:09:40] "[37mGET /api/orders/926b5dbd-e6ed-4c01-a801-5cbb35b2eaf3/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:09:47,071 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:09:47,075 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:09:47,075 Split author into author and []
+INFO 2020-06-05 15:09:47,075 Split goods into goods and []
+INFO 2020-06-05 15:09:47,077 Call serializer for type:Order
+INFO 2020-06-05 15:09:47,078 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:09:47,079 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:09:47,079 Skip key:user of model:Order
+INFO 2020-06-05 15:09:47,079 Skip key:token of model:Order
+INFO 2020-06-05 15:09:47,079 Skip key:id of model:Order
+INFO 2020-06-05 15:09:47,080 127.0.0.1 - - [05/Jun/2020 15:09:47] "[37mGET /api/orders/926b5dbd-e6ed-4c01-a801-5cbb35b2eaf3/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:09:53,958 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:09:53,958 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:09:53,958 Split author into author and []
+INFO 2020-06-05 15:09:53,958 Split goods into goods and []
+INFO 2020-06-05 15:09:53,959 Call serializer for type:Order
+INFO 2020-06-05 15:09:53,959 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:09:53,959 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:09:53,959 Skip key:user of model:Order
+INFO 2020-06-05 15:09:53,959 Skip key:token of model:Order
+INFO 2020-06-05 15:09:53,959 Skip key:id of model:Order
+INFO 2020-06-05 15:09:53,960 127.0.0.1 - - [05/Jun/2020 15:09:53] "[37mGET /api/orders/926b5dbd-e6ed-4c01-a801-5cbb35b2eaf3/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:09:54,961 127.0.0.1 - - [05/Jun/2020 15:09:54] "[37mGET /game_api/get_orders?user_token=c3288c7b-acd1-4a6c-8e66-5c9b9c0c6fe0 HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:10:00,905 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:10:00,905 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:10:00,905 Split author into author and []
+INFO 2020-06-05 15:10:00,905 Split goods into goods and []
+INFO 2020-06-05 15:10:00,906 Call serializer for type:Order
+INFO 2020-06-05 15:10:00,907 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:10:00,907 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:10:00,907 Skip key:user of model:Order
+INFO 2020-06-05 15:10:00,907 Skip key:token of model:Order
+INFO 2020-06-05 15:10:00,907 Skip key:id of model:Order
+INFO 2020-06-05 15:10:00,908 127.0.0.1 - - [05/Jun/2020 15:10:00] "[37mGET /api/orders/926b5dbd-e6ed-4c01-a801-5cbb35b2eaf3/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:10:07,870 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:10:07,870 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:10:07,872 Split author into author and []
+INFO 2020-06-05 15:10:07,872 Split goods into goods and []
+INFO 2020-06-05 15:10:07,872 Call serializer for type:Order
+INFO 2020-06-05 15:10:07,872 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:10:07,872 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:10:07,872 Skip key:user of model:Order
+INFO 2020-06-05 15:10:07,872 Skip key:token of model:Order
+INFO 2020-06-05 15:10:07,872 Skip key:id of model:Order
+INFO 2020-06-05 15:10:07,873 127.0.0.1 - - [05/Jun/2020 15:10:07] "[37mGET /api/orders/926b5dbd-e6ed-4c01-a801-5cbb35b2eaf3/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:10:14,806 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:10:14,806 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:10:14,807 Split author into author and []
+INFO 2020-06-05 15:10:14,807 Split goods into goods and []
+INFO 2020-06-05 15:10:14,809 Call serializer for type:Order
+INFO 2020-06-05 15:10:14,809 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:10:14,809 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:10:14,809 Skip key:user of model:Order
+INFO 2020-06-05 15:10:14,809 Skip key:token of model:Order
+INFO 2020-06-05 15:10:14,809 Skip key:id of model:Order
+INFO 2020-06-05 15:10:14,810 127.0.0.1 - - [05/Jun/2020 15:10:14] "[37mGET /api/orders/926b5dbd-e6ed-4c01-a801-5cbb35b2eaf3/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:10:21,702 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:10:21,705 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:10:21,705 Split author into author and []
+INFO 2020-06-05 15:10:21,705 Split goods into goods and []
+INFO 2020-06-05 15:10:21,705 Call serializer for type:Order
+INFO 2020-06-05 15:10:21,706 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:10:21,706 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:10:21,706 Skip key:user of model:Order
+INFO 2020-06-05 15:10:21,706 Skip key:token of model:Order
+INFO 2020-06-05 15:10:21,706 Skip key:id of model:Order
+INFO 2020-06-05 15:10:21,707 127.0.0.1 - - [05/Jun/2020 15:10:21] "[37mGET /api/orders/926b5dbd-e6ed-4c01-a801-5cbb35b2eaf3/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:10:30,241 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:10:30,241 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:10:30,241 Split author into author and []
+INFO 2020-06-05 15:10:30,241 Split goods into goods and []
+INFO 2020-06-05 15:10:30,241 Call serializer for type:Order
+INFO 2020-06-05 15:10:30,241 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:10:30,242 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:10:30,242 Skip key:user of model:Order
+INFO 2020-06-05 15:10:30,243 Skip key:token of model:Order
+INFO 2020-06-05 15:10:30,243 Skip key:id of model:Order
+INFO 2020-06-05 15:10:30,244 127.0.0.1 - - [05/Jun/2020 15:10:30] "[37mGET /api/orders/926b5dbd-e6ed-4c01-a801-5cbb35b2eaf3/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:10:38,648 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:10:38,648 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:10:38,648 Split author into author and []
+INFO 2020-06-05 15:10:38,648 Split goods into goods and []
+INFO 2020-06-05 15:10:38,648 Call serializer for type:Order
+INFO 2020-06-05 15:10:38,649 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:10:38,650 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:10:38,650 Skip key:user of model:Order
+INFO 2020-06-05 15:10:38,650 Skip key:token of model:Order
+INFO 2020-06-05 15:10:38,650 Skip key:id of model:Order
+INFO 2020-06-05 15:10:38,658 127.0.0.1 - - [05/Jun/2020 15:10:38] "[37mGET /api/orders/926b5dbd-e6ed-4c01-a801-5cbb35b2eaf3/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:10:45,533 127.0.0.1 - - [05/Jun/2020 15:10:45] "[37mGET /game_api/delete_order?user_token=926b5dbd-e6ed-4c01-a801-5cbb35b2eaf3 HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:10:45,575 127.0.0.1 - - [05/Jun/2020 15:10:45] "[33mGET /api/orders/926b5dbd-e6ed-4c01-a801-5cbb35b2eaf3/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 404 -
+INFO 2020-06-05 15:22:34,150 127.0.0.1 - - [05/Jun/2020 15:22:34] "[37mGET /game_api/create_order?token=c11cc4ab-492c-424c-aec1-e40b6e5236db&goods=Спирт%2C+Яблоко%2C+Морковь HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:22:43,858 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:22:43,859 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:22:43,859 Split author into author and []
+INFO 2020-06-05 15:22:43,859 Split goods into goods and []
+INFO 2020-06-05 15:22:43,859 Call serializer for type:Order
+INFO 2020-06-05 15:22:43,859 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:22:43,860 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:22:43,860 Skip key:user of model:Order
+INFO 2020-06-05 15:22:43,860 Skip key:token of model:Order
+INFO 2020-06-05 15:22:43,860 Skip key:id of model:Order
+INFO 2020-06-05 15:22:43,860 127.0.0.1 - - [05/Jun/2020 15:22:43] "[37mGET /api/orders/70dd22ed-1813-4629-87f5-9eb56af4c4a8/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:22:50,679 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:22:50,679 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:22:50,679 Split author into author and []
+INFO 2020-06-05 15:22:50,680 Split goods into goods and []
+INFO 2020-06-05 15:22:50,680 Call serializer for type:Order
+INFO 2020-06-05 15:22:50,680 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:22:50,680 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:22:50,680 Skip key:user of model:Order
+INFO 2020-06-05 15:22:50,680 Skip key:token of model:Order
+INFO 2020-06-05 15:22:50,680 Skip key:id of model:Order
+INFO 2020-06-05 15:22:50,681 127.0.0.1 - - [05/Jun/2020 15:22:50] "[37mGET /api/orders/70dd22ed-1813-4629-87f5-9eb56af4c4a8/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:22:57,466 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:22:57,467 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:22:57,467 Split author into author and []
+INFO 2020-06-05 15:22:57,467 Split goods into goods and []
+INFO 2020-06-05 15:22:57,467 Call serializer for type:Order
+INFO 2020-06-05 15:22:57,467 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:22:57,467 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:22:57,468 Skip key:user of model:Order
+INFO 2020-06-05 15:22:57,468 Skip key:token of model:Order
+INFO 2020-06-05 15:22:57,469 Skip key:id of model:Order
+INFO 2020-06-05 15:22:57,470 127.0.0.1 - - [05/Jun/2020 15:22:57] "[37mGET /api/orders/70dd22ed-1813-4629-87f5-9eb56af4c4a8/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:23:01,158 127.0.0.1 - - [05/Jun/2020 15:23:01] "[37mGET /game_api/get_orders?user_token=c3288c7b-acd1-4a6c-8e66-5c9b9c0c6fe0 HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:23:04,267 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:23:04,267 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:23:04,268 Split author into author and []
+INFO 2020-06-05 15:23:04,268 Split goods into goods and []
+INFO 2020-06-05 15:23:04,268 Call serializer for type:Order
+INFO 2020-06-05 15:23:04,268 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:23:04,268 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:23:04,268 Skip key:user of model:Order
+INFO 2020-06-05 15:23:04,268 Skip key:token of model:Order
+INFO 2020-06-05 15:23:04,269 Skip key:id of model:Order
+INFO 2020-06-05 15:23:04,269 127.0.0.1 - - [05/Jun/2020 15:23:04] "[37mGET /api/orders/70dd22ed-1813-4629-87f5-9eb56af4c4a8/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:23:11,076 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:23:11,077 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:23:11,077 Split author into author and []
+INFO 2020-06-05 15:23:11,077 Split goods into goods and []
+INFO 2020-06-05 15:23:11,077 Call serializer for type:Order
+INFO 2020-06-05 15:23:11,077 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:23:11,078 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:23:11,078 Skip key:user of model:Order
+INFO 2020-06-05 15:23:11,078 Skip key:token of model:Order
+INFO 2020-06-05 15:23:11,078 Skip key:id of model:Order
+INFO 2020-06-05 15:23:11,079 127.0.0.1 - - [05/Jun/2020 15:23:11] "[37mGET /api/orders/70dd22ed-1813-4629-87f5-9eb56af4c4a8/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:23:17,928 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:23:17,928 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:23:17,928 Split author into author and []
+INFO 2020-06-05 15:23:17,928 Split goods into goods and []
+INFO 2020-06-05 15:23:17,928 Call serializer for type:Order
+INFO 2020-06-05 15:23:17,929 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:23:17,930 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:23:17,930 Skip key:user of model:Order
+INFO 2020-06-05 15:23:17,930 Skip key:token of model:Order
+INFO 2020-06-05 15:23:17,930 Skip key:id of model:Order
+INFO 2020-06-05 15:23:17,931 127.0.0.1 - - [05/Jun/2020 15:23:17] "[37mGET /api/orders/70dd22ed-1813-4629-87f5-9eb56af4c4a8/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:23:24,733 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:23:24,733 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:23:24,733 Split author into author and []
+INFO 2020-06-05 15:23:24,733 Split goods into goods and []
+INFO 2020-06-05 15:23:24,733 Call serializer for type:Order
+INFO 2020-06-05 15:23:24,734 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:23:24,734 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:23:24,734 Skip key:user of model:Order
+INFO 2020-06-05 15:23:24,734 Skip key:token of model:Order
+INFO 2020-06-05 15:23:24,734 Skip key:id of model:Order
+INFO 2020-06-05 15:23:24,735 127.0.0.1 - - [05/Jun/2020 15:23:24] "[37mGET /api/orders/70dd22ed-1813-4629-87f5-9eb56af4c4a8/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:23:31,542 Init schema is_greedy:False rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:23:31,543 Update schema with rules:{Rule(author), Rule(goods)}
+INFO 2020-06-05 15:23:31,544 Split author into author and []
+INFO 2020-06-05 15:23:31,544 Split goods into goods and []
+INFO 2020-06-05 15:23:31,544 Call serializer for type:Order
+INFO 2020-06-05 15:23:31,544 Serialize key:author type:int model:Order
+INFO 2020-06-05 15:23:31,545 Serialize key:goods type:str model:Order
+INFO 2020-06-05 15:23:31,545 Skip key:user of model:Order
+INFO 2020-06-05 15:23:31,545 Skip key:token of model:Order
+INFO 2020-06-05 15:23:31,545 Skip key:id of model:Order
+INFO 2020-06-05 15:23:31,546 127.0.0.1 - - [05/Jun/2020 15:23:31] "[37mGET /api/orders/70dd22ed-1813-4629-87f5-9eb56af4c4a8/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:23:38,090 127.0.0.1 - - [05/Jun/2020 15:23:38] "[37mGET /game_api/delete_order?user_token=70dd22ed-1813-4629-87f5-9eb56af4c4a8 HTTP/1.1[0m" 200 -
+INFO 2020-06-05 15:23:38,340 127.0.0.1 - - [05/Jun/2020 15:23:38] "[33mGET /api/orders/70dd22ed-1813-4629-87f5-9eb56af4c4a8/token/c11cc4ab-492c-424c-aec1-e40b6e5236db HTTP/1.1[0m" 404 -

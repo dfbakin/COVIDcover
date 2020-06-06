@@ -46,7 +46,7 @@ args = sys.argv[1:]
 pygame.init()
 
 size = width, height = 1280, 720
-screen = pygame.display.set_mode(size)  # , pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size)#, pygame.FULLSCREEN)
 # sprite groups set up
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -100,8 +100,9 @@ orders = None
 
 # internal_id = input('Enter internal id:   ')
 # setting vars from args for online mode
+#TODO fix
 host, port, internal_id, player_name = args
-# port = int(port)
+port = int(port)
 api_port = 8080
 # for debug
 '''role = 'policeman'
@@ -3113,10 +3114,6 @@ def choose_role():
                 for btn in button_group:
                     if btn.rect.collidepoint(pos):
                         role = btn.run()
-                        # TODO fix debug lines
-                        button_group.empty()
-                        settings_buttons_group.empty()
-                        return
                         logging.info(role)
                         if role == 'policeman':
                             user_role = 'pol'

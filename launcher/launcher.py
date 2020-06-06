@@ -6,6 +6,7 @@ from zipfile import ZipFile
 log_filename = 'covid_cover.log'
 user_registration = "f5d9063b-ccb1-4a60-b4a1-8abf6ed38708"
 
+
 class Ui_Downloader(object):
     def setupUi(self, Downloader):
         Downloader.resize(391, 111)
@@ -131,26 +132,26 @@ class Ui_MainWindow(object):
         self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_2.setGeometry(QtCore.QRect(420, 350, 181, 61))
         self.pushButton_2.setStyleSheet(":!hover{\n"
-"background-color: rgb(172, 216, 230);\n"
-"}\n"
-"\n"
-":hover{\n"
-"    border: 4px solid black; \n"
-"    background: rgb(105, 185, 211); \n"
-"    padding: 10px;\n"
-"}")
+                                        "background-color: rgb(172, 216, 230);\n"
+                                        "}\n"
+                                        "\n"
+                                        ":hover{\n"
+                                        "    border: 4px solid black; \n"
+                                        "    background: rgb(105, 185, 211); \n"
+                                        "    padding: 10px;\n"
+                                        "}")
         self.pushButton_2.setObjectName("pushButton_2")
         self.pushButton_3 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_3.setGeometry(QtCore.QRect(520, 430, 171, 61))
         self.pushButton_3.setStyleSheet("backgr:!hover{\n"
-"background-color: rgb(172, 216, 230);\n"
-"}\n"
-"\n"
-":hover{\n"
-"    border: 4px solid black; \n"
-"    background: rgb(105, 185, 211); \n"
-"    padding: 10px;\n"
-"}ound-color: rgb(172, 216, 230);")
+                                        "background-color: rgb(172, 216, 230);\n"
+                                        "}\n"
+                                        "\n"
+                                        ":hover{\n"
+                                        "    border: 4px solid black; \n"
+                                        "    background: rgb(105, 185, 211); \n"
+                                        "    padding: 10px;\n"
+                                        "}ound-color: rgb(172, 216, 230);")
         self.pushButton_3.setObjectName("pushButton_3")
         self.plainTextEdit = QtWidgets.QPlainTextEdit(self.centralwidget)
         self.plainTextEdit.setGeometry(QtCore.QRect(10, 340, 301, 151))
@@ -158,14 +159,14 @@ class Ui_MainWindow(object):
         self.pushButton_5 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_5.setGeometry(QtCore.QRect(320, 430, 191, 61))
         self.pushButton_5.setStyleSheet(":!hover{\n"
-"background-color: rgb(172, 216, 230);\n"
-"}\n"
-"\n"
-":hover{\n"
-"    border: 4px solid black; \n"
-"    background: rgb(105, 185, 211); \n"
-"    padding: 10px;\n"
-"}")
+                                        "background-color: rgb(172, 216, 230);\n"
+                                        "}\n"
+                                        "\n"
+                                        ":hover{\n"
+                                        "    border: 4px solid black; \n"
+                                        "    background: rgb(105, 185, 211); \n"
+                                        "    padding: 10px;\n"
+                                        "}")
         self.pushButton_5.setObjectName("pushButton_5")
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
         self.label_3.setGeometry(QtCore.QRect(10, 80, 681, 21))
@@ -202,14 +203,14 @@ class Ui_MainWindow(object):
         self.pushButton = QtWidgets.QPushButton(self.tab)
         self.pushButton.setGeometry(QtCore.QRect(100, 130, 81, 51))
         self.pushButton.setStyleSheet(":!hover{\n"
-"background-color: rgb(172, 216, 230);\n"
-"}\n"
-"\n"
-":hover{\n"
-"    border: 4px solid black; \n"
-"    background: rgb(105, 185, 211); \n"
-"    padding: 10px;\n"
-"}")
+                                      "background-color: rgb(172, 216, 230);\n"
+                                      "}\n"
+                                      "\n"
+                                      ":hover{\n"
+                                      "    border: 4px solid black; \n"
+                                      "    background: rgb(105, 185, 211); \n"
+                                      "    padding: 10px;\n"
+                                      "}")
         self.pushButton.setObjectName("pushButton")
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QtWidgets.QWidget()
@@ -238,14 +239,14 @@ class Ui_MainWindow(object):
         self.pushButton_4 = QtWidgets.QPushButton(self.tab_2)
         self.pushButton_4.setGeometry(QtCore.QRect(50, 130, 181, 51))
         self.pushButton_4.setStyleSheet(":!hover{\n"
-"background-color: rgb(172, 216, 230);\n"
-"}\n"
-"\n"
-":hover{\n"
-"    border: 4px solid black; \n"
-"    background: rgb(105, 185, 211); \n"
-"    padding: 10px;\n"
-"}")
+                                        "background-color: rgb(172, 216, 230);\n"
+                                        "}\n"
+                                        "\n"
+                                        ":hover{\n"
+                                        "    border: 4px solid black; \n"
+                                        "    background: rgb(105, 185, 211); \n"
+                                        "    padding: 10px;\n"
+                                        "}")
         self.pushButton_4.setObjectName("pushButton_4")
         self.tabWidget.addTab(self.tab_2, "")
         MainWindow.setCentralWidget(self.centralwidget)
@@ -269,7 +270,7 @@ class Ui_MainWindow(object):
         self.pushButton_2.setText(_translate("MainWindow", "Открыть сайт"))
         self.pushButton_3.setText(_translate("MainWindow", "Запустить игру!"))
         self.plainTextEdit.setPlainText(_translate("MainWindow", "Error logs:\n"
-"OK"))
+                                                                 "OK"))
         self.pushButton_5.setText(_translate("MainWindow", "Запустить мультиплеер!"))
         self.label_3.setText(_translate("MainWindow", "Auth status here"))
         self.label_4.setText(_translate("MainWindow", "Все системы функционируют нормально."))
@@ -283,8 +284,6 @@ class Ui_MainWindow(object):
         self.pushButton_4.setText(_translate("MainWindow", "Зарегестрироваться"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Зарегестрироваться"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
-
-
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
@@ -302,8 +301,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         if not self.update_needed:
             self.show()
 
-
-
     def initUI(self):
         self.pushButton_3.clicked.connect(self.launch_single)
         self.pushButton_2.clicked.connect(lambda: webbrowser.open(f'http://{MyWidget.host}:{MyWidget.port}', new=0))
@@ -316,7 +313,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
         self.user = None
         self.password = None
-
 
     def check_hash(self, script_path=str(os.path.join(os.path.dirname(__file__), "COVIDcover"))):
         lst = []
@@ -357,7 +353,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.show_error('Заполните все поля!')
             return
         try:
-            response = requests.post(f'http://{MyWidget.host}:{MyWidget.port}/api/users/token/{user_registration}', data={'email': email, 'password': password, "username": username})
+            response = requests.post(f'http://{MyWidget.host}:{MyWidget.port}/api/users/token/{user_registration}',
+                                     data={'email': email, 'password': password, "username": username})
         except requests.exceptions.ConnectionError:
             self.show_error('Отсутствует интернет. Запустите программу позже.')
             return
@@ -385,7 +382,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.show_error('Заполните все поля!')
             return
         self.auth(email, password)
-
 
     def auth(self, email, password):
         try:
@@ -425,22 +421,23 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.show_error('Видимо, у наш сервер сейчас отдыхает ;) Вам недоступна сетевая игра')
                 return
             except Exception:
-                self.show_error('Возникла непредвиденная ошибка.\nВы можете написать в тех. поддержку.\nВам недоступна сетевая игра')
+                self.show_error(
+                    'Возникла непредвиденная ошибка.\nВы можете написать в тех. поддержку.\nВам недоступна сетевая игра')
                 return
             if response.status_code == 500:
                 self.show_error('Ошибка на сервере. Мы уже работаем.\nВам недоступна сетевая игра')
                 return False
             versions_list = json.loads(response.content.decode('utf-8'))
-            with open(os.path.join(os.path.dirname(__file__), 'COVIDcover/versions.json'), mode='r', encoding='utf-8') as f:
+            with open(os.path.join(os.path.dirname(__file__), 'COVIDcover/versions.json'), mode='r',
+                      encoding='utf-8') as f:
                 data = json.load(f)
                 self.update_needed = data['last_version'] != versions_list['last_version']
         if not self.update_needed:
             self.update_needed = not self.check_hash()
         if self.update_needed:
             self.hide()
-            self.updater = LoadingWidget(self) # TODO Update launcher
+            self.updater = LoadingWidget(self)  # TODO Update launcher
             self.updater.closed_signal.connect(self.show)
-
 
     def launch_multi(self):
         self.show_error('Все системы функционируют нормально.')
@@ -481,13 +478,14 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         try:
             error_code = None
             self.hide()
-            os.system(f"cd COVIDcover && \"{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'COVIDcover', 'multi_build/multi_main.exe')}\" {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
+            os.system(
+                f"cd COVIDcover && \"{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'COVIDcover', 'multi_build/multi_main.exe')}\" {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
             self.show()
-            if os.path.isfile('score.dat'):
-                with open('score.dat', mode='r', encoding='utf-8') as file:
+            if os.path.isfile('COVIDcover/multi_build/score.dat'):
+                with open('COVIDcover/multi_build/score.dat', mode='r', encoding='utf-8') as file:
                     score, error_code = file.read().strip().split()
                     error_code = int(error_code)
-                os.remove('score.dat')
+                os.remove('COVIDcover/multi_build/score.dat')
             else:
                 score, error_code = '0', -7
 
@@ -513,25 +511,17 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
                              params={'user_token': self.user['token'], 'score': 0})
             finally:
-                if os.path.isfile('score.dat'):
-                    os.remove('score.dat')
-                if os.path.isfile('covid_cover.log'):
-                    os.remove('covid_cover.log')
-                if error_code and error_code != 0:
-                    if os.path.isfile(log_filename):
-                        try:
-                            os.remove(log_filename)
-                        except Exception as e:
-                            print(e)
-
-                    with open(log_filename, mode='r', encoding='utf-8') as file:
+                if os.path.isfile('COVIDcover/multi_build/score.dat'):
+                    os.remove('COVIDcover/multi_build/score.dat')
+                if error_code != 0 and os.path.isfile('COVIDcover/multi_build/' + log_filename):
+                    with open('COVIDcover/multi_build/' + log_filename, mode='r', encoding='utf-8') as file:
                         try:
                             response = requests.post(f'http://{host}:{port}/game_api/get_log', files={'log': file})
                         except Exception as e:
                             self.show_error(str(e))
-                if os.path.isfile(log_filename):
+                if os.path.isfile('COVIDcover/multi_build/' + log_filename):
                     try:
-                        os.remove(log_filename)
+                        os.remove('COVIDcover/multi_build/' + log_filename)
                     except PermissionError:
                         pass
                     except Exception as e:

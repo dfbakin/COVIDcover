@@ -200,7 +200,7 @@ def roles_left():
     res = request.args['role'] in roles
     if res:
         server.roles = edit_lst(server.roles, request.args['role'], False)
-        user.role = ""
+        user.role = request.args['role']
         session.merge(user)
         session.merge(server)
         session.commit()

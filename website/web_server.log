@@ -621,3 +621,8 @@ INFO 2020-06-06 19:57:55,167 127.0.0.1 - - [06/Jun/2020 19:57:55] "[37mGET /gam
 INFO 2020-06-06 19:58:04,035 127.0.0.1 - - [06/Jun/2020 19:58:04] "[37mGET /game_api/roles_left?role=use&user_token=854f3a8d-07c2-4dad-b71b-6b6bbb0c534b HTTP/1.1[0m" 200 -
 INFO 2020-06-06 19:59:07,500 127.0.0.1 - - [06/Jun/2020 19:59:07] "[37mGET /game_api/quit?user_token=854f3a8d-07c2-4dad-b71b-6b6bbb0c534b&score=15750 HTTP/1.1[0m" 200 -
 INFO 2020-06-06 19:59:14,813 127.0.0.1 - - [06/Jun/2020 19:59:14] "[37mGET /admin HTTP/1.1[0m" 200 -
+INFO 2020-06-06 20:21:26,353  * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
+INFO 2020-06-06 20:22:07,304 127.0.0.1 - - [06/Jun/2020 20:22:07] "[37mGET /game_api/check_hash/d41d8cd98f00b204e9800998ecf8427e HTTP/1.1[0m" 200 -
+INFO 2020-06-06 20:54:29,785  * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
+INFO 2020-06-06 20:54:34,804 127.0.0.1 - - [06/Jun/2020 20:54:34] "[37mGET / HTTP/1.1[0m" 200 -
+INFO 2020-06-06 20:54:38,964 127.0.0.1 - - [06/Jun/2020 20:54:38] "[37mGET /static/releases/setup.zip HTTP/1.1[0m" 200 -

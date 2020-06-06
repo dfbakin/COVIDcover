@@ -45,7 +45,7 @@ class Ui_Downloader(object):
 
 
 class LoadingWidget(QtWidgets.QMainWindow, Ui_Downloader):
-    host = "127.0.0.1"
+    host = "84.201.145.186"
     port = "8080"
     closed_signal = QtCore.pyqtSignal()
 

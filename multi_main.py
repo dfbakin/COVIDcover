@@ -127,7 +127,7 @@ speeches = {'intro': pygame.mixer.Sound('data/speech/intro.wav'),
             'news': pygame.mixer.Sound('data/speech/news.wav')}
 
 music = {'main': pygame.mixer.Sound('data/music/main_music.ogg')}
-# music['main'].play(-1)
+music['main'].play(-1)
 
 # all objects sounds
 sounds = {'apple': pygame.mixer.Sound('data/sounds/apple_crunch.wav'),

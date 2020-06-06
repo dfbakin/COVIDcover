@@ -1,2 +1,0 @@
-color A
-tree

@@ -343,9 +343,9 @@ class Character(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         if random.random() > 0.5:
-            self.rect.x, self.rect.y = randint(100, 4000), randint(200, 300)
+            self.rect.x, self.rect.y = randint(100, 4000) + terrain.rect.x, randint(200, 300) + terrain.rect.y
         else:
-            self.rect.x, self.rect.y = randint(4000, 7500), randint(100, 200)
+            self.rect.x, self.rect.y = randint(4000, 7500) + terrain.rect.x, randint(100, 200) + terrain.rect.y
         self.image_num = 0
 
         self.prev_coords = 0, 0

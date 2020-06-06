@@ -99,7 +99,7 @@ def quit():
     server.players_n = len(server.players.split())
 
     server.roles = edit_lst(server.roles, user.role, True)
-    user.role = None
+    user.role = ""
     user.score = int(score)
 
     session.merge(user)
@@ -195,11 +195,13 @@ def roles_left():
     if not server:
         abort(406)
     roles = server.roles.split()
-    if user.role:
+    if user.role in ("cou", "pol", "use"):
         abort(400)
     res = request.args['role'] in roles
     if res:
         server.roles = edit_lst(server.roles, request.args['role'], False)
+        user.role = ""
+        session.merge(user)
         session.merge(server)
         session.commit()
 

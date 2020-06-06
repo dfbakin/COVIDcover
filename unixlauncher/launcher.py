@@ -480,7 +480,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         try:
             error_code = None
             self.hide()
-            os.system(f"cd COVIDcover && {sys.executable} \"multi_build/multi_main.exe\" {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
+            os.system(f"cd COVIDcover && {sys.executable} \"multi_build/multi_main.py\" {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
             self.show()
             if os.path.isfile('score.dat'):
                 with open('score.dat', mode='r', encoding='utf-8') as file:
@@ -541,7 +541,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def launch_single(self):
         try:
             self.hide()
-            os.system(f'cd COVIDcover && {sys.executable} "main_build/main"')
+            os.system(f'cd COVIDcover && {sys.executable} "main_build/main.py"')
             self.show()
         except Exception as e:
             self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + str(e) + '\n\n')

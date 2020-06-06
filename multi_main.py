@@ -46,7 +46,7 @@ args = sys.argv[1:]
 pygame.init()
 
 size = width, height = 1280, 720
-screen = pygame.display.set_mode(size)#, pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 # sprite groups set up
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -100,7 +100,6 @@ orders = None
 
 # internal_id = input('Enter internal id:   ')
 # setting vars from args for online mode
-#TODO fix
 host, port, internal_id, player_name = args
 port = int(port)
 api_port = 8080
@@ -109,7 +108,7 @@ api_port = 8080
 host, port = '127.0.0.1', 9000
 player_name = '123456'
 internal_id = 'c11cc4ab-492c-424c-aec1-e40b6e5236db'''
-#internal_id = 'c3288c7b-acd1-4a6c-8e66-5c9b9c0c6fe0'
+# internal_id = 'c3288c7b-acd1-4a6c-8e66-5c9b9c0c6fe0'
 # internal_id = '2a288d46-b3bf-4669-a938-dbaa6e8d9126'
 # ip = socket.gethostbyname('0.tcp.ngrok.io')
 # host = ip
@@ -496,7 +495,7 @@ class Player(pygame.sprite.Sprite):
         self.speed = Player.speed
         self.satiety = Player.satiety
 
-        self.card_money = 15500#2500
+        self.card_money = 2500
         self.cash = 5000
         self.profit = 0.1
         self.profit_timer = pygame.time.Clock()
@@ -649,8 +648,8 @@ class Player(pygame.sprite.Sprite):
 
     # reducing health, increasing danger_level (risk of infection)
     def update_params(self, at_work=False):
-        if self.satiety < Player.satiety // 1.5:
-            self.health -= (1 - self.satiety / Player.satiety) * 0.05
+        if self.satiety < Player.satiety // 3:
+            self.health -= (1 - self.satiety / Player.satiety) * 0.02
         if at_work and self.role == 'citizen':
             self.profit_num += self.profit_timer.tick()
             if self.profit_num >= 1000:
@@ -2833,7 +2832,8 @@ class Equipment:
                                     if use_btn:
                                         use_btn.kill()
                                     if player.get_objects()[btn.id].can_be_used:
-                                        use_btn = Button(width - 300, height - 150, 300, 75, render_text('Использовать'),
+                                        use_btn = Button(width - 300, height - 150, 300, 75,
+                                                         render_text('Использовать'),
                                                          self.products[int(btn.id)].use, None, product_buttons)
                             else:
                                 btn.run()
@@ -3180,7 +3180,8 @@ with open('data/data_files/products.dat', mode='r', encoding='utf-8') as f:
         # load image of the path from the file
         image = load_image(data[2], size=(50, 90))
         # 4 and 5 are new
-        products[data[0]] = Product(0, 0, data[1], image, int(data[3]), data[4]=='true', data[5], data[6].split(r'\n'))
+        products[data[0]] = Product(0, 0, data[1], image, int(data[3]), data[4] == 'true', data[5],
+                                    data[6].split(r'\n'))
 # default images
 # rarely used, only images with general meaning
 images = {'pause_button': load_image('data/other/pause_button.png', size=(50, 50)),
@@ -3256,7 +3257,7 @@ was_click = False
 policeman_radius = 450
 arrest_rate = 0
 
-#second_shop.enter()
+# second_shop.enter()
 
 # all exceptions in the loop cause quit and all of exit_game func
 try:
@@ -3271,7 +3272,7 @@ try:
                     was_click = True
                     for i in remote_players:
                         try:
-                            if i.rect.collidepoint(event.pos) and\
+                            if i.rect.collidepoint(event.pos) and \
                                     distance(player.get_coords(), event.pos) <= policeman_radius:
                                 i.caught += 1
                                 print(i.caught)

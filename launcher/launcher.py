@@ -119,7 +119,6 @@ class LoadingWidget(QtWidgets.QMainWindow, Ui_Downloader):
         with ZipFile("tmp.zip") as zp:
             zp.extractall(os.path.join(os.path.dirname(__file__), "COVIDcover"))
         os.remove(os.path.join(os.path.dirname(__file__), "tmp.zip"))
-        self.close()
 
 
 class Ui_MainWindow(object):

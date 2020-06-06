@@ -5,7 +5,7 @@ import sys
 pygame.init()
 
 size = width, height = 1280, 720
-screen = pygame.display.set_mode(size)  # , pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()

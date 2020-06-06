@@ -8,8 +8,7 @@ from hashing import check_hash
 
 bp = Blueprint('game_api', __name__)
 # TODO hash
-HASH = check_hash("static/releases/game.zip")
-UNIX_HASH = check_hash("static/releases/game.zip")
+HASH = 'f7e87b89a096da969a9971f56c4417e2'
 
 
 def jlst(lst):
@@ -176,11 +175,6 @@ def get_log():
 @bp.route('/game_api/check_hash/<hsh>')
 def ch_hsh(hsh):
     return jsonify({'success': hsh == HASH})
-
-
-@bp.route('/game_api/check_unix_hash/<hsh>')
-def ch_nx_hsh(hsh):
-    return jsonify({'success': hsh == UNIX_HASH})
 
 
 @bp.route('/game_api/roles_left')

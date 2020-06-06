@@ -509,7 +509,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 if error_code != 0 and os.path.isfile('COVIDcover/' + log_filename):
                     with open('COVIDcover/' + log_filename, mode='r', encoding='utf-8') as file:
                         try:
-                            response = requests.post(f'http://{host}:{port}/game_api/get_log', files={'log': file})
+                            response = requests.post(f'http://{HOST}:{PORT}/game_api/get_log', files={'log': file})
                         except Exception as e:
                             self.show_error(str(e))
                 if os.path.isfile('COVIDcover/' + log_filename):
@@ -521,14 +521,17 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                         self.show_error(str(e))
 
     def launch_single(self):
-        try:
-            self.hide()
-            os.system(f'cd COVIDcover && "{sys.executable}" "main_build/main.py"')
-            self.show()
-        except Exception as e:
-            self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + str(e) + '\n\n')
-        finally:
-            self.show()
+        if os.path.isfile("COVIDcover/main_build/main.py"):
+            try:
+                self.hide()
+                os.system(f'cd COVIDcover && "{sys.executable}" "main_build/main.py"')
+                self.show()
+            except Exception as e:
+                self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + str(e) + '\n\n')
+            finally:
+                self.show()
+        else:
+            self.show_error("Необнаружено файла игры. Все файлы установятся,\nкогда вы перезапустите лаунчер с подключением к интернету.")
 
     def show_error(self, error):
         self.label_4.setText(error)

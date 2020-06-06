@@ -521,7 +521,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def launch_single(self):
         try:
             self.hide()
-            os.system('cd COVIDcover && "main_build/main"')
+            os.system('cd COVIDcover && "main_build/main.exe"')
             self.show()
         except Exception as e:
             self.plainTextEdit.setPlainText(self.plainTextEdit.toPlainText() + str(e) + '\n\n')

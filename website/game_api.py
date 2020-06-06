@@ -4,11 +4,10 @@ from data.db_session import create_session
 from data.__all_models import User, Server, Order
 from random import shuffle
 from uuid import uuid4
-from hashing import check_hash
 
 bp = Blueprint('game_api', __name__)
 # TODO hash
-HASH = 'f7e87b89a096da969a9971f56c4417e2'
+HASH = '39df0f0c7985c427532f61f061c2c164'
 
 
 def jlst(lst):

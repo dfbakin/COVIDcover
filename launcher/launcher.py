@@ -489,10 +489,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                     error_code = int(error_code)
                 os.remove('score.dat')
             else:
-                score, error_code = 0, -7
+                score, error_code = '0', -7
 
-            if not score.isdigit():
-                self.show_error('Ошибка клиента игры. Напишите нам.')
             if error_code == -5:
                 self.show_error('Отсутствует интернет. Запустите программу позже.')
             elif error_code == -6:

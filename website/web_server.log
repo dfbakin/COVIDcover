@@ -626,3 +626,14 @@ INFO 2020-06-06 20:22:07,304 127.0.0.1 - - [06/Jun/2020 20:22:07] "[37mGET /gam
 INFO 2020-06-06 20:54:29,785  * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
 INFO 2020-06-06 20:54:34,804 127.0.0.1 - - [06/Jun/2020 20:54:34] "[37mGET / HTTP/1.1[0m" 200 -
 INFO 2020-06-06 20:54:38,964 127.0.0.1 - - [06/Jun/2020 20:54:38] "[37mGET /static/releases/setup.zip HTTP/1.1[0m" 200 -
+INFO 2020-06-06 22:14:10,615  * Running on http://127.0.0.1:8080/ (Press CTRL+C to quit)
+INFO 2020-06-06 22:19:29,613 127.0.0.1 - - [06/Jun/2020 22:19:29] "[37mGET /game_api/check_hash/d41d8cd98f00b204e9800998ecf8427e HTTP/1.1[0m" 200 -
+INFO 2020-06-06 22:21:48,780 127.0.0.1 - - [06/Jun/2020 22:21:48] "[37mGET /game_api/check_hash/d41d8cd98f00b204e9800998ecf8427e HTTP/1.1[0m" 200 -
+INFO 2020-06-06 22:33:00,547  * Running on http://127.0.0.1:8080/ (Press CTRL+C to quit)
+INFO 2020-06-06 22:33:21,986 127.0.0.1 - - [06/Jun/2020 22:33:21] "[37mGET /game_api/check_hash/d41d8cd98f00b204e9800998ecf8427e HTTP/1.1[0m" 200 -
+INFO 2020-06-06 22:34:30,818  * Running on http://127.0.0.1:8080/ (Press CTRL+C to quit)
+INFO 2020-06-06 22:34:41,439 127.0.0.1 - - [06/Jun/2020 22:34:41] "[37mGET /game_api/check_hash/d41d8cd98f00b204e9800998ecf8427e HTTP/1.1[0m" 200 -
+INFO 2020-06-06 22:35:18,824 127.0.0.1 - - [06/Jun/2020 22:35:18] "[37mGET /game_api/check_hash/d41d8cd98f00b204e9800998ecf8427e HTTP/1.1[0m" 200 -
+INFO 2020-06-06 22:55:57,492  * Running on http://127.0.0.1:8080/ (Press CTRL+C to quit)
+INFO 2020-06-06 22:56:04,523 127.0.0.1 - - [06/Jun/2020 22:56:04] "[37mGET /game_api/check_hash/d41d8cd98f00b204e9800998ecf8427e HTTP/1.1[0m" 200 -
+INFO 2020-06-06 22:56:05,772 127.0.0.1 - - [06/Jun/2020 22:56:05] "[37mGET /static/releases/game.zip HTTP/1.1[0m" 200 -

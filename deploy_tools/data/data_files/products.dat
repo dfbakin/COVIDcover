@@ -1,0 +1,11 @@
+alcohol\tСпирт\tdata/objects/bottle.png\t550\ttrue\tmed\tОчищает поверхности, \nуменьшает риск заражения. \nИспользовать ТОЛЬКО в \nконцентрации 10-20%!
+mask\tМаска\tdata/objects/mask.png\t450\ttrue\tmed\tУменьшает риск\nзаражения.
+apple\tЯблоко\tdata/objects/apple.png\t250\ttrue\tfood\tДает чрезвычайно\nнеобходимые организму\n витамины и вещества
+carrot\tМорковь\tdata/objects/carrot.png\t300\ttrue\tfood\tДает чрезвычайно\nнеобходимые организму\n витамины и вещества
+potato\tКартофель\tdata/objects/potato.png\t450\ttrue\tfood\tДает чрезвычайно\nнеобходимые организму\n витамины и вещества
+pills\tВитамины\tdata/objects/pills.png\t50\ttrue\tmed\tПовышают устойчивость\nорганизма к инфекциям
+soap\tМыло\tdata/objects/soap.png\t450\ttrue\tmed\tУменьшает вероятность\nзаражения коронавирусом\nи другими инфекциями
+card\tБанковская карта\tdata/objects/bank_card.png\t0\tfalse\telse\tПин код:
+image_prog\tРедактор презентаций\tdata/objects/image_icon.png\t1000\tfalse\tprog\tПовышает зарплату и \nпозволяет работать\nс картинками
+text_prog\tТекстовый редактор\tdata/objects/word_icon.png\t1500\tfalse\tprog\tПовышает зарплату и \nпозволяет печатать текст
+table_prog\tМатематический помощник\tdata/objects/table_icon.png\t3000\tfalse\tprog\tПозволяет считать\n и заносить результаты\n в таблицу

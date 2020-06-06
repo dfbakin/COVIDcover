@@ -5,7 +5,7 @@ from zipfile import ZipFile
 
 log_filename = 'covid_cover.log'
 user_registration = "f5d9063b-ccb1-4a60-b4a1-8abf6ed38708"
-
+HOST, PORT = "127.0.0.1", "8080"
 
 class Ui_Downloader(object):
     def setupUi(self, Downloader):
@@ -45,8 +45,6 @@ class Ui_Downloader(object):
 
 
 class LoadingWidget(QtWidgets.QMainWindow, Ui_Downloader):
-    host = "84.201.145.186"
-    port = "8080"
     closed_signal = QtCore.pyqtSignal()
 
     def __init__(self, parent):
@@ -85,7 +83,7 @@ class LoadingWidget(QtWidgets.QMainWindow, Ui_Downloader):
     def start_download(self):
         self.label.setText('Идёт загрузка игры')
         try:
-            response = requests.get(f'http://{self.host}:{self.port}/static/releases/game.zip', stream=True)
+            response = requests.get(f'http://{HOST}:{PORT}/static/releases/game.zip', stream=True)
             chunks_required = round(int(response.headers.get('content-length', '0')) / 4096)
             if chunks_required:
                 chunks_downloaded = 0
@@ -287,8 +285,6 @@ class Ui_MainWindow(object):
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
-    host = "84.201.145.186"
-    port = "8080"
 
     def __init__(self):
         super().__init__()
@@ -300,7 +296,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def initUI(self):
         self.pushButton_3.clicked.connect(self.launch_single)
-        self.pushButton_2.clicked.connect(lambda: webbrowser.open(f'http://{MyWidget.host}:{MyWidget.port}', new=0))
+        self.pushButton_2.clicked.connect(lambda: webbrowser.open(f'http://{HOST}:{PORT}', new=0))
         self.pushButton_5.clicked.connect(self.launch_multi)
         self.pushButton.clicked.connect(self.login)
 
@@ -322,7 +318,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         hash.update(b''.join(lst))
         output = hash.hexdigest()
         try:
-            response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/check_hash/{output}')
+            response = requests.get(f'http://{HOST}:{PORT}/game_api/check_hash/{output}')
         except requests.exceptions.ConnectionError:
             self.show_error('Отсутствует интернет. Запустите программу позже.')
             return True
@@ -350,7 +346,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.show_error('Заполните все поля!')
             return
         try:
-            response = requests.post(f'http://{MyWidget.host}:{MyWidget.port}/api/users/token/{user_registration}',
+            response = requests.post(f'http://{HOST}:{PORT}/api/users/token/{user_registration}',
                                      data={'email': email, 'password': password, "username": username})
         except requests.exceptions.ConnectionError:
             self.show_error('Отсутствует интернет. Запустите программу позже.')
@@ -382,7 +378,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def auth(self, email, password):
         try:
-            response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/auth',
+            response = requests.get(f'http://{HOST}:{PORT}/game_api/auth',
                                     params={'email': email, 'password': password}, timeout=3.)
         except requests.exceptions.ConnectionError:
             self.show_error('Отсутствует интернет. Запустите программу позже.')
@@ -409,7 +405,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.update_needed = False
         if os.path.isfile(os.path.join(os.path.dirname(__file__), 'COVIDcover/versions.json')):
             try:
-                response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/static/releases/versions.json',
+                response = requests.get(f'http://{HOST}:{PORT}/static/releases/versions.json',
                                         timeout=5.)
             except requests.exceptions.ConnectionError:
                 self.show_error('Отсутствует интернет. Вам недоступна сетевая игра')
@@ -446,7 +442,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.show_error('Файлы игры повреждены. Попробуйте позже.')
             return
         try:
-            response = requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/join',
+            response = requests.get(f'http://{HOST}:{PORT}/game_api/join',
                                     params={'user_token': self.user['token']}, timeout=3.)
         except requests.exceptions.ConnectionError:
             self.show_error('Отсутствует интернет. Запустите программу позже.')
@@ -498,14 +494,14 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.show()
             try:
                 if not score or not score.isdigit() or len(score) > 6 or error_code != 0:
-                    requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
+                    requests.get(f'http://{HOST}:{PORT}/game_api/quit',
                                  params={'user_token': self.user['token'], 'score': int(self.user['score'])})
                 else:
-                    requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
+                    requests.get(f'http://{HOST}:{PORT}/game_api/quit',
                                  params={'user_token': self.user['token'], 'score': int(score)})
             except Exception as e:
                 self.plainTextEdit.appendPlainText(str(e) + '\n')
-                requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
+                requests.get(f'http://{HOST}:{PORT}/game_api/quit',
                              params={'user_token': self.user['token'], 'score': 0})
             finally:
                 if os.path.isfile('COVIDcover/score.dat'):

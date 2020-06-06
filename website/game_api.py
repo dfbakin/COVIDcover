@@ -9,7 +9,7 @@ from hashing import check_hash
 bp = Blueprint('game_api', __name__)
 # TODO hash
 HASH = check_hash("static/releases/game.zip")
-UNIX_HASH = 'check_hash("static/releases/game.zip")'
+UNIX_HASH = check_hash("static/releases/game.zip")
 
 
 def jlst(lst):

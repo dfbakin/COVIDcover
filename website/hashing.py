@@ -24,5 +24,3 @@ def check_hash(path):
     hash.update(b''.join(lst))
     output = hash.hexdigest()
     return output
-
-check_hash("static/releases/game.zip")

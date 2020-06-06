@@ -287,10 +287,7 @@ class Ui_MainWindow(object):
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
-    """ host = '130.193.46.251'
-        port = '8080'
-    """
-    host = "127.0.0.1"
+    host = "84.201.145.186"
     port = "8080"
 
     def __init__(self):

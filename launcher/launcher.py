@@ -481,11 +481,11 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             os.system(
                 f"cd COVIDcover && \"{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'COVIDcover', 'multi_build/multi_main.exe')}\" {data['ip']} {data['port']} {self.user['token']} {self.user['username']}")
             self.show()
-            if os.path.isfile('COVIDcover/multi_build/score.dat'):
-                with open('COVIDcover/multi_build/score.dat', mode='r', encoding='utf-8') as file:
+            if os.path.isfile('COVIDcover/score.dat'):
+                with open('COVIDcover/score.dat', mode='r', encoding='utf-8') as file:
                     score, error_code = file.read().strip().split()
                     error_code = int(error_code)
-                os.remove('COVIDcover/multi_build/score.dat')
+                os.remove('COVIDcover/score.dat')
             else:
                 score, error_code = '0', -7
 
@@ -511,17 +511,17 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 requests.get(f'http://{MyWidget.host}:{MyWidget.port}/game_api/quit',
                              params={'user_token': self.user['token'], 'score': 0})
             finally:
-                if os.path.isfile('COVIDcover/multi_build/score.dat'):
-                    os.remove('COVIDcover/multi_build/score.dat')
-                if error_code != 0 and os.path.isfile('COVIDcover/multi_build/' + log_filename):
-                    with open('COVIDcover/multi_build/' + log_filename, mode='r', encoding='utf-8') as file:
+                if os.path.isfile('COVIDcover/score.dat'):
+                    os.remove('COVIDcover/score.dat')
+                if error_code != 0 and os.path.isfile('COVIDcover/' + log_filename):
+                    with open('COVIDcover/' + log_filename, mode='r', encoding='utf-8') as file:
                         try:
                             response = requests.post(f'http://{host}:{port}/game_api/get_log', files={'log': file})
                         except Exception as e:
                             self.show_error(str(e))
-                if os.path.isfile('COVIDcover/multi_build/' + log_filename):
+                if os.path.isfile('COVIDcover/' + log_filename):
                     try:
-                        os.remove('COVIDcover/multi_build/' + log_filename)
+                        os.remove('COVIDcover/' + log_filename)
                     except PermissionError:
                         pass
                     except Exception as e:

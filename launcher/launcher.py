@@ -5,7 +5,7 @@ from zipfile import ZipFile
 
 log_filename = 'covid_cover.log'
 user_registration = "f5d9063b-ccb1-4a60-b4a1-8abf6ed38708"
-HOST, PORT = "127.0.0.1", "8080"
+HOST, PORT = "84.201.145.186", "8080"
 
 class Ui_Downloader(object):
     def setupUi(self, Downloader):

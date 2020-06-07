@@ -151,6 +151,7 @@ class Player(pygame.sprite.Sprite):
 
         self.speed = Player.speed
 
+        self.infection_rate = Player.infection_rate
         if level == 1:
             self.card_money = 500
             self.cash = 0
@@ -160,7 +161,7 @@ class Player(pygame.sprite.Sprite):
         elif level == 3:
             self.card_money = 0
             self.cash = 3000
-            self.infection_rate = 750
+            self.infection_rate = 1100
 
         self.objects = []
         pin = str(randint(1000, 9999))
@@ -280,7 +281,7 @@ class Player(pygame.sprite.Sprite):
         self.danger_level = 1 - (100 - self.health) / 100
         self.hazard_timer += self.clock.tick()
         for i in npc_group:
-            if distance(self.get_coords(), i.get_coords()) < 250:
+            if distance(self.get_coords(), i.get_coords()) < 100:
                 self.infection_rate -= 450
         if self.infection_rate < 350:
             self.infection_rate = 350
@@ -1192,7 +1193,7 @@ class Pharmacy(pygame.sprite.Sprite):
 
 
 class Product(pygame.sprite.Sprite):
-    def __init__(self, x, y, name, image, price, describtion, *groups):
+    def __init__(self, x, y, name, image, price, can_be_used, kind, describtion, *groups):
         super().__init__(groups)
 
         self.image = image
@@ -1203,6 +1204,8 @@ class Product(pygame.sprite.Sprite):
 
         self.name = name
         self.price = price
+        self.can_be_used = can_be_used
+        self.kind = kind
         self.id = id
         self.description = describtion
         self.bought = False
@@ -1322,7 +1325,7 @@ class Equipment:
                                 if btn.id is not None:
                                     if use_btn:
                                         use_btn.kill()
-                                    if self.products[int(btn.id)].name != 'Банковская карта':
+                                    if player.get_objects()[btn.id].can_be_used:
                                         use_btn = Button(width - 300, height - 150, 300, 75,
                                                          render_text('Использовать'),
                                                          self.products[int(btn.id)].use, None, product_buttons)
@@ -1603,9 +1606,14 @@ def menu(pause=False):
 
 with open('data/data_files/products.dat', mode='r', encoding='utf-8') as f:
     for i in f.readlines():
+        # products params are joined with raw str '\t'
+        # get params
         data = i.split(r'\t')
+        # load image of the path from the file
         image = load_image(data[2], size=(50, 90))
-        products[data[0]] = Product(0, 0, data[1], image, int(data[3]), data[4].split(r'\n'))
+        # 4 and 5 are new
+        products[data[0]] = Product(0, 0, data[1], image, int(data[3]), data[4] == 'true', data[5],
+                                    data[6].split(r'\n'))
 
 images = {'pause_button': load_image('data/other/pause_button.png', size=(50, 50)),
           'right_arrow': load_image('data/objects/arrow_button_right.png', size=(50, 50)),
@@ -1625,11 +1633,13 @@ backgr = pygame.sprite.Sprite(background_group)
 backgr.image = load_image('data/textures/background.png', size=size)
 backgr.rect = backgr.image.get_rect()
 
-for i in range(25):
-    Character(npc_group, all_sprites)
 
 player = Player(3850, 480, player_group)
 terrain = Terrain(0, 0, all_sprites, terrain_group)
+
+for i in range(20):
+    Character(npc_group, all_sprites)
+
 bank = Bank(350, 300, all_sprites, building_group)
 home = MainHouse(3710, 125, building_group, all_sprites)
 pharmacy = Pharmacy(5050, 100, building_group, all_sprites)
@@ -1646,9 +1656,14 @@ while running:
     if not level:
         with open('data/data_files/products.dat', mode='r', encoding='utf-8') as f:
             for i in f.readlines():
+                # products params are joined with raw str '\t'
+                # get params
                 data = i.split(r'\t')
+                # load image of the path from the file
                 image = load_image(data[2], size=(50, 90))
-                products[data[0]] = Product(0, 0, data[1], image, int(data[3]), data[4].split(r'\n'))
+                # 4 and 5 are new
+                products[data[0]] = Product(0, 0, data[1], image, int(data[3]), data[4] == 'true', data[5],
+                                            data[6].split(r'\n'))
 
         images = {'pause_button': load_image('data/other/pause_button.png', size=(50, 50)),
                   'right_arrow': load_image('data/objects/arrow_button_right.png', size=(50, 50)),
@@ -1667,11 +1682,13 @@ while running:
             i.kill()
         player.kill()
 
-        for i in range(25):
-            Character(npc_group, all_sprites)
 
         player = Player(3850, 500, player_group)
         terrain = Terrain(0, 0, all_sprites, terrain_group)
+
+        for i in range(20):
+            Character(npc_group, all_sprites)
+
         bank = Bank(350, 350, all_sprites, building_group)
         home = MainHouse(3710, 125, building_group, all_sprites)
         pharmacy = Pharmacy(5050, 100, building_group, all_sprites)

@@ -427,7 +427,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.update_needed = not self.check_hash()
         if self.update_needed:
             self.hide()
-            self.updater = LoadingWidget(self)  # TODO Update launcher
+            self.updater = LoadingWidget()  # TODO Update launcher
             self.updater.closed_signal.connect(self.show)
 
     def launch_multi(self):

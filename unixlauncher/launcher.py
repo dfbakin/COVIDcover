@@ -5,7 +5,7 @@ from zipfile import ZipFile
 
 log_filename = 'covid_cover.log'
 user_registration = "f5d9063b-ccb1-4a60-b4a1-8abf6ed38708"
-HOST, PORT = "84.201.145.186", "8080"
+HOST, PORT = "127.0.0.1", "8080"
 
 class Ui_Downloader(object):
     def setupUi(self, Downloader):
@@ -47,8 +47,8 @@ class Ui_Downloader(object):
 class LoadingWidget(QtWidgets.QMainWindow, Ui_Downloader):
     closed_signal = QtCore.pyqtSignal()
 
-    def __init__(self, parent):
-        super().__init__(parent)
+    def __init__(self):
+        super().__init__()
         self.setupUi(self)
         self.initUI()
 

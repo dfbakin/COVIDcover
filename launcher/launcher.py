@@ -47,8 +47,8 @@ class Ui_Downloader(object):
 class LoadingWidget(QtWidgets.QMainWindow, Ui_Downloader):
     closed_signal = QtCore.pyqtSignal()
 
-    def __init__(self, parent):
-        super().__init__(parent)
+    def __init__(self):
+        super().__init__()
         self.setupUi(self)
         self.initUI()
 

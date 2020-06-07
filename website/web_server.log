@@ -1,0 +1,6 @@
+INFO 2020-06-07 19:38:33,910  * Running on http://127.0.0.1:8080/ (Press CTRL+C to quit)
+INFO 2020-06-07 19:38:41,367 127.0.0.1 - - [07/Jun/2020 19:38:41] "[37mGET /game_api/check_hash/d41d8cd98f00b204e9800998ecf8427e HTTP/1.1[0m" 200 -
+INFO 2020-06-07 19:40:17,058 127.0.0.1 - - [07/Jun/2020 19:40:17] "[37mGET /game_api/check_hash/d41d8cd98f00b204e9800998ecf8427e HTTP/1.1[0m" 200 -
+INFO 2020-06-07 19:41:41,821 127.0.0.1 - - [07/Jun/2020 19:41:41] "[37mGET /game_api/check_hash/d41d8cd98f00b204e9800998ecf8427e HTTP/1.1[0m" 200 -
+INFO 2020-06-07 19:41:48,620 127.0.0.1 - - [07/Jun/2020 19:41:48] "[37mGET /game_api/check_hash/d41d8cd98f00b204e9800998ecf8427e HTTP/1.1[0m" 200 -
+INFO 2020-06-07 19:42:10,248 127.0.0.1 - - [07/Jun/2020 19:42:10] "[37mGET /game_api/check_hash/d41d8cd98f00b204e9800998ecf8427e HTTP/1.1[0m" 200 -

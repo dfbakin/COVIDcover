@@ -1,4 +1,4 @@
-Werkzeug==1.0.0
+Werkzeug==2.2.3
 Flask_Login==0.5.0
 Flask_RESTful==0.3.8
 WTForms==2.2.1
